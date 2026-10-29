@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <i>Hecho por humanos e IA, para humanos con sentimientos.</i>
+  <i>Hecho por humanos e IA (pero con UI bien hecha), para humanos con sentimientos.</i>
 </p>
 
 ---
@@ -98,13 +98,24 @@ Son dos piezas y un truco. La app es una ventana nativa chica de macOS: AppKit m
 - **El primer escaneo pide permiso de archivos** en carpetas como Documentos o Descargas: la app solo lee cabeceras de `.rpp`.
 - **Desinstalar**: `./install.sh --revert` devuelve el launcher original de REAPER, después borrá `~/Applications/ReaLauncher.app` y `~/Library/Application Support/ReaLauncher`.
 
+## Sobre hombros ajenos
+
+Nada de esto se vería así sin lo siguiente:
+
+- **[Phosphor Icons](https://phosphoricons.com/)** (MIT) — los iconos de carpeta, tema, acento e idioma, y casi todos los glifos chicos. Van empaquetados como paths SVG; no hay dependencia en tiempo de ejecución ni nada que se descargue al abrir.
+- **El tema Reapertips** — la paleta sobre la que se apoya toda la interfaz: ese violeta, los acentos cian y rosa, y una serie de grises que no se sienten planos.
+- **El kit de diseño de ReaSet Pro** — espaciado, escala tipográfica y lenguaje de componentes de mis propias herramientas. ReaLauncher lo toma prestado a propósito para que los dos se sientan de la misma familia.
+- **[DeepSeek](https://www.deepseek.com/) V4.1 Flash** — el modelo que escribió buena parte de esto conmigo.
+
+Todo lo demás — la app, los scripts Lua, la interfaz — es código original bajo licencia MIT.
+
 ## Créditos
 
 Hecho por **[@djenttleman](https://github.com/djenttleman)** — ingeniero en vivo, Chile — con **DeepSeek V4.1 Flash** escribiendo buena parte del código. El lenguaje visual toma prestado el kit de diseño de ReaSet Pro; la paleta se apoya en el tema Reapertips.
 
 Si te ahorra diez segundos cada vez que abrís un proyecto, cumplió.
 
-<p align="center"><sub>Hecho por humanos e IA, para humanos con sentimientos.</sub></p>
+<p align="center"><sub>Hecho por humanos e IA (pero con UI bien hecha), para humanos con sentimientos.</sub></p>
 
 ---
 

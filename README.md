@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <i>Made by humans and AI, for humans with feelings.</i>
+  <i>Made by humans and AI (but with a properly built UI), for humans with feelings.</i>
 </p>
 
 ---
@@ -98,13 +98,24 @@ It's two pieces and a trick. The app is a small native macOS window — AppKit p
 - **The first scan asks for file access** on folders like Documents or Downloads — the app only reads `.rpp` headers.
 - **Uninstall**: `./install.sh --revert` restores REAPER's own launcher, then delete `~/Applications/ReaLauncher.app` and `~/Library/Application Support/ReaLauncher`.
 
+## Built on other people's work
+
+None of this would look the way it does without these:
+
+- **[Phosphor Icons](https://phosphoricons.com/)** (MIT) — the folder, theme, accent and language glyphs, and most of the small icons. Bundled locally as SVG paths; no runtime dependency, nothing downloaded at startup.
+- **The Reapertips theme** — the palette the whole interface leans on: that violet, the cyan and rose accents, and a set of grays that don't look flat.
+- **The ReaSet Pro design kit** — spacing, type scale and component language of my own tools. ReaLauncher borrows it on purpose so the two feel like the same family.
+- **[DeepSeek](https://www.deepseek.com/) V4.1 Flash** — the model that wrote a good chunk of this with me.
+
+Everything else — the app, the Lua scripts, the interface — is original code under the MIT license.
+
 ## Credits
 
 Built by **[@djenttleman](https://github.com/djenttleman)** — live engineer, Chile — with **DeepSeek V4.1 Flash** doing a lot of the typing. The visual language borrows the ReaSet Pro design kit; the palette leans on the Reapertips theme.
 
 If it saves you ten seconds every time you open a project, it did its job.
 
-<p align="center"><sub>Made by humans and AI, for humans with feelings.</sub></p>
+<p align="center"><sub>Made by humans and AI (but with a properly built UI), for humans with feelings.</sub></p>
 
 ---
 

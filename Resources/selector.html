@@ -198,7 +198,11 @@ body.is-slim .slim{display:flex;flex-direction:column;width:100vw;height:100vh;b
   <div class="rk-toast" id="toast" hidden>
     <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="M232.5 73.5 96 202.5 23.5 130.5a12 12 0 0 1 17-17L96 168.5l128.5-121a12 12 0 0 1 17 17Z"/></svg>
     <span id="toastMsg"></span>
-    <button class="act" id="toastAct" hidden data-en="Undo">Deshacer</button>
+    <button class="act" id="toastAct" hidden>
+      <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/></svg>
+      <span data-en="Undo">Deshacer</span>
+    </button>
+    <i class="toast-bar" id="toastBar"></i>
   </div>
 </div>
 
@@ -607,7 +611,10 @@ function rowFor(p,idx){
     p.pinned=!p.pinned;
     renderAll();
     native('update',{id:p.id,pinned:p.pinned});
-    toast(T(p.pinned?'Fijado arriba':'Quitado de fijados'));
+    toast(T(p.pinned?'Fijado arriba':'Quitado de fijados'), ()=>{
+      p.pinned=!p.pinned; renderAll(); native('update',{id:p.id,pinned:p.pinned});
+      toast(T(p.pinned?'Fijado arriba':'Quitado de fijados'));
+    });
   };
   tdNum.appendChild(pin); tr.appendChild(tdNum);
 
@@ -812,17 +819,35 @@ function openMenu(p,anchor){
   if(DB.reaperRunning){ m.appendChild(el('div','sep')); mk(T('Traer todos los FX online'),()=>native('fxonline')); }
   if((p.backups||[]).length) mk(T('Ver copias de seguridad')+' ('+p.backups.length+')',async()=>{ if(state.expanded.has(p.id))state.expanded.delete(p.id); else state.expanded.add(p.id); renderTable(); });
   m.appendChild(el('div','sep'));
-  mk(T(p.pinned?'Quitar de fijados':'Fijar arriba'),async()=>{p.pinned=!p.pinned; await native('update',{id:p.id,pinned:p.pinned}); renderTable(); renderRail(); toast(T(p.pinned?'Fijado arriba':'Quitado de fijados'));});
+  mk(T(p.pinned?'Quitar de fijados':'Fijar arriba'),()=>{
+    p.pinned=!p.pinned; renderTable(); renderRail(); native('update',{id:p.id,pinned:p.pinned});
+    toast(T(p.pinned?'Fijado arriba':'Quitado de fijados'), ()=>{
+      p.pinned=!p.pinned; renderAll(); native('update',{id:p.id,pinned:p.pinned});
+    });
+  });
   if(p.hidden) mk(T('Volver a recientes'),async()=>{p.hidden=false; await native('update',{id:p.id,hidden:false}); await refresh();});
-  else mk(T('Quitar de recientes'),async()=>{p.hidden=true; await native('update',{id:p.id,hidden:true}); await refresh(); toast(T('Quitado de recientes · el archivo sigue en su carpeta'));});
-  mk(T(p.archived?'Desarchivar':'Archivar'),async()=>{p.archived=!p.archived; await native('update',{id:p.id,archived:p.archived}); await refresh(); toast(T(p.archived?'Archivado':'Restaurado'));});
+  else mk(T('Quitar de recientes'),()=>{
+    p.hidden=true; renderAll(); native('update',{id:p.id,hidden:true});
+    toast(T('Quitado de recientes · el archivo sigue en su carpeta'), ()=>{
+      p.hidden=false; renderAll(); native('update',{id:p.id,hidden:false});
+    });
+  });
+  mk(T(p.archived?'Desarchivar':'Archivar'),()=>{
+    p.archived=!p.archived; renderAll(); native('update',{id:p.id,archived:p.archived});
+    toast(T(p.archived?'Archivado':'Restaurado'), ()=>{
+      p.archived=!p.archived; renderAll(); native('update',{id:p.id,archived:p.archived});
+    });
+  });
   mk(T('Mover a carpeta…'),async()=>{
     const f=await askFolder(p.folder);
     if(!f) return;
     p.folder=f; renderAll();
     native('update',{id:p.id,folder:f});
     if(!(DB.folders||[]).includes(f)){ DB.folders=(DB.folders||[]).concat([f]); native('addFolder',{name:f}); renderRail(); }
-    toast(T('Movido a «{f}»',{f:folderLabel(f)}));
+    const prev=p.folder;
+    toast(T('Movido a «{f}»',{f:folderLabel(f)}), ()=>{
+      p.folder=prev; renderAll(); native('update',{id:p.id,folder:prev});
+    });
   });
   m.appendChild(el('div','sep'));
   mk(T('Quitar del launcher…'),async()=>{
@@ -830,10 +855,15 @@ function openMenu(p,anchor){
       T('¿Quitar «{name}» del launcher?\n\nEl .rpp no se toca: sigue en su carpeta y no vuelve a la lista al abrirlo desde fuera.',{name:p.name}),
       T('Quitar'), true);
     if(yes){
+      const snap=JSON.parse(JSON.stringify(p));
       native('forget',{id:p.id});
       DB.projects=(DB.projects||[]).filter(x=>x.id!==p.id);
       state.selected=null; renderAll();
-      toast(T('Quitado del launcher'));
+      toast(T('Quitado del launcher'), ()=>{
+        native('restoreProject',{project:snap});
+        DB.projects=DB.projects.concat([snap]); renderAll();
+        toast(T('Devuelto al launcher'));
+      });
     }
   },'is-danger');
   m.classList.add('is-on');
@@ -905,12 +935,46 @@ function closeModal(){ $('#scrim').classList.remove('is-on'); $('#modalWrap').cl
    Toast / estado
    ========================================================= */
 let toastTimer=null;
-function toast(msg){
-  $('#toastMsg').textContent=msg;
-  $('#toast').hidden=false;
+/* Toast con acción opcional: el botón vive 5 s y hay una barra que se agota.
+   Al pasar el mouse por encima el tiempo se detiene, para no perder el deshacer. */
+let toastUndo=null, toastDeadline=0;
+function toastHide(){
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>{ $('#toast').hidden=true; },2600);
+  const box=$('#toast'); if(box) box.hidden=true;
+  toastUndo=null;
 }
+function toast(msg, undo){
+  const box=$('#toast'), act=$('#toastAct'), bar=$('#toastBar');
+  $('#toastMsg').textContent=msg;
+  toastUndo=(typeof undo==='function')?undo:null;
+  act.hidden=!toastUndo;
+  const ms = toastUndo ? 5000 : 2600;
+  box.hidden=false;
+  clearTimeout(toastTimer);
+  toastDeadline=Date.now()+ms;
+  box.style.setProperty('--toast-ms', ms+'ms');
+  if(bar){
+    bar.classList.remove('is-on');
+    void bar.offsetWidth;                       // reinicia la animación
+    bar.classList.add('is-on');
+  }
+  toastTimer=setTimeout(toastHide, ms);
+}
+(function(){
+  const box=$('#toast');
+  if(!box) return;
+  box.addEventListener('mouseenter',()=>{ if(toastUndo) clearTimeout(toastTimer); });
+  box.addEventListener('mouseleave',()=>{
+    if(!toastUndo) return;
+    const left=Math.max(700, toastDeadline-Date.now());
+    clearTimeout(toastTimer); toastTimer=setTimeout(toastHide,left);
+  });
+  $('#toastAct').onclick=()=>{
+    const fn=toastUndo;
+    toastHide();
+    if(fn) fn();
+  };
+})();
 
 async function refresh(){
   const data=await native('list');
@@ -1024,8 +1088,14 @@ function projectMenu(p){
     {label:T('Abrir y traer los FX online'), run:()=>openWith(p,'fxoffline-online')},
     {label:T('Mostrar en Finder'), run:()=>native('reveal',{path:p.path})},
     {sep:true},
-    {label:T(p.pinned?'Quitar de fijados':'Fijar arriba'), run:()=>{ p.pinned=!p.pinned; renderAll(); native('update',{id:p.id,pinned:p.pinned}); }},
-    {label:T(p.archived?'Desarchivar':'Archivar'), run:()=>{ p.archived=!p.archived; renderAll(); native('update',{id:p.id,archived:p.archived}); }}
+    {label:T(p.pinned?'Quitar de fijados':'Fijar arriba'), run:()=>{
+      p.pinned=!p.pinned; renderAll(); native('update',{id:p.id,pinned:p.pinned});
+      toast(T(p.pinned?'Fijado arriba':'Quitado de fijados'), ()=>{ p.pinned=!p.pinned; renderAll(); native('update',{id:p.id,pinned:p.pinned}); });
+    }},
+    {label:T(p.archived?'Desarchivar':'Archivar'), run:()=>{
+      p.archived=!p.archived; renderAll(); native('update',{id:p.id,archived:p.archived});
+      toast(T(p.archived?'Archivado':'Restaurado'), ()=>{ p.archived=!p.archived; renderAll(); native('update',{id:p.id,archived:p.archived}); });
+    }}
   ];
   if((p.backups||[]).length) items.push({label:T('Ver copias de seguridad')+' ('+p.backups.length+')', run:()=>{ if(state.expanded.has(p.id)) state.expanded.delete(p.id); else state.expanded.add(p.id); renderTable(); }});
   items.push({sep:true});
@@ -1035,12 +1105,14 @@ function projectMenu(p){
     p.folder=f; renderAll();
     native('update',{id:p.id,folder:f});
     if(!(DB.folders||[]).includes(f)){ DB.folders=(DB.folders||[]).concat([f]); native('addFolder',{name:f}); renderRail(); }
-    toast(T('Movido a «{f}»',{f:folderLabel(f)}));
+    const prev=p.folder;
+    toast(T('Movido a «{f}»',{f:folderLabel(f)}), ()=>{ p.folder=prev; renderAll(); native('update',{id:p.id,folder:prev}); });
   }});
   items.push({label:T(p.hidden?'Volver a recientes':'Quitar de recientes'), run:()=>{
     p.hidden=!p.hidden; renderAll();
     native('update',{id:p.id,hidden:p.hidden});
-    toast(T(p.hidden?'Quitado de recientes · el archivo sigue en su carpeta':'Devuelto a recientes'));
+    toast(T(p.hidden?'Quitado de recientes · el archivo sigue en su carpeta':'Devuelto a recientes'),
+          ()=>{ p.hidden=!p.hidden; renderAll(); native('update',{id:p.id,hidden:p.hidden}); });
   }});
   items.push({sep:true});
   if(DB.reaperRunning){ items.push({sep:true}); items.push({label:T('Traer todos los FX online'), run:()=>native('fxonline')}); }
@@ -1049,10 +1121,15 @@ function projectMenu(p){
       T('¿Quitar «{name}» del launcher?\n\nEl .rpp no se toca: sigue en su carpeta y no vuelve a la lista al abrirlo desde fuera.',{name:p.name}),
       T('Quitar'), true);
     if(!yes) return;
+    const snap=JSON.parse(JSON.stringify(p));
     native('forget',{id:p.id});
     DB.projects=(DB.projects||[]).filter(x=>x.id!==p.id);
     state.selected=null; renderAll();
-    toast(T('Quitado del launcher'));
+    toast(T('Quitado del launcher'), ()=>{
+      native('restoreProject',{project:snap});
+      DB.projects=DB.projects.concat([snap]); renderAll();
+      toast(T('Devuelto al launcher'));
+    });
   }});
   items.push({label:T('Eliminar proyecto…'), danger:true, run:()=>deleteProject(p)});
   return items;
@@ -1141,10 +1218,18 @@ async function deleteProject(p){
   if(!ok) return;
   const r=await native('delete',{id:p.id});
   if(r && r.ok===false){ toast(T('No se pudo eliminar: {e}',{e:(r.error||T('error desconocido'))})); return; }
+  const snap=JSON.parse(JSON.stringify(p));
+  const trashPath = r && r.trashPath ? r.trashPath : '';
   state.selected=null;
   DB.projects=(DB.projects||[]).filter(x=>x.id!==p.id);
   renderAll();
-  toast(T('Proyecto eliminado · el .rpp está en la Papelera'));
+  toast(T('Proyecto eliminado · el .rpp está en la Papelera'), ()=>{
+    native('undelete',{path:snap.path, trashPath, project:snap}).then(res=>{
+      if(res && res.ok===false){ toast(T('No se pudo deshacer: {e}',{e:(res.error||'?')})); return; }
+      DB.projects=DB.projects.concat([snap]); renderAll();
+      toast(T('Proyecto restaurado'));
+    });
+  });
 }
 
 async function createFolder(){
@@ -1426,6 +1511,9 @@ function slimRow(p){
     p.hidden = true;
     renderSlim();
     native('update',{id:p.id, hidden:true});
+    toast(T('Quitado de recientes · el archivo sigue en su carpeta'), ()=>{
+      p.hidden=false; renderSlim(); native('update',{id:p.id, hidden:false});
+    });
   };
 
   row.appendChild(slot); row.appendChild(txt); row.appendChild(x);

@@ -148,6 +148,19 @@ Las variables locales usadas dentro de un `defer` tienen que declararse **antes*
 de la función que las usa: si no, Lua las resuelve como globales (`nil`) y el
 script muere con "attempt to perform arithmetic on a nil value".
 
+## Toast con deshacer (1.2.1)
+
+`toast(msg, undoFn)` acepta una acción opcional. Con acción vive **5 s**, muestra el botón
+**Deshacer** (icono Phosphor `arrow-counter-clockwise`), una barra verde que se agota y se
+pausa mientras el cursor está encima. Sin acción dura 2.6 s y el botón queda oculto.
+
+Acciones con deshacer: fijar, archivar, quitar/volver a recientes (también desde la X del
+slim), mover a carpeta, quitar del launcher y eliminar proyecto.
+
+Deshacer de "quitar del launcher" usa `restoreProject` (vuelve la entrada y borra el
+tombstone); el de "eliminar" usa `undelete`, que saca el .rpp de la Papelera y lo devuelve
+a su ruta original — por eso el comando `delete` ahora responde con `trashPath`.
+
 ## Diálogos y menús (1.2.1)
 
 **WKWebView bloquea `confirm()` y `prompt()`** salvo que el `WKUIDelegate` implemente

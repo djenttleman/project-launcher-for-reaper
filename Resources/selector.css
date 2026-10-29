@@ -282,7 +282,17 @@
 
   .toast-wrap{position:fixed;left:50%;bottom:46px;transform:translateX(-50%);z-index:var(--rk-z-toast);display:flex;align-items:center;gap:10px}
   .toast-wrap .rk-toast[hidden]{display:none}
-  .toast-wrap .act{border:0;background:none;color:var(--rk-green);font:700 13px var(--rk-font)}
+  .toast-wrap .rk-toast{position:relative;overflow:hidden;padding-bottom:1px}
+  .toast-wrap .act{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px 0 8px;
+    border-radius:var(--rk-r-xs);background:transparent;border:1px solid var(--rk-line-3);
+    color:var(--rk-text-1);font:700 12.5px var(--rk-font);transition:background var(--rk-fast) var(--rk-ease),border-color var(--rk-fast) var(--rk-ease)}
+  .toast-wrap .act:hover{background:var(--rk-bg-3);border-color:var(--rk-text-3)}
+  .toast-wrap .act:active{background:var(--rk-bg-2)}
+  .toast-wrap .act .rk-ico{width:15px;height:15px;color:var(--rk-green)}
+  .toast-wrap .toast-bar{position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--rk-green);
+    transform-origin:left center;transform:scaleX(1)}
+  .toast-wrap .toast-bar.is-on{animation:toast-drain var(--toast-ms,5000ms) linear forwards}
+  @keyframes toast-drain{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 
   /* ============ responsive ============ */
   @media (max-width:1380px){

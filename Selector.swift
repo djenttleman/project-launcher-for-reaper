@@ -641,8 +641,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             let victim = store.library.projects[i]
             var trashed = false
             var errMsg = ""
+            var resulting: NSURL?
             if FileManager.default.fileExists(atPath: victim.path) {
-                var resulting: NSURL?
                 do {
                     try FileManager.default.trashItem(at: URL(fileURLWithPath: victim.path),
                                                       resultingItemURL: &resulting)
@@ -656,7 +656,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
                 store.library.projects.removeAll { $0.id == id }
                 store.save()
             }
-            reply(["ok": gone, "trashed": trashed, "error": errMsg])
+            reply(["ok": gone, "trashed": trashed, "trashPath": resulting?.path ?? "", "error": errMsg])
+
+        case "restoreProject":
+            // Deshacer de "Quitar del launcher": vuelve la entrada y se borra el tombstone.
+            guard let p = decodeProject(body["project"]) else { reply(["ok": false, "error": "proyecto inválido"]); return }
+            if !store.library.projects.contains(where: { $0.path == p.path }) {
+                store.library.projects.append(p)
+            }
+            store.library.ignored = (store.library.ignored ?? []).filter { $0 != p.path }
+            store.save()
+            reply(["ok": true])
+
+        case "undelete":
+            // Deshacer de "Eliminar proyecto": saca el .rpp de la Papelera y lo devuelve a su ruta.
+            guard let path = body["path"] as? String else { reply(["ok": false, "error": "sin ruta"]); return }
+            let trash = body["trashPath"] as? String ?? ""
+            var moved = false
+            let fm = FileManager.default
+            if !trash.isEmpty, fm.fileExists(atPath: trash), !fm.fileExists(atPath: path) {
+                do {
+                    try fm.moveItem(at: URL(fileURLWithPath: trash), to: URL(fileURLWithPath: path))
+                    moved = true
+                } catch {
+                    reply(["ok": false, "error": error.localizedDescription]); return
+                }
+            } else if fm.fileExists(atPath: path) {
+                moved = true                       // el archivo ya estaba en su sitio
+            }
+            if !moved { reply(["ok": false, "error": "no está en la Papelera"]); return }
+            if let p = decodeProject(body["project"]),
+               !store.library.projects.contains(where: { $0.path == p.path }) {
+                store.library.projects.append(p)
+            }
+            store.save()
+            reply(["ok": true])
 
         case "forget":
             guard let id = body["id"] as? String else { return }
@@ -740,6 +774,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         default:
             reply(["error": "cmd desconocido: \(cmd)"])
         }
+    }
+
+    /// Reconstruye un Project desde el JSON que manda el JS (para deshacer).
+    func decodeProject(_ raw: Any?) -> Project? {
+        guard let raw = raw, JSONSerialization.isValidJSONObject(raw),
+              let data = try? JSONSerialization.data(withJSONObject: raw) else { return nil }
+        return try? JSONDecoder().decode(Project.self, from: data)
     }
 
     static func color(fromHex hex: String) -> NSColor? {

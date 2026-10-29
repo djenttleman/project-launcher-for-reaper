@@ -179,6 +179,21 @@ body.is-slim .slim{display:flex;flex-direction:column;width:100vw;height:100vh;b
   </div>
 </div>
 
+<div class="scrim" id="askScrim"></div>
+<div class="modal-wrap" id="askWrap">
+  <div class="rk-modal rk-modal--ask">
+    <div class="rk-modal-head">
+      <span class="rk-section" id="askTitle"></span>
+      <span class="rk-meta" id="askMsg"></span>
+    </div>
+    <div class="rk-modal-body" id="askBody"></div>
+    <div class="rk-modal-foot">
+      <button class="rk-btn rk-btn--quiet" id="askCancel" data-en="Cancel">Cancelar</button>
+      <button class="rk-btn rk-btn--primary" id="askOk" data-en="OK">Aceptar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-wrap" id="toastWrap">
   <div class="rk-toast" id="toast" hidden>
     <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="M232.5 73.5 96 202.5 23.5 130.5a12 12 0 0 1 17-17L96 168.5l128.5-121a12 12 0 0 1 17 17Z"/></svg>
@@ -801,21 +816,53 @@ function openMenu(p,anchor){
   if(p.hidden) mk(T('Volver a recientes'),async()=>{p.hidden=false; await native('update',{id:p.id,hidden:false}); await refresh();});
   else mk(T('Quitar de recientes'),async()=>{p.hidden=true; await native('update',{id:p.id,hidden:true}); await refresh(); toast(T('Quitado de recientes · el archivo sigue en su carpeta'));});
   mk(T(p.archived?'Desarchivar':'Archivar'),async()=>{p.archived=!p.archived; await native('update',{id:p.id,archived:p.archived}); await refresh(); toast(T(p.archived?'Archivado':'Restaurado'));});
-  mk(T('Mover a carpeta…'),async()=>{const f=prompt(T('Carpeta:'),p.folder); if(f){p.folder=f; await native('update',{id:p.id,folder:f}); await refresh();}});
+  mk(T('Mover a carpeta…'),async()=>{
+    const f=await askFolder(p.folder);
+    if(!f) return;
+    p.folder=f; renderAll();
+    native('update',{id:p.id,folder:f});
+    if(!(DB.folders||[]).includes(f)){ DB.folders=(DB.folders||[]).concat([f]); native('addFolder',{name:f}); renderRail(); }
+    toast(T('Movido a «{f}»',{f:folderLabel(f)}));
+  });
   m.appendChild(el('div','sep'));
   mk(T('Quitar del launcher…'),async()=>{
-    if(confirm(T('¿Quitar «{name}» del launcher? El .rpp no se toca.',{name:p.name}))){
-      await native('forget',{id:p.id}); state.selected=null; await refresh();
+    const yes=await askConfirm(T('Quitar del launcher'),
+      T('¿Quitar «{name}» del launcher?\n\nEl .rpp no se toca: sigue en su carpeta y no vuelve a la lista al abrirlo desde fuera.',{name:p.name}),
+      T('Quitar'), true);
+    if(yes){
+      native('forget',{id:p.id});
+      DB.projects=(DB.projects||[]).filter(x=>x.id!==p.id);
+      state.selected=null; renderAll();
+      toast(T('Quitado del launcher'));
     }
   },'is-danger');
   m.classList.add('is-on');
-  const r=anchor.getBoundingClientRect(), mw=m.offsetWidth, mh=m.offsetHeight;
-  let x=r.right-mw, y=r.bottom+4;
-  if(x<8)x=8;
-  if(y+mh>innerHeight-8) y=r.top-mh-4;
-  m.style.left=x+'px'; m.style.top=y+'px';
+  const r=anchor.getBoundingClientRect();
+  placeMenu(m, r.right, r.bottom+4, true);
 }
 function closeMenu(){ $('#menu').classList.remove('is-on'); }
+
+// La barra de estado está dentro de la página: si el menú se limita al
+// viewport, la tapa. El límite inferior es el borde superior de la barra.
+function menuLimits(){
+  const sb=document.querySelector('.rk-statusbar');
+  const maxY=(sb ? sb.getBoundingClientRect().top : innerHeight) - 8;
+  return {maxX: innerWidth-8, maxY: Math.max(160, maxY), minY: 8};
+}
+function placeMenu(m, x, y, alignRight){
+  const {maxX, maxY, minY}=menuLimits();
+  m.style.maxHeight=Math.max(140, maxY-minY)+'px';
+  m.style.overflow='auto';
+  const w=m.offsetWidth, h=Math.min(m.offsetHeight, maxY-minY);
+  let left = alignRight ? x-w : x;           // alignRight: x es el borde derecho del ancla
+  if(left+w>maxX) left=maxX-w;               // que no se salga por la derecha
+  if(left<8) left=8;
+  let top = y;
+  if(top+h>maxY) top=y-h;                    // si no entra abajo, se abre hacia arriba
+  if(top<minY) top=minY;
+  if(top+h>maxY) top=Math.max(minY, maxY-h);
+  m.style.left=left+'px'; m.style.top=top+'px';
+}
 document.addEventListener('click',closeMenu);
 
 /* =========================================================
@@ -967,9 +1014,7 @@ function openMenuAt(items, x, y){
   });
   m.classList.add('is-on');
   m.style.left='0px'; m.style.top='0px';
-  const w=m.offsetWidth, h=m.offsetHeight;
-  m.style.left=Math.max(8, Math.min(x, innerWidth-w-8))+'px';
-  m.style.top=Math.max(8, Math.min(y, innerHeight-h-8))+'px';
+  placeMenu(m, x, y, false);
 }
 
 function projectMenu(p){
@@ -985,12 +1030,30 @@ function projectMenu(p){
   if((p.backups||[]).length) items.push({label:T('Ver copias de seguridad')+' ('+p.backups.length+')', run:()=>{ if(state.expanded.has(p.id)) state.expanded.delete(p.id); else state.expanded.add(p.id); renderTable(); }});
   items.push({sep:true});
   items.push({label:T('Mover a carpeta…'), run:async()=>{
-    const f=prompt(T('Carpeta:'),p.folder);
-    if(f){ p.folder=f; await native('update',{id:p.id,folder:f}); if(!(DB.folders||[]).includes(f)) await native('addFolder',{name:f}); await refresh(); }
+    const f=await askFolder(p.folder);
+    if(!f) return;
+    p.folder=f; renderAll();
+    native('update',{id:p.id,folder:f});
+    if(!(DB.folders||[]).includes(f)){ DB.folders=(DB.folders||[]).concat([f]); native('addFolder',{name:f}); renderRail(); }
+    toast(T('Movido a «{f}»',{f:folderLabel(f)}));
   }});
-  items.push({label:T('Quitar de recientes'), run:async()=>{p.hidden=true; await native('update',{id:p.id,hidden:true}); await refresh();}});
+  items.push({label:T(p.hidden?'Volver a recientes':'Quitar de recientes'), run:()=>{
+    p.hidden=!p.hidden; renderAll();
+    native('update',{id:p.id,hidden:p.hidden});
+    toast(T(p.hidden?'Quitado de recientes · el archivo sigue en su carpeta':'Devuelto a recientes'));
+  }});
   items.push({sep:true});
   if(DB.reaperRunning){ items.push({sep:true}); items.push({label:T('Traer todos los FX online'), run:()=>native('fxonline')}); }
+  items.push({label:T('Quitar del launcher…'), danger:true, run:async()=>{
+    const yes=await askConfirm(T('Quitar del launcher'),
+      T('¿Quitar «{name}» del launcher?\n\nEl .rpp no se toca: sigue en su carpeta y no vuelve a la lista al abrirlo desde fuera.',{name:p.name}),
+      T('Quitar'), true);
+    if(!yes) return;
+    native('forget',{id:p.id});
+    DB.projects=(DB.projects||[]).filter(x=>x.id!==p.id);
+    state.selected=null; renderAll();
+    toast(T('Quitado del launcher'));
+  }});
   items.push({label:T('Eliminar proyecto…'), danger:true, run:()=>deleteProject(p)});
   return items;
 }
@@ -1008,28 +1071,95 @@ function folderMenu(name){
   ];
 }
 
+/* ---------------------------------------------------------
+   Diálogos propios
+   WKWebView bloquea confirm() y prompt() del navegador (el
+   UIDelegate no implementa esos paneles), así que devolvían
+   false/null sin mostrar nada. Todo pasa por esta hoja.
+   --------------------------------------------------------- */
+function askSheet(cfg){
+  return new Promise(resolve=>{
+    const scrim=$('#askScrim'), wrap=$('#askWrap'), body=$('#askBody');
+    $('#askTitle').textContent = cfg.title || '';
+    const msg=$('#askMsg'); msg.textContent = cfg.msg || '';
+    body.innerHTML='';
+    let inputEl=null;
+
+    if(cfg.list && cfg.list.length){
+      const list=document.createElement('div'); list.className='asklist';
+      cfg.list.forEach(name=>{
+        const b=document.createElement('button');
+        b.className='it'+(name===cfg.value?' is-on':'');
+        b.textContent=folderLabel(name);
+        b.onclick=()=>finish(name);
+        list.appendChild(b);
+      });
+      body.appendChild(list);
+    }
+    if(cfg.input!==false){
+      inputEl=document.createElement('input');
+      inputEl.className='rk-input';
+      inputEl.value=cfg.value||'';
+      inputEl.placeholder=cfg.placeholder||'';
+      body.appendChild(inputEl);
+    }
+
+    const ok=$('#askOk'), cancel=$('#askCancel');
+    ok.textContent=cfg.okLabel||T('Aceptar');
+    ok.className='rk-btn '+(cfg.danger?'rk-btn--danger':'rk-btn--primary');
+    scrim.classList.add('is-on'); wrap.classList.add('is-on');
+
+    function finish(v){
+      scrim.classList.remove('is-on'); wrap.classList.remove('is-on');
+      ok.onclick=cancel.onclick=scrim.onclick=null;
+      document.removeEventListener('keydown',onKey);
+      resolve(v);
+    }
+    function onKey(e){
+      if(e.key==='Escape'){ e.preventDefault(); finish(null); }
+      else if(e.key==='Enter'){ e.preventDefault(); finish(inputEl ? (inputEl.value.trim()||null) : true); }
+    }
+    document.addEventListener('keydown',onKey);
+    ok.onclick=()=>finish(inputEl ? (inputEl.value.trim()||null) : true);
+    cancel.onclick=()=>finish(null);
+    scrim.onclick=()=>finish(null);
+    setTimeout(()=>{ if(inputEl){ inputEl.focus(); inputEl.select(); } else ok.focus(); },60);
+  });
+}
+const askConfirm=(title,msg,okLabel,danger)=>askSheet({title,msg,okLabel:okLabel||T('Aceptar'),danger:!!danger,input:false});
+const askText=(title,msg,value,okLabel,ph)=>askSheet({title,msg,value,okLabel,placeholder:ph});
+const askFolder=cur=>askSheet({title:T('Mover a carpeta'),msg:T('Elige una carpeta o escribe una nueva:'),
+                               list:(DB.folders||[]).slice(),value:cur,okLabel:T('Mover')});
+
 async function deleteProject(p){
-  const ok=confirm(LANG==='es'
-    ? '¿Eliminar «'+p.name+'»?\n\nEl archivo se mueve a la Papelera:\n'+p.path+'\n\nEsta acción borra el proyecto del disco y del launcher.'
-    : 'Delete "'+p.name+'"?\n\nThe file goes to the Trash:\n'+p.path+'\n\nThis removes the project from disk and from the launcher.');
+  const ok=await askConfirm(
+    LANG==='es' ? 'Eliminar proyecto' : 'Delete project',
+    LANG==='es'
+      ? '¿Eliminar «'+p.name+'»?\n\nEl archivo se mueve a la Papelera:\n'+p.path+'\n\nEsta acción borra el proyecto del disco y del launcher.'
+      : 'Delete "'+p.name+'"?\n\nThe file goes to the Trash:\n'+p.path+'\n\nThis removes the project from disk and from the launcher.',
+    LANG==='es' ? 'Eliminar' : 'Delete', true);
   if(!ok) return;
   const r=await native('delete',{id:p.id});
   if(r && r.ok===false){ toast(T('No se pudo eliminar: {e}',{e:(r.error||T('error desconocido'))})); return; }
-  state.selected=null; await refresh();
+  state.selected=null;
+  DB.projects=(DB.projects||[]).filter(x=>x.id!==p.id);
+  renderAll();
   toast(T('Proyecto eliminado · el .rpp está en la Papelera'));
 }
 
-function createFolder(){
-  const n=prompt(T('Nombre de la carpeta (virtual, no mueve archivos):'));
+async function createFolder(){
+  const n=await askText(T('Nueva carpeta'), T('Es virtual: no mueve archivos.'),
+                        '', T('Crear'), T('Nombre de la carpeta'));
   if(!n) return;
-  native('addFolder',{name:n}).then(refresh);
+  native('addFolder',{name:n});
+  await refresh();
 }
 
 async function deleteFolder(name){
   const msg = LANG==='es'
     ? '¿Eliminar la carpeta «'+folderLabel(name)+'»?\n\nLos proyectos no se borran: pasan a «Sin carpeta».'
     : 'Delete the folder "'+folderLabel(name)+'"?\n\nProjects are not deleted: they move to "No folder".';
-  if(!confirm(msg)){
+  if(!(await askConfirm(LANG==='es'?'Eliminar carpeta':'Delete folder', msg, LANG==='es'?'Eliminar':'Delete', true))){
     return;
   }
   await native('deleteFolder',{name});
@@ -1189,11 +1319,14 @@ document.addEventListener('contextmenu', e=>{
 document.addEventListener('selectstart', e=>{
   if(!/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) e.preventDefault();
 });
-$('#addTag').onclick=()=>{
+$('#addTag').onclick=async ()=>{
   const p=byId(state.selected);
   if(!p){ toast(T('Selecciona un proyecto primero')); return; }
-  const n=prompt(T('Nueva etiqueta:'));
-  if(n){ const v=n.trim().toLowerCase().replace(/\s+/g,'-'); if(!p.tags.includes(v)) p.tags.push(v); native('update',{id:p.id,tags:p.tags}).then(refresh); }
+  const n=await askText(T('Nueva etiqueta'), ' ', '', T('Agregar'), T('nombre-de-la-etiqueta'));
+  if(n){
+    const v=n.trim().toLowerCase().replace(/\s+/g,'-');
+    if(v && !p.tags.includes(v)){ p.tags.push(v); renderAll(); native('update',{id:p.id,tags:p.tags}); }
+  }
 };
 $('#railToggle').onclick=()=>$('#rail').classList.toggle('is-open');
 

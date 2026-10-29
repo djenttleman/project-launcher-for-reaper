@@ -148,6 +148,30 @@ Las variables locales usadas dentro de un `defer` tienen que declararse **antes*
 de la función que las usa: si no, Lua las resuelve como globales (`nil`) y el
 script muere con "attempt to perform arithmetic on a nil value".
 
+## Diálogos y menús (1.2.1)
+
+**WKWebView bloquea `confirm()` y `prompt()`** salvo que el `WKUIDelegate` implemente
+`runJavaScriptConfirmPanel` / `runJavaScriptTextInputPanel`; sin eso devuelven `false`
+y `null` en silencio. Por eso "mover a carpeta", "eliminar proyecto" y "quitar del
+launcher" no hacían nada. Todo pasa ahora por `askSheet()` en `selector.html`:
+`askConfirm()`, `askText()` y `askFolder()`, con el mismo kit visual, Enter/Escape y
+foco automático.
+
+**El id del puente se parsea con `NSNumber`**: `body["id"] as? Int` puede fallar con los
+números que entrega `WKScriptMessage`, y entonces la respuesta sale sin `_id`, la promesa
+del JS nunca resuelve y el handler queda colgado antes de repintar. Se resuelve con
+`(body["id"] as? NSNumber)?.intValue`. Aun así, las mutaciones se pintan primero y el
+`update` viaja detrás (optimista), con un timeout de 4 s como red de seguridad.
+
+**Los menús se colocan con `placeMenu()`**: el límite inferior es el borde superior de la
+barra de estado, no el viewport (la barra vive dentro de la página y tapaba el último
+ítem). Si no cabe abajo se abre hacia arriba, si no cabe a la derecha se corre a la
+izquierda, y la altura se limita con scroll.
+
+**Tombstones**: `library.ignored` guarda las rutas quitadas con "Quitar del launcher…".
+`pickProject` y el seed desde `REAPER.ini` las saltan, así un proyecto quitado a mano no
+vuelve a la lista al abrirlo desde fuera.
+
 ## Modo slim (1.2)
 
 La ventana puede entrar en un modo de lista angosta de 380 × 620, pensado para dejar el launcher abierto al costado mientras trabajás.

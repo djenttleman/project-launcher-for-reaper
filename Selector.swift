@@ -45,6 +45,8 @@ struct Library: Codable {
     var projects: [Project] = []
     var folders: [String] = ["Shows", "Estudio", "Laboratorio", "Plantillas"]
     var folderMeta: [String: FolderMeta]? = [:]
+    /// Rutas quitadas a mano del launcher: no vuelven a entrar solas.
+    var ignored: [String]? = []
     var version: Int = 2
 }
 
@@ -137,6 +139,7 @@ final class Store {
             guard line.hasPrefix("recent"), let eq = line.firstIndex(of: "=") else { continue }
             let path = String(line[line.index(after: eq)...]).trimmingCharacters(in: .whitespaces)
             guard path.lowercased().hasSuffix(".rpp"), !seen.contains(path) else { continue }
+            guard !(library.ignored ?? []).contains(path) else { continue }
             guard FileManager.default.fileExists(atPath: path) else { continue }
             seen.insert(path)
             var p = makeProject(path: path)
@@ -526,7 +529,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
                                didReceive message: WKScriptMessage) {
         guard let body = message.body as? [String: Any],
               let cmd = body["cmd"] as? String else { return }
-        currentMsgId = body["id"] as? Int
+        // WKWebView entrega los números como NSNumber: `as? Int` puede fallar y
+        // entonces la respuesta sale sin _id y la promesa del JS nunca resuelve.
+        currentMsgId = (body["id"] as? NSNumber)?.intValue
+            ?? (body["id"] as? Int)
+            ?? Int(body["id"] as? String ?? "")
 
         switch cmd {
         case "list":
@@ -575,7 +582,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             panel.allowedContentTypes = [UTType(filenameExtension: "rpp") ?? .data]
             panel.prompt = "Abrir"
             guard panel.runModal() == .OK, let url = panel.url else { reply(["path": ""]); return }
-            if !store.library.projects.contains(where: { $0.path == url.path }) {
+            let quitado = (store.library.ignored ?? []).contains(url.path)
+            if !quitado && !store.library.projects.contains(where: { $0.path == url.path }) {
                 store.library.projects.append(store.makeProject(path: url.path))
                 store.save()
             }
@@ -652,6 +660,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
 
         case "forget":
             guard let id = body["id"] as? String else { return }
+            if let victim = store.library.projects.first(where: { $0.id == id }) {
+                var ign = store.library.ignored ?? []
+                if !ign.contains(victim.path) { ign.append(victim.path) }
+                store.library.ignored = ign
+            }
             store.library.projects.removeAll { $0.id == id }
             store.save()
             reply(["ok": true])

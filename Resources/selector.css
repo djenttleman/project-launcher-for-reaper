@@ -244,6 +244,13 @@
   /* ---------------- overlays ---------------- */
   .scrim{position:fixed;inset:0;background:var(--rk-scrim);display:none;z-index:var(--rk-z-modal)}
   .scrim.is-on{display:block}
+  .rk-modal--ask{width:420px;max-width:100%}
+  .rk-modal--ask .rk-modal-body{padding-top:2px}
+  .askmsg{margin:0 0 10px;color:var(--rk-text-2);font:500 12.5px/1.5 var(--rk-font);white-space:pre-wrap}
+  .asklist{display:flex;flex-direction:column;gap:2px;max-height:216px;overflow:auto;margin:0 0 10px}
+  .asklist .it{display:flex;align-items:center;gap:9px;width:100%;min-height:32px;padding:0 8px;border-radius:var(--rk-r-xs);color:var(--rk-text-1);font:600 12.5px var(--rk-font);text-align:left}
+  .asklist .it:hover{background:var(--rk-bg-4)}
+  .asklist .it.is-on{background:var(--rk-bg-4);box-shadow:inset 0 0 0 1px var(--rk-line-2)}
   .modal-wrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;z-index:calc(var(--rk-z-modal) + 1)}
   .modal-wrap.is-on{display:flex}
 

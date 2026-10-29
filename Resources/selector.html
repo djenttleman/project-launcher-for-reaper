@@ -36,9 +36,7 @@ body.is-slim .slim{display:flex;flex-direction:column;width:100vw;height:100vh;b
 .slim-row:hover .go{opacity:1}
 .slim-foot{display:flex;align-items:center;gap:8px;padding:7px 12px;border-top:1px solid var(--rk-line-1);font:400 10.5px/1 var(--rk-font);color:var(--rk-text-3)}
 .slim-foot .sp{flex:1}
-.slim-btn--full{width:auto;gap:6px;padding:0 7px;height:22px;color:var(--rk-text-2)}
-.slim-btn--full span{font:700 9px/1 var(--rk-font);letter-spacing:1.2px}
-.slim-btn--full svg{width:11px;height:11px}
+.slim-btn--full{color:var(--rk-text-2)}
 .slim-led{width:7px;height:7px;border-radius:50%;background:#4A4A4E;flex:none}
 .slim-led.on{background:var(--rk-green);box-shadow:0 0 6px var(--rk-green)}
 </style>
@@ -130,7 +128,7 @@ body.is-slim .slim{display:flex;flex-direction:column;width:100vw;height:100vh;b
     <span class="slim-led" id="slimLed"></span>
     <span id="slimCount">—</span>
     <span class="sp"></span>
-    <button class="slim-btn slim-btn--ghost slim-btn--full" id="btnFull2" title="Volver al modo completo" data-en-title="Back to full mode"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"><path d="M104 56H56v48"/><path d="M152 56h48v48"/><path d="M104 200H56v-48"/><path d="M152 200h48v-48"/></svg><span>FULL</span></button>
+    <button class="slim-btn slim-btn--full" id="btnFull2" title="Volver al modo completo" data-en-title="Back to full mode"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"><path d="M104 56H56v48"/><path d="M152 56h48v48"/><path d="M104 200H56v-48"/><path d="M152 200h48v-48"/></svg></button>
   </footer>
 </section>
 
@@ -303,6 +301,8 @@ const EN = {
   '⌥ clic para abrir con FX offline':'⌥ click to open with FX offline',
   'Más opciones de apertura':'More opening options',
   'FIJADOS':'PINNED','RECIENTES':'RECENT','proyectos':'projects',
+  'Abrir':'Open','Abrir con FX offline':'Open with FX offline',
+  'Abrir y traer FX online':'Open, then FX online','Traer FX online':'Bring FX online',
   'Modo slim':'Slim mode','Volver al modo completo':'Back to full mode','Modo completo':'Full mode',
   'Laboratorio':'Lab','mezcla':'mixing','master':'mastering','grabación':'recording',
   'edición':'editing','en vivo':'live','plantilla':'template','show':'show'
@@ -1217,6 +1217,21 @@ setInterval(()=>{ refresh(); }, 30000);
 const SVG_SLIM = '<svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"><path d="M104 56v48H56"/><path d="M152 56v48h48"/><path d="M104 200v-48H56"/><path d="M152 200v-48h48"/></svg>';
 const SVG_GO = '<svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"><path d="M40 128h168"/><path d="M144 64l64 64-64 64"/></svg>';
 
+function slimMenu(p){
+  const items = [
+    {label:T('Abrir'), run:()=>native('open',{path:p.path})},
+    {label:T('Abrir con FX offline'), run:()=>openWith(p,'fxoffline')},
+    {label:T('Abrir y traer FX online'), run:()=>openWith(p,'fxoffline-online')},
+    {sep:true},
+    {label:T('Mostrar en Finder'), run:()=>native('reveal',{path:p.path})}
+  ];
+  if(DB.reaperRunning){
+    items.push({sep:true});
+    items.push({label:T('Traer FX online'), run:()=>native('fxonline')});
+  }
+  return items;
+}
+
 function slimRow(p){
   const b = el('button','slim-row');
   const d = el('span','dot');
@@ -1228,6 +1243,7 @@ function slimRow(p){
   const go = el('span','go'); go.innerHTML = SVG_GO;
   b.appendChild(d); b.appendChild(txt); b.appendChild(go);
   b.onclick = () => native('open', {path: p.path});
+  b.oncontextmenu = e => { e.preventDefault(); openMenuAt(slimMenu(p), e.clientX, e.clientY); };
   return b;
 }
 

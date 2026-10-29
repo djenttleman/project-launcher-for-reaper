@@ -300,6 +300,9 @@ const EN = {
   '＋ {n} más…':'＋ {n} more…','Abrir proyecto':'Open project','Mostrar en Finder':'Reveal in Finder',
   'Volver a recientes':'Back to recent','Eliminar proyecto…':'Delete project…',
   'Devuelto a recientes':'Back to recent',
+  'Quitado de recientes':'Removed from recent',
+  'Proyecto eliminado':'Project deleted',
+  'Movido a «{f}»':'Moved to "{f}"',
   'Abrir en REAPER':'Open in REAPER','Fijar arriba':'Pin to top','Archivar':'Archive',
   'Desarchivar':'Unarchive','Mover a carpeta…':'Move to folder…','Quitar de recientes':'Remove from recent',
   'Quitar del launcher…':'Remove from launcher…','Carpeta:':'Folder:',
@@ -828,7 +831,7 @@ function openMenu(p,anchor){
   if(p.hidden) mk(T('Volver a recientes'),async()=>{p.hidden=false; await native('update',{id:p.id,hidden:false}); await refresh();});
   else mk(T('Quitar de recientes'),()=>{
     p.hidden=true; renderAll(); native('update',{id:p.id,hidden:true});
-    toast(T('Quitado de recientes · el archivo sigue en su carpeta'), ()=>{
+    toast(T('Quitado de recientes'), ()=>{
       p.hidden=false; renderAll(); native('update',{id:p.id,hidden:false});
     });
   });
@@ -1111,7 +1114,7 @@ function projectMenu(p){
   items.push({label:T(p.hidden?'Volver a recientes':'Quitar de recientes'), run:()=>{
     p.hidden=!p.hidden; renderAll();
     native('update',{id:p.id,hidden:p.hidden});
-    toast(T(p.hidden?'Quitado de recientes · el archivo sigue en su carpeta':'Devuelto a recientes'),
+    toast(T(p.hidden?'Quitado de recientes':'Devuelto a recientes'),
           ()=>{ p.hidden=!p.hidden; renderAll(); native('update',{id:p.id,hidden:p.hidden}); });
   }});
   items.push({sep:true});
@@ -1223,7 +1226,7 @@ async function deleteProject(p){
   state.selected=null;
   DB.projects=(DB.projects||[]).filter(x=>x.id!==p.id);
   renderAll();
-  toast(T('Proyecto eliminado · el .rpp está en la Papelera'), ()=>{
+  toast(T('Proyecto eliminado'), ()=>{
     native('undelete',{path:snap.path, trashPath, project:snap}).then(res=>{
       if(res && res.ok===false){ toast(T('No se pudo deshacer: {e}',{e:(res.error||'?')})); return; }
       DB.projects=DB.projects.concat([snap]); renderAll();
@@ -1511,7 +1514,7 @@ function slimRow(p){
     p.hidden = true;
     renderSlim();
     native('update',{id:p.id, hidden:true});
-    toast(T('Quitado de recientes · el archivo sigue en su carpeta'), ()=>{
+    toast(T('Quitado de recientes'), ()=>{
       p.hidden=false; renderSlim(); native('update',{id:p.id, hidden:false});
     });
   };

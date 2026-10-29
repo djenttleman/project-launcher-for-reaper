@@ -256,6 +256,7 @@ const EN = {
   'Abrir y traer los FX online':'Open, then bring FX online',
   'Traer todos los FX online':'Bring all FX online',
   '⌥ clic para abrir con FX offline':'⌥ click to open with FX offline',
+  'Más opciones de apertura':'More opening options',
   'Laboratorio':'Lab','mezcla':'mixing','master':'mastering','grabación':'recording',
   'edición':'editing','en vivo':'live','plantilla':'template','show':'show'
 };
@@ -677,10 +678,30 @@ function renderRail(){
   c.appendChild(body);
 
   const foot=el('div','rail-foot');
+  // Botón partido: abre normal por defecto y el segmento derecho despliega
+  // las otras formas de apertura, sin pasar por el clic derecho.
+  const split=el('div','rk-split');
   const bOpen=el('button','rk-btn rk-btn--primary',T('Abrir proyecto'));
   bOpen.title=T('⌥ clic para abrir con FX offline');
   bOpen.onclick=e=> e.altKey ? openWith(p,'fxoffline') : native('open',{path:p.path});
-  foot.appendChild(bOpen);
+  const bMore=el('button','rk-btn rk-btn--primary');
+  bMore.innerHTML='<svg viewBox="0 0 256 256" fill="currentColor" width="14" height="14"><circle cx="128" cy="60" r="14"/><circle cx="128" cy="128" r="14"/><circle cx="128" cy="196" r="14"/></svg>';
+  bMore.title=T('Más opciones de apertura');
+  bMore.setAttribute('aria-label',T('Más opciones de apertura'));
+  bMore.onclick=e=>{
+    e.stopPropagation();
+    const r=bMore.getBoundingClientRect();
+    const items=[
+      {header:T('Abrir proyecto')},
+      {label:T('Abrir'), run:()=>native('open',{path:p.path})},
+      {label:T('Abrir con FX offline (recovery mode)'), run:()=>openWith(p,'fxoffline')},
+      {label:T('Abrir y traer los FX online'), run:()=>openWith(p,'fxoffline-online')}
+    ];
+    if(DB.reaperRunning){ items.push({sep:true}); items.push({label:T('Traer todos los FX online'), run:()=>native('fxonline')}); }
+    openMenuAt(items, r.right-214, r.bottom+4);
+  };
+  split.appendChild(bOpen); split.appendChild(bMore);
+  foot.appendChild(split);
   const bRev=el('button','rk-btn',T('Mostrar en Finder'));
   bRev.onclick=()=>native('reveal',{path:p.path});
   foot.appendChild(bRev);

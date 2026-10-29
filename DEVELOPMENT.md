@@ -118,6 +118,12 @@ load*. De esas, el API de ReaScript sólo documenta la de FX:
 - CLI: `REAPER -fxoffline path` → lo mismo al arrancar REAPER cerrado.
 - `new tab` y `read-only` no están en el API; por eso el launcher no las ofrece.
 
+### Botón partido del inspector
+`Abrir proyecto` es un `.rk-split` del kit: la mitad izquierda abre normal (⌥-clic
+fuerza recovery mode) y el segmento de tres puntos despliega las demás formas de
+apertura con `openMenuAt`. Si se agrega una opción de apertura nueva, va en ese
+menú y no hace falta tocar el clic derecho.
+
 ### Canal de comandos app → REAPER
 Como con REAPER abierto no se pueden pasar flags, la app escribe una línea en
 `~/Library/Application Support/ReaLauncher/inbox.txt` y `ReaLauncher Startup.lua`

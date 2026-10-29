@@ -28,6 +28,8 @@ struct Project: Codable {
     var scanMtime: Double? = nil
     var scanSize: Int64? = nil
     var backups: [Backup]? = nil
+    /// false cuando el .rpp ya no está en `path` (se movió o lo borraron).
+    var exists: Bool? = nil
 }
 
 struct Backup: Codable {
@@ -246,6 +248,7 @@ final class Store {
             "id": p.id, "path": p.path, "name": p.name, "folder": p.folder,
             "tags": p.tags, "pinned": p.pinned, "hidden": p.hidden, "archived": p.archived,
             "lastOpened": p.lastOpened, "type": p.type,
+            "mtime": p.scanMtime ?? 0, "exists": p.exists ?? true,
             "regions": p.regions ?? 0, "tracks": p.tracks ?? 0,
             "tempo": p.tempo ?? NSNull(), "size": size,
             "backups": (p.backups ?? []).map {
@@ -259,9 +262,15 @@ final class Store {
     func refreshScans(completion: @escaping (Bool) -> Void) {
         let snapshotProjects = library.projects
         DispatchQueue.global(qos: .utility).async {
-            var results: [(String, Int, Int, Double?, Double, Int64, [Backup])] = []
+            var results: [(String, Int, Int, Double?, Double, Int64, [Backup], Bool)] = []
             for p in snapshotProjects {
                 let attrs = try? FileManager.default.attributesOfItem(atPath: p.path)
+                let existe = (attrs != nil)
+                if p.exists != existe {
+                    // cambió la existencia: se refleja aunque no haya que re-escanear
+                    results.append((p.id, p.regions ?? 0, p.tracks ?? 0, p.tempo,
+                                    p.scanMtime ?? 0, p.scanSize ?? 0, p.backups ?? [], existe))
+                }
                 let mtime = (attrs?[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
                 let size = (attrs?[.size] as? NSNumber)?.int64Value ?? 0
                 let needsScan = (p.scanMtime != mtime || p.scanSize != size)
@@ -276,7 +285,7 @@ final class Store {
                     return Backup(name: name, path: path,
                                   date: d["date"] as? Double ?? 0, size: d["size"] as? Int64 ?? 0)
                 } : (p.backups ?? [])
-                results.append((p.id, s.0, s.1, s.2, mtime, size, bk))
+                results.append((p.id, s.0, s.1, s.2, mtime, size, bk, existe))
             }
             guard !results.isEmpty else { DispatchQueue.main.async { completion(false) }; return }
             DispatchQueue.main.async {
@@ -288,6 +297,7 @@ final class Store {
                         self.library.projects[i].scanMtime = r.4
                         self.library.projects[i].scanSize = r.5
                         self.library.projects[i].backups = r.6
+                        self.library.projects[i].exists = r.7
                     }
                 }
                 self.save()
@@ -617,6 +627,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
                 store.save()
             }
             openInReaper(url.path)
+
+        case "relocate":
+            // El .rpp se movió de sitio: se vuelve a apuntar el mismo proyecto,
+            // conservando id, carpetas del launcher, etiquetas y fecha de apertura.
+            guard let id = body["id"] as? String,
+                  let i = store.library.projects.firstIndex(where: { $0.id == id }) else { return }
+            let panel = NSOpenPanel()
+            panel.canChooseDirectories = false
+            panel.allowsMultipleSelection = false
+            panel.allowedContentTypes = [UTType(filenameExtension: "rpp") ?? .data]
+            panel.prompt = "Ubicar"
+            panel.message = NSLocalizedString("Elige el .rpp en su nueva ubicación", comment: "")
+            guard panel.runModal() == .OK, let url = panel.url else { return }
+            store.library.projects[i].path = url.path
+            store.library.projects[i].name = url.deletingPathExtension().lastPathComponent
+            store.library.projects[i].exists = true
+            store.library.projects[i].scanMtime = nil      // fuerza re-escaneo
+            store.library.projects[i].scanSize = nil
+            store.library.projects[i].type = store.guessType(url.path)
+            store.save()
+            reply(store.projectJSON(store.library.projects[i]))
 
         case "create":
             guard let name = body["name"] as? String, let dir = body["dir"] as? String else { return }

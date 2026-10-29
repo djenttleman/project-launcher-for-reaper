@@ -353,6 +353,16 @@ const FOLDER_ALIASES = {
   'estudio':'Estudio','studio':'Estudio','shows':'Shows','show':'Shows',
   'plantillas':'Plantillas','templates':'Plantillas','laboratorio':'Laboratorio','lab':'Laboratorio'
 };
+// Carpeta REAL en disco donde vive el .rpp (no la carpeta del launcher).
+function realFolder(path){
+  const home=(DB.home||'').replace(/\/$/,'');
+  let q=String(path||'');
+  if(home && q.startsWith(home+'/')) q=q.slice(home.length+1);
+  const parts=q.split('/'); parts.pop();
+  const cola=parts.slice(-3);
+  return (parts.length>3?'…/':'')+cola.join('/');
+}
+
 function folderLabel(name){
   if(!name) return name;
   const key = FOLDER_ALIASES[String(name).trim().toLowerCase()];
@@ -595,7 +605,9 @@ function rowFor(p,idx){
   const tr=el('tr','project'+(p.id===state.selected?' is-on':''));
   tr.dataset.id=p.id;
   tr.onclick=()=>{state.selected=p.id; renderTable(); renderRail();};
-  tr.ondblclick=e=>{ e.altKey ? openWith(p,'fxoffline') : native('open',{path:p.path}); };
+  tr.ondblclick=e=>{ e.altKey ? openWith(p,'fxoffline') : (native('open',{path:p.path}), setTimeout(refresh, 1200)); };
+
+  if(p.exists===false) tr.classList.add('is-missing');
 
   const tdNum=el('td','c-num');
   const pin=el('button','pin-btn'+(p.pinned?' is-pinned':''));
@@ -639,6 +651,16 @@ function rowFor(p,idx){
 
   const box=el('div','proj-name');
   box.appendChild(el('div','nm',p.name));
+
+  // Etiquetas del proyecto (la carpeta va en su columna).
+  if((p.tags||[]).length){
+    const loc=el('div','proj-loc');
+    const tg=el('span','proj-tags');
+    (p.tags||[]).slice(0,4).forEach(t=>tg.appendChild(el('span','proj-tag','#'+tagLabel(t))));
+    loc.appendChild(tg);
+    box.appendChild(loc);
+  }
+
   if(p.type==='show' && p.regions){
     const st=el('div','proj-strip');
     for(let i=0;i<Math.min(p.regions,16);i++){
@@ -651,8 +673,12 @@ function rowFor(p,idx){
 
   const tdType=el('td','c-type');
   const badge=el('span','rk-badge rk-badge--plain');
-  const dot=el('span'); dot.style.cssText='width:8px;height:8px;border-radius:50%;background:'+(TYPES[p.type]||TYPES.studio).color;
-  badge.appendChild(dot); badge.appendChild(document.createTextNode(typeLabel(p.type)));
+  const fmeta=(DB.folderMeta||{})[p.folder]||{};
+  const dot=el('span');
+  dot.style.cssText='width:8px;height:8px;border-radius:50%;background:'+(fmeta.color||'var(--rk-text-3)');
+  badge.appendChild(dot);
+  badge.appendChild(document.createTextNode(p.folder ? folderLabel(p.folder) : T('Sin carpeta')));
+  badge.title=T('Carpeta del launcher')+' · '+T('Tipo')+': '+typeLabel(p.type);
   tdType.appendChild(badge); tr.appendChild(tdType);
 
   const tdWhen=el('td','c-when');
@@ -718,7 +744,8 @@ function renderRail(){
   add(T('Pistas'),p.tracks||0);
   if(p.tempo) add('Tempo',p.tempo+' BPM');
   add(T('Tamaño'),mb(p.size));
-  add(T('Modificado'),ago(p.lastOpened));
+  if(p.mtime) add(T('Modificado'),ago(p.mtime));
+  add(T('Última vez abierto'),ago(p.lastOpened));
   body.appendChild(dl);
 
   const secTags=el('div','rail-section');
@@ -842,12 +869,12 @@ function openMenu(p,anchor){
     });
   });
   mk(T('Mover a carpeta…'),async()=>{
-    const f=await askFolder(p.folder);
-    if(!f) return;
+    const prev=p.folder;                       // se guarda ANTES de mover
+    const f=await askFolder(prev);
+    if(!f || f===prev) return;
     p.folder=f; renderAll();
     native('update',{id:p.id,folder:f});
     if(!(DB.folders||[]).includes(f)){ DB.folders=(DB.folders||[]).concat([f]); native('addFolder',{name:f}); renderRail(); }
-    const prev=p.folder;
     toast(T('Movido a «{f}»',{f:folderLabel(f)}), ()=>{
       p.folder=prev; renderAll(); native('update',{id:p.id,folder:prev});
     });
@@ -1086,10 +1113,14 @@ function openMenuAt(items, x, y){
 
 function projectMenu(p){
   const items=[
-    {label:T('Abrir en REAPER'), run:()=>native('open',{path:p.path})},
+    {label:T('Abrir en REAPER'), run:()=>{ native('open',{path:p.path}); setTimeout(refresh, 1200); }},
     {label:T('Abrir con FX offline (recovery mode)'), run:()=>openWith(p,'fxoffline')},
     {label:T('Abrir y traer los FX online'), run:()=>openWith(p,'fxoffline-online')},
     {label:T('Mostrar en Finder'), run:()=>native('reveal',{path:p.path})},
+    ...(p.exists===false ? [{label:T('Ubicar de nuevo…'), run:async()=>{
+      await native('relocate',{id:p.id});
+      await refresh();
+    }}] : []),
     {sep:true},
     {label:T(p.pinned?'Quitar de fijados':'Fijar arriba'), run:()=>{
       p.pinned=!p.pinned; renderAll(); native('update',{id:p.id,pinned:p.pinned});
@@ -1103,12 +1134,12 @@ function projectMenu(p){
   if((p.backups||[]).length) items.push({label:T('Ver copias de seguridad')+' ('+p.backups.length+')', run:()=>{ if(state.expanded.has(p.id)) state.expanded.delete(p.id); else state.expanded.add(p.id); renderTable(); }});
   items.push({sep:true});
   items.push({label:T('Mover a carpeta…'), run:async()=>{
-    const f=await askFolder(p.folder);
-    if(!f) return;
+    const prev=p.folder;                       // se guarda ANTES de mover
+    const f=await askFolder(prev);
+    if(!f || f===prev) return;
     p.folder=f; renderAll();
     native('update',{id:p.id,folder:f});
     if(!(DB.folders||[]).includes(f)){ DB.folders=(DB.folders||[]).concat([f]); native('addFolder',{name:f}); renderRail(); }
-    const prev=p.folder;
     toast(T('Movido a «{f}»',{f:folderLabel(f)}), ()=>{ p.folder=prev; renderAll(); native('update',{id:p.id,folder:prev}); });
   }});
   items.push({label:T(p.hidden?'Volver a recientes':'Quitar de recientes'), run:()=>{

@@ -1,4 +1,4 @@
-# ReaLauncher
+# Project Launcher
 
 Selector de proyectos de REAPER. Reemplaza el diálogo nativo *Choose Project*
 por una ventana propia con biblioteca, carpetas y etiquetas virtuales, pin,
@@ -8,12 +8,12 @@ backups por proyecto y métricas de uso.
 
 | Pieza | Ruta |
 |---|---|
-| App nativa (WKWebView) | `~/Applications/ReaLauncher.app` |
-| Lanzador (Action List) | `~/Library/Application Support/REAPER/Scripts/Reaset Scripts/ReaLauncher.lua` |
-| Arranque + métricas | `~/Library/Application Support/REAPER/Scripts/Reaset Scripts/ReaLauncher Startup.lua` |
+| App nativa (WKWebView) | `~/Applications/Project Launcher.app` |
+| Lanzador (Action List) | `~/Library/Application Support/REAPER/Scripts/Reaset Scripts/Project Launcher.lua` |
+| Arranque + métricas | `~/Library/Application Support/REAPER/Scripts/Reaset Scripts/Project Launcher Startup.lua` |
 | Gancho de arranque | `~/Library/Application Support/REAPER/Scripts/__startup.lua` (bloque marcado) |
-| Biblioteca del launcher | `~/Library/Application Support/ReaLauncher/library.json` |
-| Horas de uso | `~/Library/Application Support/ReaLauncher/usage.json` |
+| Biblioteca del launcher | `~/Library/Application Support/Project Launcher/library.json` |
+| Horas de uso | `~/Library/Application Support/Project Launcher/usage.json` |
 
 ## Cómo funciona
 
@@ -42,7 +42,7 @@ backups por proyecto y métricas de uso.
 ## Instalar / revertir
 
 ```bash
-cd ~/dev/realauncher
+cd ~/dev/project-launcher
 ./install.sh            # compila, copia scripts, engancha el arranque
 ./install.sh --revert   # deja REAPER como estaba (loadlastproj=20, sin bloque ni scripts)
 ```
@@ -126,7 +126,7 @@ menú y no hace falta tocar el clic derecho.
 
 ### Canal de comandos app → REAPER
 Como con REAPER abierto no se pueden pasar flags, la app escribe una línea en
-`~/Library/Application Support/ReaLauncher/inbox.txt` y `ReaLauncher Startup.lua`
+`~/Library/Application Support/Project Launcher/inbox.txt` y `Project Launcher Startup.lua`
 la consume desde su `defer` (cada ~8 ticks):
 
 ```

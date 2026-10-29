@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ReaLauncher — a project launcher for REAPER that doesn't look like 2003</title>
+<title>Project Launcher for REAPER — it doesn't look like 2003</title>
 <meta name="description" content="A native macOS project launcher for REAPER. Folders, tags, backups, inspector and a decent design. Made by humans and AI (but with a properly built UI), for humans with feelings.">
-<meta property="og:title" content="ReaLauncher">
+<meta property="og:title" content="Project Launcher for REAPER">
 <meta property="og:description" content="A project launcher for REAPER that doesn't look like 2003.">
 <meta property="og:image" content="assets/screenshot-dark.png">
 <style>
@@ -46,9 +46,10 @@
   .ghost:hover{color:var(--text);border-color:rgba(255,255,255,.22)}
   header{padding:64px 0 8px}
   h1{
-    font-size:clamp(52px,9vw,104px);line-height:.95;letter-spacing:-.045em;margin:0 0 20px;font-weight:800;
+    font-size:clamp(42px,7.2vw,86px);line-height:.95;letter-spacing:-.045em;margin:0 0 14px;font-weight:800;
     background:linear-gradient(180deg,#fff,#CFC9DE);-webkit-background-clip:text;background-clip:text;color:transparent;
   }
+  .for{margin:0 0 24px;font-size:clamp(13px,1.5vw,17px);font-weight:700;letter-spacing:.46em;text-transform:uppercase;color:var(--dim2)}
   .rule{height:4px;width:min(430px,70%);border-radius:3px;margin:0 0 26px;
     background:linear-gradient(90deg,var(--violet),var(--blue) 55%,var(--green))}
   .lead{font-size:clamp(17px,2.2vw,21px);color:var(--dim);max-width:720px;margin:0 0 22px}
@@ -94,17 +95,18 @@
 <div class="wrap">
 
   <nav>
-    <div class="brand"><span class="dot"></span>ReaLauncher</div>
+    <div class="brand"><span class="dot"></span>Project Launcher</div>
     <div class="spacer"></div>
     <div class="lang" role="group" aria-label="Language">
       <button id="btnEn" class="on" onclick="setLang('en')">EN</button>
       <button id="btnEs" onclick="setLang('es')">ES</button>
     </div>
-    <a class="ghost" href="https://github.com/djenttleman/realauncher" target="_blank" rel="noopener">GitHub ↗</a>
+    <a class="ghost" href="https://github.com/djenttleman/project-launcher-for-reaper" target="_blank" rel="noopener">GitHub ↗</a>
   </nav>
 
   <header>
-    <h1>ReaLauncher</h1>
+    <h1>Project Launcher</h1>
+    <p class="for">for REAPER</p>
     <div class="rule"></div>
     <p class="lead">
       <span class="en">A project launcher for REAPER that doesn't look like 2003. Native, fast, and with folders, tags, backups and an inspector that actually tells you something.</span>
@@ -116,7 +118,7 @@
     </p>
 
     <div class="install">
-      <code><b>$</b> curl -fsSL https://raw.githubusercontent.com/djenttleman/realauncher/main/bootstrap.sh | bash</code>
+      <code><b>$</b> curl -fsSL https://raw.githubusercontent.com/djenttleman/project-launcher-for-reaper/main/bootstrap.sh | bash</code>
       <button class="copy" id="copyBtn" onclick="copyCmd()">
         <span class="en">copy</span><span class="es">copiar</span>
       </button>
@@ -129,8 +131,8 @@
 
   <section>
     <div class="hero-shot">
-      <img class="shot en" src="assets/en/screenshot-dark.png" alt="ReaLauncher, dark theme">
-      <img class="shot es" src="assets/es/screenshot-dark.png" alt="ReaLauncher, tema oscuro">
+      <img class="shot en" src="assets/en/screenshot-dark.png" alt="Project Launcher, dark theme">
+      <img class="shot es" src="assets/es/screenshot-dark.png" alt="Project Launcher, tema oscuro">
     </div>
   </section>
 
@@ -169,8 +171,8 @@
   <section>
     <h2><span class="en">A closer look</span><span class="es">De cerca</span></h2>
     <div class="hero-shot">
-      <img class="shot en" src="assets/en/screenshot-light.png" alt="ReaLauncher, light theme">
-      <img class="shot es" src="assets/es/screenshot-light.png" alt="ReaLauncher, tema claro">
+      <img class="shot en" src="assets/en/screenshot-light.png" alt="Project Launcher, light theme">
+      <img class="shot es" src="assets/es/screenshot-light.png" alt="Project Launcher, tema claro">
     </div>
     <div class="split">
       <figure>
@@ -213,13 +215,13 @@
   <footer>
     <span>© 2026 djenttleman · MIT · <span class="en">Built with AI</span><span class="es">Hecho con IA</span></span>
     <span class="spacer"></span>
-    <a class="ghost" href="https://github.com/djenttleman/realauncher" target="_blank" rel="noopener">Source ↗</a>
-    <a class="ghost" href="https://github.com/djenttleman/realauncher/blob/main/README.es.md">README ES</a>
+    <a class="ghost" href="https://github.com/djenttleman/project-launcher-for-reaper" target="_blank" rel="noopener">Source ↗</a>
+    <a class="ghost" href="https://github.com/djenttleman/project-launcher-for-reaper/blob/main/README.es.md">README ES</a>
   </footer>
 </div>
 
 <script>
-const CMD = 'curl -fsSL https://raw.githubusercontent.com/djenttleman/realauncher/main/bootstrap.sh | bash';
+const CMD = 'curl -fsSL https://raw.githubusercontent.com/djenttleman/project-launcher-for-reaper/main/bootstrap.sh | bash';
 
 function setLang(lang){
   document.documentElement.dataset.lang = lang;

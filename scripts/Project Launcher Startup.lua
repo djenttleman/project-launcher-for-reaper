@@ -8,7 +8,7 @@
 local SEP = package.config:sub(1, 1)
 
 local function supportDir()
-  return (os.getenv("HOME") or "") .. "/Library/Application Support/ReaLauncher"
+  return (os.getenv("HOME") or "") .. "/Library/Application Support/Project Launcher"
 end
 
 local function ensureDir(path)
@@ -180,9 +180,9 @@ reaper.defer(flusher)
 -- un .rpp desde Finder, el proyecto ya está cargado y no se muestra nada.
 local function selectorApp()
   local home = os.getenv("HOME") or ""
-  local cands = { home .. "/Applications/ReaLauncher.app", "/Applications/ReaSet Selector.app" }
+  local cands = { home .. "/Applications/Project Launcher.app", home .. "/Applications/ReaLauncher.app" }
   for _, p in ipairs(cands) do
-    local f = io.open(p .. "/Contents/MacOS/ReaLauncher", "r") or io.open(p .. "/Contents/MacOS/ReaSetSelector", "r")
+    local f = io.open(p .. "/Contents/MacOS/ProjectLauncher", "r") or io.open(p .. "/Contents/MacOS/ReaSetSelector", "r")
     if f then f:close(); return p end
   end
   return nil
@@ -191,11 +191,11 @@ end
 -- -------------------------------------------------- Action List (una vez)
 -- AddRemoveReaScript es la vía soportada: agrega el lanzador a la Action List
 -- sin tocar reaper-kb.ini a mano. Si REAPER se actualiza, el bloque se repone.
-if reaper.GetExtState("ReaLauncher", "action") ~= "1" then
-  local launcher = reaper.GetResourcePath() .. "/Scripts/Reaset Scripts/ReaLauncher.lua"
+if reaper.GetExtState("ProjectLauncher", "action") ~= "1" then
+  local launcher = reaper.GetResourcePath() .. "/Scripts/Reaset Scripts/Project Launcher.lua"
   if reaper.file_exists(launcher) then
     reaper.AddRemoveReaScript(true, 0, launcher, true)
-    reaper.SetExtState("ReaLauncher", "action", "1", true)
+    reaper.SetExtState("ProjectLauncher", "action", "1", true)
   end
 end
 

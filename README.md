@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="ReaLauncher — a project launcher for REAPER" width="100%">
+  <img src="assets/banner.svg" alt="Project Launcher — a project launcher for REAPER" width="100%">
 </p>
 
 <p align="center">
-  <b>English</b> · <a href="README.es.md">Español</a> · <a href="https://djenttleman.github.io/realauncher/">Website</a>
+  <b>English</b> · <a href="README.es.md">Español</a> · <a href="https://djenttleman.github.io/project-launcher-for-reaper/">Website</a>
 </p>
 
 <p align="center">
@@ -50,11 +50,11 @@ It started as a tool for my own live shows. Then it grew folders, tags, backups,
 ## Screenshots
 
 <p align="center">
-  <img src="assets/en/screenshot-dark.png" alt="ReaLauncher, dark theme" width="100%">
+  <img src="assets/en/screenshot-dark.png" alt="Project Launcher, dark theme" width="100%">
 </p>
 
 <p align="center">
-  <img src="assets/en/screenshot-light.png" alt="ReaLauncher, light theme" width="100%">
+  <img src="assets/en/screenshot-light.png" alt="Project Launcher, light theme" width="100%">
 </p>
 
 <p align="center">
@@ -72,20 +72,20 @@ It started as a tool for my own live shows. Then it grew folders, tags, backups,
 **One command** — clones, builds and installs:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/djenttleman/realauncher/main/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/djenttleman/project-launcher-for-reaper/main/bootstrap.sh | bash
 ```
 
 **Or step by step**, if you like to see what runs on your machine:
 
 ```bash
-git clone https://github.com/djenttleman/realauncher.git ~/dev/realauncher
-cd ~/dev/realauncher
+git clone https://github.com/djenttleman/project-launcher-for-reaper.git ~/dev/project-launcher
+cd ~/dev/project-launcher
 ./install.sh
 ```
 
 Requirements: **macOS 13+**, **Xcode Command Line Tools** (`swiftc`) and **REAPER 7**.
 
-The installer builds the app into `~/Applications/ReaLauncher.app`, copies the two Lua scripts into your REAPER resource folder, hooks them into `__startup.lua` and sets `loadlastproj=19` so REAPER stops showing its own dialog. It backs up the two files it edits, and nothing else in your REAPER config is touched.
+The installer builds the app into `~/Applications/Project Launcher.app`, copies the two Lua scripts into your REAPER resource folder, hooks them into `__startup.lua` and sets `loadlastproj=19` so REAPER stops showing its own dialog. It backs up the two files it edits, and nothing else in your REAPER config is touched.
 
 ## How it works
 
@@ -94,10 +94,10 @@ It's two pieces and a trick. The app is a small native macOS window — AppKit p
 ## Good to know
 
 - **macOS only.** It's built with AppKit; porting it is a different project.
-- **Nothing is moved or renamed** behind your back. Folders, tags and pins live in `~/Library/Application Support/ReaLauncher/library.json`.
+- **Nothing is moved or renamed** behind your back. Folders, tags and pins live in `~/Library/Application Support/Project Launcher/library.json`.
 - **Deleting a project** from the inspector sends the `.rpp` to the Trash and removes it from the library. It asks first.
 - **The first scan asks for file access** on folders like Documents or Downloads — the app only reads `.rpp` headers.
-- **Uninstall**: `./install.sh --revert` restores REAPER's own launcher, then delete `~/Applications/ReaLauncher.app` and `~/Library/Application Support/ReaLauncher`.
+- **Uninstall**: `./install.sh --revert` restores REAPER's own launcher, then delete `~/Applications/Project Launcher.app` and `~/Library/Application Support/Project Launcher`.
 
 ## Built on other people's work
 
@@ -105,7 +105,7 @@ None of this would look the way it does without these:
 
 - **[Phosphor Icons](https://phosphoricons.com/)** (MIT) — the folder, theme, accent and language glyphs, and most of the small icons. Bundled locally as SVG paths; no runtime dependency, nothing downloaded at startup.
 - **[The Reapertips theme](https://forum.cockos.com/showthread.php?t=281644)** by [Alez156](https://forum.cockos.com/member.php?u=100131) — the palette the whole interface leans on: that violet, the cyan and rose accents, and a set of grays that don't look flat. Thanks for making REAPER pleasant to look at; this launcher stands on it.
-- **[ReaSet Pro](https://reaset.app/)** — the design kit from my own live-show tool: spacing, type scale and component language. ReaLauncher borrows it on purpose so the two feel like the same family.
+- **[ReaSet Pro](https://reaset.app/)** — the design kit from my own live-show tool: spacing, type scale and component language. Project Launcher borrows it on purpose so the two feel like the same family.
 - **[DeepSeek](https://www.deepseek.com/) V4.1 Flash** — the model that wrote a good chunk of this with me.
 
 Everything else — the app, the Lua scripts, the interface — is original code under the MIT license.

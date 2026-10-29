@@ -3,9 +3,9 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-APP="$HOME/Applications/ReaLauncher.app"
+APP="$HOME/Applications/Project Launcher.app"
 BUILD="$HERE/.build"
-BIN="$BUILD/ReaLauncher"
+BIN="$BUILD/ProjectLauncher"
 
 rm -rf "$BUILD"; mkdir -p "$BUILD"
 
@@ -18,7 +18,7 @@ swiftc -O -parse-as-library \
 echo "== armando bundle =="
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN" "$APP/Contents/MacOS/ReaLauncher"
+cp "$BIN" "$APP/Contents/MacOS/ProjectLauncher"
 cp "$HERE/Resources/selector.html" "$HERE/Resources/selector.css" "$HERE/Resources/reaset-kit.css" "$APP/Contents/Resources/"
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
@@ -26,10 +26,10 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>CFBundleName</key><string>ReaLauncher</string>
-  <key>CFBundleDisplayName</key><string>ReaLauncher</string>
+  <key>CFBundleName</key><string>Project Launcher</string>
+  <key>CFBundleDisplayName</key><string>Project Launcher</string>
   <key>CFBundleIdentifier</key><string>com.reaset.selector</string>
-  <key>CFBundleExecutable</key><string>ReaLauncher</string>
+  <key>CFBundleExecutable</key><string>ProjectLauncher</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>1.1.0</string>
   <key>CFBundleVersion</key><string>1</string>
@@ -38,11 +38,11 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>NSHighResolutionCapable</key><true/>
   <key>LSApplicationCategoryType</key><string>public.app-category.music</string>
   <key>NSHumanReadableCopyright</key><string>ReaSet</string>
-  <key>NSDocumentsFolderUsageDescription</key><string>ReaLauncher lee tus archivos .rpp para mostrar regiones, pistas y copias de seguridad.</string>
-  <key>NSDesktopFolderUsageDescription</key><string>ReaLauncher lee tus archivos .rpp para mostrar regiones, pistas y copias de seguridad.</string>
-  <key>NSDownloadsFolderUsageDescription</key><string>ReaLauncher lee tus archivos .rpp para mostrar regiones, pistas y copias de seguridad.</string>
-  <key>NSRemovableVolumesUsageDescription</key><string>ReaLauncher lee proyectos .rpp guardados en discos externos.</string>
-  <key>NSNetworkVolumesUsageDescription</key><string>ReaLauncher lee proyectos .rpp guardados en volúmenes de red.</string>
+  <key>NSDocumentsFolderUsageDescription</key><string>Project Launcher lee tus archivos .rpp para mostrar regiones, pistas y copias de seguridad.</string>
+  <key>NSDesktopFolderUsageDescription</key><string>Project Launcher lee tus archivos .rpp para mostrar regiones, pistas y copias de seguridad.</string>
+  <key>NSDownloadsFolderUsageDescription</key><string>Project Launcher lee tus archivos .rpp para mostrar regiones, pistas y copias de seguridad.</string>
+  <key>NSRemovableVolumesUsageDescription</key><string>Project Launcher lee proyectos .rpp guardados en discos externos.</string>
+  <key>NSNetworkVolumesUsageDescription</key><string>Project Launcher lee proyectos .rpp guardados en volúmenes de red.</string>
 </dict>
 </plist>
 PLIST

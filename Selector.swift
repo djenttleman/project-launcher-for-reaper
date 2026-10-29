@@ -75,17 +75,18 @@ final class Store {
 
     init() {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        root = base.appendingPathComponent("ReaLauncher", isDirectory: true)
+        root = base.appendingPathComponent("Project Launcher", isDirectory: true)
         try? FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         libraryURL = root.appendingPathComponent("library.json")
         usageURL = root.appendingPathComponent("usage.json")
         prefsURL = root.appendingPathComponent("prefs.json")
 
-        // migración desde el nombre anterior del launcher
-        let old = base.appendingPathComponent("ReaSet Selector", isDirectory: true)
-        if !FileManager.default.fileExists(atPath: libraryURL.path),
-           FileManager.default.fileExists(atPath: old.path) {
-            for f in ["library.json", "usage.json"] {
+        // migración desde nombres anteriores del launcher (el más nuevo primero)
+        for prev in ["ReaLauncher", "ReaSet Selector"] {
+            let old = base.appendingPathComponent(prev, isDirectory: true)
+            guard !FileManager.default.fileExists(atPath: libraryURL.path),
+                  FileManager.default.fileExists(atPath: old.path) else { continue }
+            for f in ["library.json", "usage.json", "prefs.json"] {
                 try? FileManager.default.copyItem(at: old.appendingPathComponent(f),
                                                   to: root.appendingPathComponent(f))
             }
@@ -358,11 +359,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
 
         let appItem = NSMenuItem()
         let appMenu = NSMenu()
-        appMenu.addItem(withTitle: "Acerca de ReaLauncher",
+        appMenu.addItem(withTitle: "Acerca de Project Launcher",
                         action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)),
                         keyEquivalent: "")
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Ocultar ReaLauncher",
+        appMenu.addItem(withTitle: "Ocultar Project Launcher",
                         action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
         appMenu.addItem(.separator())
         let quit = NSMenuItem(title: "Salir y cerrar REAPER", action: #selector(quitAll(_:)), keyEquivalent: "q")
@@ -414,7 +415,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         window = NSWindow(contentRect: rect,
                           styleMask: [.titled, .closable, .miniaturizable, .resizable],
                           backing: .buffered, defer: false)
-        window.title = "ReaLauncher"
+        window.title = "Project Launcher"
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.backgroundColor = bg
@@ -423,14 +424,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         window.isRestorable = false
 
         // Marco guardado (se migra la clave anterior una sola vez)
-        if window.setFrameUsingName("ReaLauncherWindow") == false {
+        if window.setFrameUsingName("ProjectLauncherWindow") == false {
             if window.setFrameUsingName("ReaSetSelectorWindow") {
-                window.setFrameAutosaveName("ReaLauncherWindow")
+                window.setFrameAutosaveName("ProjectLauncherWindow")
             } else {
                 window.center()
             }
         }
-        window.setFrameAutosaveName("ReaLauncherWindow")
+        window.setFrameAutosaveName("ProjectLauncherWindow")
 
         let cfg = WKWebViewConfiguration()
         cfg.userContentController.add(self, name: "sel")
@@ -749,7 +750,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
     /// Deja una orden en inbox.txt; el script de arranque la ejecuta dentro de REAPER.
     func sendCommand(_ line: String) {
         let dir = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Application Support/ReaLauncher", isDirectory: true)
+            .appendingPathComponent("Library/Application Support/Project Launcher", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent("inbox.txt")
         try? line.appending("\n").write(to: url, atomically: true, encoding: .utf8)

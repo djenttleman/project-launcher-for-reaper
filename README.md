@@ -42,7 +42,7 @@ backups por proyecto y métricas de uso.
 ## Instalar / revertir
 
 ```bash
-cd ~/dev/reaset-selector-app
+cd ~/dev/realauncher
 ./install.sh            # compila, copia scripts, engancha el arranque
 ./install.sh --revert   # deja REAPER como estaba (loadlastproj=20, sin bloque ni scripts)
 ```

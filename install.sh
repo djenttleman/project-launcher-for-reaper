@@ -111,6 +111,10 @@ say "→ 19 (proyecto nuevo sin diálogo; REAPER normaliza este valor)"
 say "backup: REAPER.ini.bak-$TS · revertir: install --revert"
 fi
 
+# no acumular backups: deja los 3 más recientes de cada tipo
+ls -t "$SCRIPTS"/__startup.lua.bak-* 2>/dev/null | tail -n +4 | while read -r f; do rm -f "$f"; done
+ls -t "$INI.bak-"* 2>/dev/null | tail -n +4 | while read -r f; do rm -f "$f"; done
+
 echo "== 5/5 resumen =="
 say "app:     $HOME/Applications/ReaLauncher.app"
 say "scripts: $SCRIPTS_DIR/ReaLauncher.lua"

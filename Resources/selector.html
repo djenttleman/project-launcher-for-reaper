@@ -547,6 +547,13 @@ function renderTable(){
   const wrap=el('div','rk-table-wrap');
   const table=el('table','rk-table');
 
+  // Encabezado sin títulos pero presente: con table-layout:fixed los anchos de
+  // columna salen de la primera fila, y la primera fila visible es la banda de
+  // grupo (colspan=5), que rompería la alineación. Alto 0 y sin texto.
+  const thead=el('thead'); const htr=el('tr');
+  [['c-num'],[''],['c-type'],['c-when'],['c-act']].forEach(([cls])=>htr.appendChild(el('th',cls)));
+  thead.appendChild(htr); table.appendChild(thead);
+
   const tbody=el('tbody');
   const pinnedCount=arr.filter(p=>p.pinned).length;
   if(pinnedCount){

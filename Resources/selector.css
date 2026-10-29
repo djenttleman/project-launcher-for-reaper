@@ -115,6 +115,7 @@
 
   .rk-table-wrap{border-radius:var(--rk-r-md)}
   .rk-table{table-layout:fixed}
+  .rk-table thead th{height:0;padding-top:0;padding-bottom:0;border:0;font-size:0;line-height:0;color:transparent;overflow:hidden}
   .rk-table th.c-num,.rk-table td.c-num{width:56px;padding-left:14px;padding-right:0}
   .rk-table th.c-when,.rk-table td.c-when{width:132px;text-align:right;padding-right:14px}
   .rk-table th.c-type,.rk-table td.c-type{width:116px}

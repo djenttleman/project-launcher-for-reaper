@@ -42,7 +42,7 @@ It started as a tool for my own live shows. Then it grew folders, tags, backups,
 | 🩺 **Recovery mode** | Open any project with all FX offline, or let the launcher bring them online one at a time once it's loaded. `⌥`-click the Open button or use the right-click menu. |
 | 🧩 **Create from templates** | Empty, recording, editing, mixing, mastering or a live show — it writes the right file in the right place. |
 | 📊 **Session stats** | Hours with REAPER open and hours actually recording, accumulated by a quiet Lua script. |
-| 🪟 **Slim mode** | Collapse the whole thing into a narrow list: pinned first, then recent. Click and the project opens — no inspector, no options. Right-click still gives you recovery mode. |
+| 🪟 **Slim mode** | Collapse the whole thing into a narrow list: pinned first, then recent. Click and the project opens — no inspector, no options. Right-click still gives you recovery mode. It remembers the mode between sessions. |
 | 🖱 **Its own right-click menus** | Rename, recolor and re-icon folders; pin, archive, move or trash projects. No native WebKit menu, no text selection. |
 | 🔒 **Update-proof** | The Lua scripts live in your REAPER resource folder and register themselves in the Action List, so a REAPER update doesn't break them. |
 | ⚡ **Fast and quiet** | Native window, no Electron, opens in ~0.4 s with no white flash and no visible redraw. |

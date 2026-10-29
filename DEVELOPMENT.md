@@ -165,8 +165,17 @@ habilite y le hace clic.
 - El contador del diálogo **sólo avanza con REAPER al frente** (~7,4 s, ~1,6 s por unidad).
   Por eso durante ese rato el launcher no reclama el foco: `claimFocus()` se rinde si el
   vigilante está activo.
-- Al terminar el vigilante deja la marca `quiet-done`; la app la consume y recupera el foco
-  (cuando macOS lo permite: una app de agente lanzada en segundo plano no puede activarse sola).
+- **No se puede sacar del todo una ventana ajena**: AppKit limita la posición para que quede
+  siempre asomando el borde de la barra de título (~40 px), y `size` de esas ventanas tampoco
+  se puede cambiar. Los SPI de SkyLight (`CGSSetWindowAlpha`, `CGSAddWindowsToSpaces`) devuelven
+  éxito pero no hacen nada sobre ventanas de otro proceso.
+- Por eso el aviso se esconde **detrás del launcher**: el launcher pasa su marco al script, el
+  aviso se centra dentro de esa área y la ventana sube a nivel `.floating` mientras dura el
+  trámite, así queda tapado sin verse ni un borde. Si el launcher está en slim (380 de ancho)
+  el aviso no cabe y vuelve al plan B: rincón fuera de cuadro, con su borde asomando.
+- Al terminar el vigilante deja la marca `quiet-done`; la app la consume, baja el nivel de la
+  ventana y recupera el foco (cuando macOS lo permite: una app de agente lanzada en segundo
+  plano no puede activarse sola).
 
 ## Toast con deshacer
 

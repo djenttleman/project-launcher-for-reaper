@@ -885,11 +885,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             return
         }
         quietWatcher?.terminate()
+        // Se espera a que la ventana esté en pantalla: el aviso se esconde dentro
+        // de ella y hace falta su marco real.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
+            self?.launchQuietWatcher(script)
+        }
+    }
+
+    private func launchQuietWatcher(_ script: URL) {
+        guard let w = window else { return }
+        let f = w.frame
+        let pantalla = (w.screen ?? NSScreen.main)?.frame.height ?? 0
+        let arriba = Int(pantalla - (f.origin.y + f.height))
+
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        p.arguments = [script.path, "12"]
+        // 1: script, 2: presupuesto, 3-6: marco del launcher (x, y, ancho, alto)
+        p.arguments = [script.path, "14", "\(Int(f.origin.x))", "\(arriba)",
+                       "\(Int(f.width))", "\(Int(f.height))"]
         do { try p.run(); quietWatcher = p }
         catch { NSLog("no pude lanzar el vigilante del nag: \(error)"); return }
+
+        // Mientras el vigilante trabaja, esta ventana sube de nivel: el aviso de
+        // licencia se coloca detrás del launcher y no se ve (macOS no deja sacar
+        // del todo una ventana ajena, siempre deja un borde asomando).
+        w.level = .floating
+        w.orderFrontRegardless()
 
         // El vigilante deja una marca al terminar: en ese momento recuperamos
         // el foco (una app de agente no se puede activar por AppleScript).
@@ -902,7 +923,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
                 try? FileManager.default.removeItem(at: flag)
                 timer.invalidate()
                 self.quietPoll = nil
+                self.window?.level = .normal
+                self.window?.orderFrontRegardless()
                 NSApp.activate(ignoringOtherApps: true)
+            } else {
                 self.window?.orderFrontRegardless()
             }
         }

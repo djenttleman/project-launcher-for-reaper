@@ -394,11 +394,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // REAPER arrancó con un proyecto ya cargado (doble clic en Finder, ReaSet…):
+        // no se abre ninguna ventana, sólo se descarta el aviso de licencia.
+        soloAyudante = CommandLine.arguments.contains("--solo-ayudante")
+
         buildMenu()
 
-        // REAPER en evaluación abre su ventana de licencia ~1 s después de
-        // arrancar, encima de todo. Se aparta sola y sin verse.
-        startQuietWatcher()
+        if soloAyudante {
+            NSApp.setActivationPolicy(.accessory)
+            guard startQuietWatcher() else { NSApp.terminate(nil); return }
+            // Red de seguridad: si el aviso no aparece, la app no se queda colgada.
+            soloTimeout = Timer.scheduledTimer(withTimeInterval: 25, repeats: false) { _ in
+                NSApp.terminate(nil)
+            }
+            return
+        }
 
         // Sin icono en el Dock: la app corre como agente (LSUIElement). Al no haber
         // barra de menú, los atajos se resuelven con un monitor local.
@@ -495,6 +505,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         container.addSubview(cover)
         self.cover = cover
         window.contentView = container
+        // Ahora que la ventana existe (y su marco es el definitivo) se lanza el
+        // vigilante del aviso de licencia: REAPER lo muestra ~1 s después.
+        startQuietWatcher()
+
         // La ventana se muestra recién cuando la UI está pintada (ver revealWindow()).
         DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) { [weak self] in
             self?.revealWindow(reason: "timeout")
@@ -504,6 +518,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
     func revealWindow(reason: String) {
         guard !windowShown else { return }
         windowShown = true
+        // Modo invisible (--solo-ayudante): no hay ventana que mostrar.
+        guard let window = window else { return }
         cover?.removeFromSuperview()
         cover = nil
         window.makeKeyAndOrderFront(nil)
@@ -868,34 +884,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
     /// después de arrancar. Un vigilante (AppleScript) la manda fuera de pantalla
     /// antes de que se vea, espera a que el botón se habilite y la descarta, y al
     /// final devuelve el foco aquí. Con licencia instalada no se ejecuta nada.
-    func startQuietWatcher() {
+    @discardableResult
+    func startQuietWatcher() -> Bool {
         let license = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/Application Support/REAPER/reaper-license.txt")
-        if FileManager.default.fileExists(atPath: license.path) { return }
+        if FileManager.default.fileExists(atPath: license.path) { return false }
 
         // El vigilante es LOCAL, no se distribuye: si el script no está (una
         // instalación de terceros) no se hace nada y nunca se pide permiso.
         let script = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/Application Support/Project Launcher/quiet-reaper.applescript")
-        guard FileManager.default.fileExists(atPath: script.path) else { return }
+        guard FileManager.default.fileExists(atPath: script.path) else { return false }
 
         guard AXIsProcessTrusted() else {
             NSLog("quiet-watcher: falta Accesibilidad, se pide el permiso")
             requestAccessibility()
-            return
+            return false
         }
         quietWatcher?.terminate()
-        // Se espera a que la ventana esté en pantalla: el aviso se esconde dentro
-        // de ella y hace falta su marco real.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
+        // Con ventana se espera a que esté en pantalla (el aviso se esconde dentro
+        // de ella y hace falta su marco). Sin ventana se arranca de inmediato.
+        let espera = 0.05
+        DispatchQueue.main.asyncAfter(deadline: .now() + espera) { [weak self] in
             self?.launchQuietWatcher(script)
         }
+        return true
     }
 
     private func launchQuietWatcher(_ script: URL) {
-        guard let w = window else { return }
-        let f = w.frame
-        let pantalla = (w.screen ?? NSScreen.main)?.frame.height ?? 0
+        // En modo invisible no hay ventana: se pasa un marco vacío y el script
+        // usa su plan B (rincón fuera de cuadro).
+        let w = window
+        let f = w?.frame ?? .zero
+        let pantalla = (w?.screen ?? NSScreen.main)?.frame.height ?? 0
         let arriba = Int(pantalla - (f.origin.y + f.height))
 
         let p = Process()
@@ -906,28 +927,56 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         do { try p.run(); quietWatcher = p }
         catch { NSLog("no pude lanzar el vigilante del nag: \(error)"); return }
 
-        // Mientras el vigilante trabaja, esta ventana sube de nivel: el aviso de
-        // licencia se coloca detrás del launcher y no se ve (macOS no deja sacar
-        // del todo una ventana ajena, siempre deja un borde asomando).
-        w.level = .floating
-        w.orderFrontRegardless()
-
         // El vigilante deja una marca al terminar: en ese momento recuperamos
         // el foco (una app de agente no se puede activar por AppleScript).
-        let flag = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Application Support/Project Launcher/quiet-done")
+        // La ventana aparece ya (con el color del tema) y por encima: así el aviso
+        // de licencia queda tapado aunque todavía no se lo haya movido.
+        if !soloAyudante, let w = w {
+            if !windowShown { revealWindow(reason: "arranque") }
+            w.level = .floating
+            w.orderFrontRegardless()
+        }
+
+        let base = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/Project Launcher")
+        let flag = base.appendingPathComponent("quiet-done")
+        let visto = base.appendingPathComponent("quiet-seen")
+
         quietPoll?.invalidate()
-        quietPoll = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { [weak self] timer in
+        quietPoll = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] timer in
             guard let self = self else { timer.invalidate(); return }
+
             if FileManager.default.fileExists(atPath: flag.path) {
                 try? FileManager.default.removeItem(at: flag)
+                try? FileManager.default.removeItem(at: visto)
                 timer.invalidate()
                 self.quietPoll = nil
+                self.soloTimeout?.invalidate()
+                if self.soloAyudante {
+                    NSApp.terminate(nil)
+                    return
+                }
                 self.window?.level = .normal
                 self.window?.orderFrontRegardless()
                 NSApp.activate(ignoringOtherApps: true)
-            } else {
-                self.window?.orderFrontRegardless()
+                return
+            }
+
+            if FileManager.default.fileExists(atPath: visto.path) {
+                // El aviso ya está colocado detrás: recién ahora se sube de nivel.
+                // En modo invisible no hay ventana que mostrar.
+                if !self.soloAyudante {
+                    if !self.windowShown { self.revealWindow(reason: "aviso de licencia") }
+                    if self.window?.level != .floating { self.window?.level = .floating }
+                    self.window?.orderFrontRegardless()
+                }
+            } else if self.quietWatcher?.isRunning == false {
+                // El vigilante terminó sin dejar marca (aviso ausente o fallo):
+                // no dejar la ventana flotando para siempre.
+                try? FileManager.default.removeItem(at: visto)
+                timer.invalidate()
+                self.quietPoll = nil
+                self.window?.level = .normal
             }
         }
     }
@@ -943,6 +992,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
     /// REAPER está abierto en esta máquina.
     private var quietWatcher: Process?
     private var quietPoll: Timer?
+    private var soloAyudante = false
+    private var soloTimeout: Timer?
     private var claimTimer: Timer?
     private var claimAttempts = 0
 

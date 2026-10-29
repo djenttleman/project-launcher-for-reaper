@@ -206,17 +206,34 @@ if reaper.GetExtState("ProjectLauncher", "action") ~= "1" then
   end
 end
 
-local function maybeLaunchSelector(tries)
-  tries = tries or 0
-  local _, proj = reaper.EnumProjects(-1, "")
-  if proj and proj ~= "" then return end          -- hay proyecto: no molestar
-  if tries < 4 then                                  -- dar tiempo al arranque
-    reaper.defer(function() maybeLaunchSelector(tries + 1) end)
-    return
+-- Arranque en blanco: se abre el launcher de inmediato, antes de que REAPER
+-- muestre su aviso de licencia, para que quede tapado detrás de su ventana.
+-- (Cuando REAPER arranca con un .rpp este script ni siquiera corre todavía,
+-- así que aquí no hay riesgo de interrumpir una carga manual.)
+do
+  local _, p0 = reaper.EnumProjects(-1, "")
+  if p0 == nil or p0 == "" then
+    local app = selectorApp()
+    if app then
+      reaper.ExecProcess("/usr/bin/open -a " .. string.format("%q", app), 0)
+    end
   end
-  local app = selectorApp()
-  if not app then return end
-  reaper.ExecProcess("/usr/bin/open -a " .. string.format("%q", app), 0)
 end
 
-reaper.defer(function() maybeLaunchSelector(0) end)
+-- Arranque con un proyecto ya cargado (doble clic en Finder, ReaSet u otra
+-- herramienta): no se abre ninguna ventana, sólo se pide descartar el aviso de
+-- licencia y esa instancia se cierra sola.
+local function maybeQuietHelper(tries)
+  tries = tries or 0
+  if tries < 4 then
+    reaper.defer(function() maybeQuietHelper(tries + 1) end)
+    return
+  end
+  local _, proj = reaper.EnumProjects(-1, "")
+  if not (proj and proj ~= "") then return end      -- en blanco: ya se abrió el launcher
+  local app = selectorApp()
+  if not app then return end
+  reaper.ExecProcess("/usr/bin/open -a " .. string.format("%q", app) .. " --args --solo-ayudante", 0)
+end
+
+reaper.defer(function() maybeQuietHelper(0) end)

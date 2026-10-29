@@ -11,6 +11,7 @@
   <img src="https://img.shields.io/badge/Swift-5.9-8660E8?style=flat-square&labelColor=1a1a20" alt="Swift">
   <img src="https://img.shields.io/badge/sin%20electron-obvio-1ED760?style=flat-square&labelColor=1a1a20" alt="Sin Electron">
   <img src="https://img.shields.io/badge/versi%C3%B3n-1.0.0-4377FF?style=flat-square&labelColor=1a1a20" alt="v1.0.0">
+  <img src="https://img.shields.io/badge/licencia-MIT-1ED760?style=flat-square&labelColor=1a1a20" alt="MIT">
 </p>
 
 <p align="center">
@@ -48,19 +49,19 @@ Empezó como una herramienta para mis propios shows en vivo. Después le crecier
 ## Pantallazos
 
 <p align="center">
-  <img src="assets/screenshot-dark.png" alt="ReaLauncher en tema oscuro" width="100%">
+  <img src="assets/es/screenshot-dark.png" alt="ReaLauncher en tema oscuro" width="100%">
 </p>
 
 <p align="center">
-  <img src="assets/screenshot-light.png" alt="ReaLauncher en tema claro" width="100%">
+  <img src="assets/es/screenshot-light.png" alt="ReaLauncher en tema claro" width="100%">
 </p>
 
 <p align="center">
-  <img src="assets/menus.png" alt="Menús de clic derecho para proyectos y carpetas" width="100%">
+  <img src="assets/es/menus.png" alt="Menús de clic derecho para proyectos y carpetas" width="100%">
 </p>
 
 <p align="center">
-  <img src="assets/modals.png" alt="Nuevo proyecto y editor de carpeta" width="72%">
+  <img src="assets/es/modals.png" alt="Nuevo proyecto y editor de carpeta" width="72%">
 </p>
 
 <sub>Los datos de las capturas son inventados; el diseño, el espaciado y los detalles son los que te vas a encontrar.</sub>

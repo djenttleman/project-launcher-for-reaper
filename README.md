@@ -11,6 +11,7 @@
   <img src="https://img.shields.io/badge/Swift-5.9-8660E8?style=flat-square&labelColor=1a1a20" alt="Swift">
   <img src="https://img.shields.io/badge/no%20electron-yes%20please-1ED760?style=flat-square&labelColor=1a1a20" alt="No Electron">
   <img src="https://img.shields.io/badge/version-1.0.0-4377FF?style=flat-square&labelColor=1a1a20" alt="v1.0.0">
+  <img src="https://img.shields.io/badge/license-MIT-1ED760?style=flat-square&labelColor=1a1a20" alt="MIT">
 </p>
 
 <p align="center">
@@ -48,19 +49,19 @@ It started as a tool for my own live shows. Then it grew folders, tags, backups,
 ## Screenshots
 
 <p align="center">
-  <img src="assets/screenshot-dark.png" alt="ReaLauncher, dark theme" width="100%">
+  <img src="assets/en/screenshot-dark.png" alt="ReaLauncher, dark theme" width="100%">
 </p>
 
 <p align="center">
-  <img src="assets/screenshot-light.png" alt="ReaLauncher, light theme" width="100%">
+  <img src="assets/en/screenshot-light.png" alt="ReaLauncher, light theme" width="100%">
 </p>
 
 <p align="center">
-  <img src="assets/menus.png" alt="Right-click menus for projects and folders" width="100%">
+  <img src="assets/en/menus.png" alt="Right-click menus for projects and folders" width="100%">
 </p>
 
 <p align="center">
-  <img src="assets/modals.png" alt="New project and folder editor" width="72%">
+  <img src="assets/en/modals.png" alt="New project and folder editor" width="72%">
 </p>
 
 <sub>The demo data in those shots is invented; the layout, the spacing and the little details are what you actually get.</sub>

@@ -28,25 +28,25 @@
       <div class="nav-actions">
         <button class="rk-btn rk-btn--primary" id="btnNew">
           <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="M128 24a104 104 0 1 0 104 104A104.1 104.1 0 0 0 128 24Zm0 192a88 88 0 1 1 88-88 88.1 88.1 0 0 1-88 88Zm40-88a8 8 0 0 1-8 8h-24v24a8 8 0 0 1-16 0v-24h-24a8 8 0 0 1 0-16h24V96a8 8 0 0 1 16 0v24h24a8 8 0 0 1 8 8Z"/></svg>
-          <span class="btn-label">Nuevo proyecto</span>
+          <span class="btn-label" data-en="New project">Nuevo proyecto</span>
         </button>
         <button class="rk-btn" id="btnOpenFile">
           <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="M216 72h-84.7l-20.7-20.7A16 16 0 0 0 99.3 48H40a16 16 0 0 0-16 16v128a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V88a16 16 0 0 0-16-16Zm0 120H40V64h59.3l24 24H216Z"/></svg>
-          <span class="btn-label">Abrir archivo…</span>
+          <span class="btn-label" data-en="Open file…">Abrir archivo…</span>
         </button>
       </div>
       <div class="nav-sep"></div>
     </div>
 
     <div class="nav-scroll" id="navScroll">
-      <div class="rk-nav-label">Biblioteca</div>
+      <div class="rk-nav-label" data-en="Library">Biblioteca</div>
       <div id="navMain"></div>
-      <div class="rk-nav-label nav-label-row">Carpetas
-        <button class="nav-add" id="addFolder" aria-label="Nueva carpeta">＋</button>
+      <div class="rk-nav-label nav-label-row" data-en="Folders">Carpetas
+        <button class="nav-add" id="addFolder" aria-label="Nueva carpeta" data-en-aria="New folder">＋</button>
       </div>
       <div id="navFolders"></div>
-      <div class="rk-nav-label nav-label-row">Etiquetas
-        <button class="nav-add" id="addTag" aria-label="Nueva etiqueta">＋</button>
+      <div class="rk-nav-label nav-label-row" data-en="Tags">Etiquetas
+        <button class="nav-add" id="addTag" aria-label="Nueva etiqueta" data-en-aria="New tag">＋</button>
       </div>
       <div id="navTags"></div>
     </div>
@@ -61,10 +61,10 @@
       <div class="topbar-tools">
         <div class="rk-search">
           <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="m229.7 218.3-42.4-42.4a84 84 0 1 0-11.3 11.3l42.4 42.4a8 8 0 0 0 11.3-11.3ZM44 116a72 72 0 1 1 72 72 72.1 72.1 0 0 1-72-72Z"/></svg>
-          <input class="rk-input" id="search" placeholder="Buscar proyecto, etiqueta o ruta">
+          <input class="rk-input" id="search" placeholder="Buscar proyecto, etiqueta o ruta" data-en-ph="Search project, tag or path">
           <span class="rk-kbd">⌘K</span>
         </div>
-        <button class="rk-btn rk-btn--icon rail-toggle" id="railToggle" aria-label="Mostrar inspector" style="display:none">
+        <button class="rk-btn rk-btn--icon rail-toggle" id="railToggle" aria-label="Mostrar inspector" data-en-aria="Show inspector" style="display:none">
           <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="M216 40H40a16 16 0 0 0-16 16v144a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V56a16 16 0 0 0-16-16Zm-96 160H40V56h80Zm96 0h-80V56h80Z"/></svg>
         </button>
       </div>
@@ -78,13 +78,14 @@
   <footer class="rk-statusbar">
     <span id="stCount">—</span>
     <span class="stsep"></span>
-    <span class="stat reaper" title="REAPER está abierto en esta máquina"><span class="led" id="ledReaper"></span><span class="l">REAPER</span></span>
+    <span class="stat reaper" title="REAPER está abierto en esta máquina" data-en-title="REAPER is open on this machine"><span class="led" id="ledReaper"></span><span class="l">REAPER</span></span>
     <span class="stsep"></span>
-    <span class="stat hours" title="Horas acumuladas con REAPER abierto"><span class="l">abierto</span><span class="v" id="stHours">—</span></span>
-    <span class="stat rec" title="Horas acumuladas en modo grabación"><span class="l">grabando</span><span class="v" id="stRec">—</span></span>
+    <span class="stat hours" title="Horas acumuladas con REAPER abierto" data-en-title="Hours with REAPER open"><span class="l" data-en="open">abierto</span><span class="v" id="stHours">—</span></span>
+    <span class="stat rec" title="Horas acumuladas en modo grabación" data-en-title="Hours recording"><span class="l" data-en="recording">grabando</span><span class="v" id="stRec">—</span></span>
     <span class="sp"></span>
-    <button class="stbtn" id="btnTheme" title="Modo claro / oscuro" aria-label="Modo claro u oscuro"></button>
-    <button class="stbtn" id="btnAccent" title="Esquema de color" aria-label="Esquema de color"></button>
+    <button class="stbtn stbtn--lang" id="btnLang" title="Idioma / Language" data-en-title="Idioma / Language">ES</button>
+    <button class="stbtn" id="btnTheme" title="Modo claro / oscuro" aria-label="Modo claro u oscuro" data-en-title="Modo claro / oscuro" data-en-aria="Modo claro u oscuro"></button>
+    <button class="stbtn" id="btnAccent" title="Esquema de color" aria-label="Esquema de color" data-en-title="Esquema de color" data-en-aria="Esquema de color"></button>
   </footer>
 </div>
 
@@ -94,31 +95,31 @@
 <div class="modal-wrap" id="modalWrap">
   <div class="rk-modal rk-modal--wide">
     <div class="rk-modal-head">
-      <span class="rk-section">Nuevo proyecto</span>
-      <span class="rk-meta">Elige el tipo: define la plantilla base y las etiquetas que guardará el launcher.</span>
+      <span class="rk-section" data-en="New project">Nuevo proyecto</span>
+      <span class="rk-meta" data-en="Pick a type: it sets the base template and the tags the launcher will store.">Elige el tipo: define la plantilla base y las etiquetas que guardará el launcher.</span>
     </div>
     <div class="rk-modal-body">
       <div class="type-list" id="typeList"></div>
       <div class="fields">
         <label class="rk-field full">
-          <span class="rk-field-label">Nombre del proyecto</span>
-          <input class="rk-input" id="pName" placeholder="RDV · Anime Setlist">
+          <span class="rk-field-label" data-en="Project name">Nombre del proyecto</span>
+          <input class="rk-input" id="pName" placeholder="Night Drive · Live set" data-en-ph="Night Drive · Live set">
         </label>
         <label class="rk-field">
-          <span class="rk-field-label">Ubicación</span>
+          <span class="rk-field-label" data-en="Location">Ubicación</span>
           <input class="rk-input rk-input--data" id="pLoc" value="">
         </label>
         <div class="rk-field">
-          <span class="rk-field-label">Elegir otra carpeta</span>
-          <button class="rk-btn" id="pPick" style="justify-content:flex-start">Elegir carpeta…</button>
+          <span class="rk-field-label" data-en="Pick another folder">Elegir otra carpeta</span>
+          <button class="rk-btn" id="pPick" style="justify-content:flex-start" data-en="Choose folder…">Elegir carpeta…</button>
         </div>
       </div>
       <div class="summary" id="pSummary"></div>
     </div>
     <div class="rk-modal-foot">
-      <span class="rk-meta" style="margin-right:auto">El launcher guarda etiquetas y orden; no mueve archivos .rpp</span>
-      <button class="rk-btn rk-btn--quiet" id="mCancel">Cancelar</button>
-      <button class="rk-btn rk-btn--primary" id="mCreate">Crear proyecto</button>
+      <span class="rk-meta" style="margin-right:auto" data-en="The launcher stores tags and order; it never moves .rpp files">El launcher guarda etiquetas y orden; no mueve archivos .rpp</span>
+      <button class="rk-btn rk-btn--quiet" id="mCancel" data-en="Cancel">Cancelar</button>
+      <button class="rk-btn rk-btn--primary" id="mCreate" data-en="Create project">Crear proyecto</button>
     </div>
   </div>
 </div>
@@ -127,7 +128,7 @@
   <div class="rk-toast" id="toast" hidden>
     <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="M232.5 73.5 96 202.5 23.5 130.5a12 12 0 0 1 17-17L96 168.5l128.5-121a12 12 0 0 1 17 17Z"/></svg>
     <span id="toastMsg"></span>
-    <button class="act" id="toastAct" hidden>Deshacer</button>
+    <button class="act" id="toastAct" hidden data-en="Undo">Deshacer</button>
   </div>
 </div>
 
@@ -169,6 +170,7 @@ const TYPES = {
   lab:      {label:'Lab',       color:'#C2527A'},
   archive:  {label:'Archivo',   color:'#5E6472'}
 };
+const typeLabel = t => T((TYPES[t]||TYPES.studio).label);
 const TEMPLATES = [
   {id:'empty',  name:'Proyecto vacío', file:'',            desc:'Sin pistas ni FX',               type:'studio', tags:[],   folder:'Estudio'},
   {id:'record', name:'Grabación',      file:'Record.rpp',  desc:'Pistas de entrada y monitor',    type:'studio', tags:['grabacion'], folder:'Estudio'},
@@ -186,22 +188,123 @@ const $ = s => document.querySelector(s);
 const el = (t,c,x)=>{const n=document.createElement(t); if(c)n.className=c; if(x!=null)n.textContent=x; return n;};
 const byId = id => DB.projects.find(p=>p.id===id);
 
+/* =========================================================
+   Idioma (ES / EN)
+   ========================================================= */
+let LANG = 'es';
+const EN = {
+  'Biblioteca':'Library','Carpetas':'Folders','Etiquetas':'Tags','Proyecto':'Project',
+  'Todos':'All','Todos los proyectos':'All projects','Recientes':'Recent','Plantillas':'Templates',
+  'Archivados':'Archived','Archivo':'Archive','Estudio':'Studio','Plantilla':'Template',
+  'Tipo':'Type','Última vez':'Last opened','Sin etiquetas todavía':'No tags yet',
+  'Nuevo proyecto':'New project','Nuevo proyecto…':'New project…','Abrir archivo…':'Open file…',
+  'Nueva carpeta':'New folder','Nueva etiqueta':'New tag','Nueva carpeta…':'New folder…',
+  'Mostrar inspector':'Show inspector','Buscar proyecto, etiqueta o ruta':'Search project, tag or path',
+  'abierto':'open','grabando':'recording',
+  'abiertos hace poco':'recently opened','biblioteca completa':'whole library','proyectos base':'base projects',
+  'fuera de la lista diaria':'out of the daily list','agrupación del launcher':'launcher grouping',
+  'Carpeta · {v}':'Folder · {v}','Etiqueta · {v}':'Tag · {v}',
+  'Sin proyectos en esta vista':'Nothing here yet',
+  'Crea un proyecto nuevo o abre un archivo .rpp.':'Create a new project or open an .rpp file.',
+  'Fijados':'Pinned','Proyectos':'Projects',
+  'Ver copias de seguridad':'Expand backups','{n} copias de seguridad':'{n} backups',
+  'Acciones del proyecto':'Project actions',
+  'Fijar proyecto':'Pin project','Quitar de fijados':'Unpin',
+  'Fijado arriba':'Pinned to top','Quitado de fijados':'Unpinned',
+  'Copias de seguridad':'Backups','Copias de seguridad · {n}':'Backups · {n}',
+  'más reciente primero':'newest first','reciente':'latest','Abrir':'Open','Mostrar':'Show',
+  'Selecciona un proyecto':'Select a project','Carpeta':'Folder','Regiones':'Regions',
+  '{n} canciones':'{n} songs','Pistas':'Tracks','Tamaño':'Size','Modificado':'Last opened',
+  'Quitar {t}':'Remove {t}','＋ etiqueta':'＋ tag','nueva':'new',
+  'Etiqueta quitada':'Tag removed','Etiqueta #{t} añadida':'Tag #{t} added',
+  '＋ {n} más…':'＋ {n} more…','Abrir proyecto':'Open project','Mostrar en Finder':'Reveal in Finder',
+  'Volver a recientes':'Back to recent','Eliminar proyecto…':'Delete project…',
+  'Devuelto a recientes':'Back to recent',
+  'Abrir en REAPER':'Open in REAPER','Fijar arriba':'Pin to top','Archivar':'Archive',
+  'Desarchivar':'Unarchive','Mover a carpeta…':'Move to folder…','Quitar de recientes':'Remove from recent',
+  'Quitar del launcher…':'Remove from launcher…','Carpeta:':'Folder:',
+  'Abrir carpeta':'Open folder','Renombrar carpeta':'Rename folder','Renombrar…':'Rename…',
+  'Color e icono…':'Color & icon…','Eliminar carpeta':'Delete folder',
+  '¿Quitar «{name}» del launcher? El .rpp no se toca.':'Remove "{name}" from the launcher? The .rpp stays untouched.',
+  'No se pudo eliminar: {e}':'Could not delete: {e}','error desconocido':'unknown error',
+  'Proyecto eliminado · el .rpp está en la Papelera':'Project deleted · the .rpp is in the Trash',
+  'Nombre de la carpeta (virtual, no mueve archivos):':'Folder name (virtual, files stay where they are):',
+  'Carpeta eliminada · los proyectos quedaron en «Sin carpeta»':'Folder deleted · projects moved to "No folder"',
+  'Nombre':'Name','Color':'Color','Icono':'Icon','Sin color':'No color','Cancelar':'Cancel',
+  'Guardar':'Save','La carpeta necesita un nombre':'The folder needs a name','Carpeta actualizada':'Folder updated',
+  'Elige el tipo: define la plantilla base y las etiquetas que guardará el launcher.':
+    'Pick a type: it sets the base template and the tags the launcher will store.',
+  'Nombre del proyecto':'Project name','Ubicación':'Location','Elegir otra carpeta':'Pick another folder',
+  'Elegir carpeta…':'Choose folder…','El launcher guarda etiquetas y orden; no mueve archivos .rpp':
+    'The launcher stores tags and order; it never moves .rpp files',
+  'Crear proyecto':'Create project','Ponle un nombre al proyecto':'Give the project a name',
+  'nuevo .rpp':'new .rpp','Proyecto vacío':'Empty project','Sin_nombre':'Untitled','proyecto vacío':'empty project',
+  'Sin pistas ni FX':'No tracks or FX','Grabación':'Recording','Pistas de entrada y monitor':'Input and monitor tracks',
+  'Edición':'Editing','Comping, crossfades, marcadores':'Comping, crossfades, markers',
+  'Mezcla':'Mixing','Buses, grupos, referencia':'Buses, groups, reference',
+  'Master':'Mastering','Cadena de master y LUFS':'Master chain and LUFS',
+  'Show en vivo':'Live show','Plantilla tipo ReaLiveMixer':'ReaLiveMixer-style template',
+  'Esquema de color':'Color scheme','Cian':'Cyan','Ámbar':'Amber','Rosa':'Rose','Esquema {name}':'Scheme {name}',
+  'Selecciona un proyecto primero':'Select a project first','Nueva etiqueta:':'New tag:',
+  '{n} proyectos':'{n} projects','{n} proyectos · {m} carpetas':'{n} projects · {m} folders',
+  'Horas acumuladas con REAPER abierto':'Hours with REAPER open','Horas acumuladas en modo grabación':'Hours recording',
+  'REAPER está abierto en esta máquina':'REAPER is open on this machine',
+  'Modo claro / oscuro':'Light / dark mode','Modo claro u oscuro':'Light or dark mode',
+  'Idioma / Language':'Language','Deshacer':'Undo'
+};
+function T(s, vars){
+  let out = (LANG === 'es') ? s : (EN[s] !== undefined ? EN[s] : s);
+  if (vars) for (const k in vars) out = out.split('{'+k+'}').join(vars[k]);
+  return out;
+}
+function applyStaticI18n(){
+  document.querySelectorAll('[data-en]').forEach(n=>{
+    if(n.dataset.es == null) n.dataset.es = n.textContent;
+    n.textContent = LANG === 'en' ? n.dataset.en : n.dataset.es;
+  });
+  document.querySelectorAll('[data-en-ph]').forEach(n=>{
+    if(n.dataset.esPh == null) n.dataset.esPh = n.placeholder;
+    n.placeholder = LANG === 'en' ? n.dataset.enPh : n.dataset.esPh;
+  });
+  document.querySelectorAll('[data-en-title]').forEach(n=>{
+    if(n.dataset.esTitle == null) n.dataset.esTitle = n.title;
+    n.title = LANG === 'en' ? n.dataset.enTitle : n.dataset.esTitle;
+  });
+  document.querySelectorAll('[data-en-aria]').forEach(n=>{
+    if(n.dataset.esAria == null) n.dataset.esAria = n.getAttribute('aria-label');
+    n.setAttribute('aria-label', LANG === 'en' ? n.dataset.enAria : n.dataset.esAria);
+  });
+  const bl = $('#btnLang'); if(bl) bl.textContent = LANG.toUpperCase();
+  document.documentElement.lang = LANG;
+}
+function setLang(lang, persist){
+  LANG = (lang === 'en') ? 'en' : 'es';
+  document.documentElement.dataset.lang = LANG;
+  setPref('lang', LANG);
+  if(persist) native('prefs', {theme:getPref('theme','dark'), accent:getPref('accent','reapertips'), lang:LANG});
+  applyStaticI18n();
+  renderAll();
+}
+
+
 function ago(ts){
   if(!ts) return '—';
   const s = Math.floor((Date.now()/1000)-ts);
-  if(s<3600) return 'hace '+Math.max(1,Math.floor(s/60))+' min';
-  if(s<86400) return 'hace '+Math.floor(s/3600)+' h';
-  if(s<86400*30) return 'hace '+Math.floor(s/86400)+' d';
+  const es = LANG === 'es';
+  if(s<3600){ const n=Math.max(1,Math.floor(s/60));  return es ? 'hace '+n+' min' : n+' min ago'; }
+  if(s<86400){ const n=Math.floor(s/3600);           return es ? 'hace '+n+' h'   : n+' h ago'; }
+  if(s<86400*30){ const n=Math.floor(s/86400);       return es ? 'hace '+n+' d'   : n+' d ago'; }
   const m = Math.floor(s/86400/30);
-  return 'hace '+m+(m===1 ? ' mes' : ' meses');
+  return es ? 'hace '+m+(m===1 ? ' mes' : ' meses')
+            : m+(m===1 ? ' month ago' : ' months ago');
 }
 function fmtDate(ts){
   if(!ts) return '—';
   const d=new Date(ts*1000), p=n=>String(n).padStart(2,'0');
   return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
 }
-function mb(bytes){ return bytes>0 ? (bytes/1048576).toFixed(1).replace('.',',')+' MB' : '—'; }
-function hrs(n){ return (n||0).toLocaleString('es-CL',{minimumFractionDigits:1,maximumFractionDigits:1})+' h'; }
+function mb(bytes){ return bytes>0 ? (bytes/1048576).toFixed(1).replace('.', LANG==='es'?',':'.')+' MB' : '—'; }
+function hrs(n){ return (n||0).toLocaleString(LANG==='es'?'es-CL':'en-US',{minimumFractionDigits:1,maximumFractionDigits:1})+' h'; }
 function icon(path){
   const ns='http://www.w3.org/2000/svg';
   const svg=document.createElementNS(ns,'svg');
@@ -249,12 +352,12 @@ function orderedList(){
 }
 function viewLabel(){
   const v=state.view;
-  if(v.kind==='recent') return ['Recientes','abiertos hace poco'];
-  if(v.kind==='all') return ['Todos los proyectos','biblioteca completa'];
-  if(v.kind==='templates') return ['Plantillas','proyectos base'];
-  if(v.kind==='archived') return ['Archivados','fuera de la lista diaria'];
-  if(v.kind==='folder') return ['Carpeta · '+v.value,'agrupación del launcher'];
-  return ['Etiqueta · '+v.value,'agrupación del launcher'];
+  if(v.kind==='recent') return [T('Recientes'),T('abiertos hace poco')];
+  if(v.kind==='all') return [T('Todos los proyectos'),T('biblioteca completa')];
+  if(v.kind==='templates') return [T('Plantillas'),T('proyectos base')];
+  if(v.kind==='archived') return [T('Archivados'),T('fuera de la lista diaria')];
+  if(v.kind==='folder') return [T('Carpeta · {v}',{v:v.value}),T('agrupación del launcher')];
+  return [T('Etiqueta · {v}',{v:v.value}),T('agrupación del launcher')];
 }
 
 /* =========================================================
@@ -266,7 +369,7 @@ function renderNav(){
   NAV.forEach(n=>{
     const b=el('button','rk-nav-item'+(state.view.kind===n.id?' is-on':''));
     b.appendChild(icon(ICONS[n.icon]));
-    b.appendChild(el('span','item-label',n.label));
+    b.appendChild(el('span','item-label',T(n.label)));
     const cnt=n.id==='recent'?DB.projects.filter(p=>!p.hidden&&!p.archived).length
       :n.id==='all'?DB.projects.filter(p=>!p.archived).length
       :n.id==='templates'?DB.projects.filter(p=>p.type==='template'&&!p.archived).length
@@ -322,13 +425,13 @@ const CHIPS=[['all','Todos'],['show','Shows'],['studio','Estudio'],['template','
 function renderFilters(){
   const c=$('#filters'); c.innerHTML='';
   CHIPS.forEach(([id,label])=>{
-    const b=el('button','rk-chip rk-chip--filter',label);
+    const b=el('button','rk-chip rk-chip--filter',T(label));
     b.setAttribute('aria-pressed', state.filter===id?'true':'false');
     b.onclick=()=>{state.filter=id; renderAll();};
     c.appendChild(b);
   });
   c.appendChild(el('div','spacer'));
-  c.appendChild(el('span','rk-meta', orderedList().length+' proyectos'));
+  c.appendChild(el('span','rk-meta', T('{n} proyectos',{n:orderedList().length})));
 }
 
 /* =========================================================
@@ -339,24 +442,24 @@ function renderTable(){
   const arr=orderedList();
   if(!arr.length){
     const e=el('div','rk-empty');
-    e.appendChild(el('div','rk-title','Sin proyectos en esta vista'));
-    e.appendChild(el('div','rk-body','Crea un proyecto nuevo o abre un archivo .rpp.'));
+    e.appendChild(el('div','rk-title',T('Sin proyectos en esta vista')));
+    e.appendChild(el('div','rk-body',T('Crea un proyecto nuevo o abre un archivo .rpp.')));
     c.appendChild(e); return;
   }
   const wrap=el('div','rk-table-wrap');
   const table=el('table','rk-table');
   const thead=el('thead'); const htr=el('tr');
-  [['c-num',''],['','Proyecto'],['c-type','Tipo'],['c-when','Última vez'],['c-act','']].forEach(([cls,label])=>htr.appendChild(el('th',cls,label)));
+  [['c-num',''],['','Proyecto'],['c-type','Tipo'],['c-when','Última vez'],['c-act','']].forEach(([cls,label])=>htr.appendChild(el('th',cls,label?T(label):'')));
   thead.appendChild(htr); table.appendChild(thead);
 
   const tbody=el('tbody');
   const pinnedCount=arr.filter(p=>p.pinned).length;
   if(pinnedCount){
-    const g=el('tr','rk-tr-group'); const td=el('td',null,'Fijados'); td.colSpan=5; g.appendChild(td); tbody.appendChild(g);
+    const g=el('tr','rk-tr-group'); const td=el('td',null,T('Fijados')); td.colSpan=5; g.appendChild(td); tbody.appendChild(g);
   }
   arr.forEach((p,idx)=>{
     if(pinnedCount && idx===pinnedCount){
-      const g=el('tr','rk-tr-group'); const td=el('td',null,'Proyectos'); td.colSpan=5; g.appendChild(td); tbody.appendChild(g);
+      const g=el('tr','rk-tr-group'); const td=el('td',null,T('Proyectos')); td.colSpan=5; g.appendChild(td); tbody.appendChild(g);
     }
     tbody.appendChild(rowFor(p,idx));
     if(state.expanded.has(p.id) && (p.backups||[]).length) tbody.appendChild(backupsRow(p));
@@ -371,8 +474,9 @@ function rowFor(p,idx){
 
   const tdNum=el('td','c-num');
   const pin=el('button','pin-btn'+(p.pinned?' is-pinned':''));
-  pin.setAttribute('aria-label',p.pinned?'Quitar de fijados':'Fijar proyecto');
-  pin.title=p.pinned?'Quitar de fijados':'Fijar proyecto';
+  const pinTxt = T(p.pinned?'Quitar de fijados':'Fijar proyecto');
+  pin.setAttribute('aria-label',pinTxt);
+  pin.title=pinTxt;
   pin.appendChild(el('span','num',String(idx+1).padStart(2,'0')));
   const ns='http://www.w3.org/2000/svg';
   const svg=document.createElementNS(ns,'svg');
@@ -385,7 +489,7 @@ function rowFor(p,idx){
     p.pinned=!p.pinned;
     await native('update',{id:p.id,pinned:p.pinned});
     renderTable(); renderRail();
-    toast(p.pinned?'Fijado arriba':'Quitado de fijados');
+    toast(T(p.pinned?'Fijado arriba':'Quitado de fijados'));
   };
   tdNum.appendChild(pin); tr.appendChild(tdNum);
 
@@ -395,8 +499,8 @@ function rowFor(p,idx){
   if(bks.length){
     const exp=el('button','expander');
     exp.setAttribute('aria-expanded', state.expanded.has(p.id)?'true':'false');
-    exp.setAttribute('aria-label','Ver copias de seguridad');
-    exp.title=bks.length+' copias de seguridad';
+    exp.setAttribute('aria-label',T('Ver copias de seguridad'));
+    exp.title=T('{n} copias de seguridad',{n:bks.length});
     const chev=document.createElementNS(ns,'svg');
     chev.setAttribute('viewBox','0 0 256 256'); chev.setAttribute('fill','currentColor');
     const cp=document.createElementNS(ns,'path'); cp.setAttribute('d',ICONS.chevron); chev.appendChild(cp);
@@ -420,7 +524,7 @@ function rowFor(p,idx){
   const tdType=el('td','c-type');
   const badge=el('span','rk-badge rk-badge--plain');
   const dot=el('span'); dot.style.cssText='width:8px;height:8px;border-radius:50%;background:'+(TYPES[p.type]||TYPES.studio).color;
-  badge.appendChild(dot); badge.appendChild(document.createTextNode((TYPES[p.type]||TYPES.studio).label));
+  badge.appendChild(dot); badge.appendChild(document.createTextNode(typeLabel(p.type)));
   tdType.appendChild(badge); tr.appendChild(tdType);
 
   const tdWhen=el('td','c-when');
@@ -430,7 +534,7 @@ function rowFor(p,idx){
   const tdAct=el('td','c-act');
   const dots=el('button','rk-btn rk-btn--icon rk-btn--quiet');
   dots.style.cssText='width:28px;height:28px;color:var(--rk-text-3)';
-  dots.setAttribute('aria-label','Acciones del proyecto');
+  dots.setAttribute('aria-label',T('Acciones del proyecto'));
   dots.appendChild(icon(ICONS.dots));
   dots.onclick=e=>{e.stopPropagation(); openMenu(p,dots);};
   tdAct.appendChild(dots); tr.appendChild(tdAct);
@@ -442,20 +546,20 @@ function backupsRow(p){
   const td=el('td'); td.colSpan=5;
   const panel=el('div','bk-panel');
   const head=el('div','bk-head');
-  head.appendChild(el('span',null,'Copias de seguridad · '+p.backups.length));
+  head.appendChild(el('span',null,T('Copias de seguridad · {n}',{n:p.backups.length})));
   head.appendChild(el('span','spacer'));
-  head.appendChild(el('span',null,'más reciente primero'));
+  head.appendChild(el('span',null,T('más reciente primero')));
   panel.appendChild(head);
   p.backups.forEach((bk,i)=>{
     const row=el('div','bk-item');
     row.appendChild(el('span','when',fmtDate(bk.date)));
     row.appendChild(el('span','name',bk.name));
     row.appendChild(el('span','size',mb(bk.size)));
-    if(i===0) row.appendChild(el('span','rk-badge rk-badge--ok','reciente'));
+    if(i===0) row.appendChild(el('span','rk-badge rk-badge--ok',T('reciente')));
     const acts=el('div','acts');
-    const bOpen=el('button','rk-btn','Abrir');
+    const bOpen=el('button','rk-btn',T('Abrir'));
     bOpen.onclick=e=>{e.stopPropagation(); native('open',{path:bk.path});};
-    const bRev=el('button','rk-btn','Mostrar');
+    const bRev=el('button','rk-btn',T('Mostrar'));
     bRev.onclick=e=>{e.stopPropagation(); native('reveal',{path:bk.path});};
     acts.appendChild(bOpen); acts.appendChild(bRev); row.appendChild(acts);
     panel.appendChild(row);
@@ -470,7 +574,7 @@ function backupsRow(p){
 function renderRail(){
   const c=$('#rail'); c.innerHTML='';
   const p=byId(state.selected);
-  if(!p){ c.appendChild(el('div','rk-empty','Selecciona un proyecto')); return; }
+  if(!p){ c.appendChild(el('div','rk-empty',T('Selecciona un proyecto'))); return; }
 
   const head=el('div','rail-head');
   head.appendChild(el('div','rk-title',p.name));
@@ -480,36 +584,36 @@ function renderRail(){
   const body=el('div','rail-body');
   const dl=el('dl','rk-dl');
   const add=(k,v,mono)=>{dl.appendChild(el('dt',null,k)); const dd=el('dd',mono?'data':null,String(v)); dd.title=String(v); dl.appendChild(dd);};
-  add('Tipo',(TYPES[p.type]||TYPES.studio).label);
-  add('Carpeta',p.folder);
-  if(p.regions) add('Regiones',p.regions+' canciones');
-  add('Pistas',p.tracks||0);
+  add(T('Tipo'),typeLabel(p.type));
+  add(T('Carpeta'),p.folder);
+  if(p.regions) add(T('Regiones'),T('{n} canciones',{n:p.regions}));
+  add(T('Pistas'),p.tracks||0);
   if(p.tempo) add('Tempo',p.tempo+' BPM');
-  add('Tamaño',mb(p.size));
-  add('Modificado',ago(p.lastOpened));
+  add(T('Tamaño'),mb(p.size));
+  add(T('Modificado'),ago(p.lastOpened));
   body.appendChild(dl);
 
   const secTags=el('div','rail-section');
-  secTags.appendChild(el('div','rk-eyebrow','Etiquetas'));
+  secTags.appendChild(el('div','rk-eyebrow',T('Etiquetas')));
   const wrap=el('div','chips-wrap');
   (p.tags||[]).forEach(tag=>{
     const chip=el('span','rk-chip');
     chip.appendChild(document.createTextNode('#'+tag));
-    const x=el('button'); x.innerHTML='&times;'; x.setAttribute('aria-label','Quitar '+tag);
-    x.onclick=async()=>{p.tags=p.tags.filter(z=>z!==tag); await native('update',{id:p.id,tags:p.tags}); renderAll(); toast('Etiqueta quitada');};
+    const x=el('button'); x.innerHTML='&times;'; x.setAttribute('aria-label',T('Quitar {t}',{t:tag}));
+    x.onclick=async()=>{p.tags=p.tags.filter(z=>z!==tag); await native('update',{id:p.id,tags:p.tags}); renderAll(); toast(T('Etiqueta quitada'));};
     chip.appendChild(x); wrap.appendChild(chip);
   });
-  const addChip=el('button','rk-chip chip-add','＋ etiqueta');
+  const addChip=el('button','rk-chip chip-add',T('＋ etiqueta'));
   addChip.onclick=()=>{
     addChip.textContent='';
-    const inp=el('input'); inp.placeholder='nueva'; addChip.appendChild(inp); inp.focus();
+    const inp=el('input'); inp.placeholder=T('nueva'); addChip.appendChild(inp); inp.focus();
     inp.onkeydown=async e=>{
       if(e.key==='Enter' && inp.value.trim()){
         const v=inp.value.trim().toLowerCase().replace(/\s+/g,'-');
         if(!p.tags.includes(v)) p.tags.push(v);
         await native('update',{id:p.id,tags:p.tags});
         await refresh();
-        toast('Etiqueta #'+v+' añadida');
+        toast(T('Etiqueta #{t} añadida',{t:v}));
       }
       if(e.key==='Escape') renderAll();
     };
@@ -520,7 +624,7 @@ function renderRail(){
   if((p.backups||[]).length){
     const secB=el('div','rail-section');
     const eh=el('div','rk-eyebrow');
-    eh.appendChild(el('span',null,'Copias de seguridad'));
+    eh.appendChild(el('span',null,T('Copias de seguridad')));
     const cnt=el('span',null,String(p.backups.length)); cnt.style.marginLeft='auto'; cnt.style.color='var(--rk-text-3)';
     eh.appendChild(cnt); secB.appendChild(eh);
     const list=el('div','bk-list');
@@ -528,29 +632,29 @@ function renderRail(){
       const row=el('div','row');
       row.appendChild(el('span','when',fmtDate(bk.date).slice(5)));
       row.appendChild(el('span','size',mb(bk.size)));
-      const b=el('button','rk-btn','Abrir');
+      const b=el('button','rk-btn',T('Abrir'));
       b.onclick=()=>native('open',{path:bk.path});
       row.appendChild(b);
       list.appendChild(row);
     });
-    if(p.backups.length>5) list.appendChild(el('div','more','＋ '+(p.backups.length-5)+' más…'));
+    if(p.backups.length>5) list.appendChild(el('div','more',T('＋ {n} más…',{n:p.backups.length-5})));
     secB.appendChild(list); body.appendChild(secB);
   }
   c.appendChild(body);
 
   const foot=el('div','rail-foot');
-  const bOpen=el('button','rk-btn rk-btn--primary','Abrir proyecto');
+  const bOpen=el('button','rk-btn rk-btn--primary',T('Abrir proyecto'));
   bOpen.onclick=()=>native('open',{path:p.path});
   foot.appendChild(bOpen);
-  const bRev=el('button','rk-btn','Mostrar en Finder');
+  const bRev=el('button','rk-btn',T('Mostrar en Finder'));
   bRev.onclick=()=>native('reveal',{path:p.path});
   foot.appendChild(bRev);
   if(p.hidden){
-    const bBack=el('button','rk-btn','Volver a recientes');
-    bBack.onclick=async()=>{p.hidden=false; await native('update',{id:p.id,hidden:false}); await refresh(); toast('Devuelto a recientes');};
+    const bBack=el('button','rk-btn',T('Volver a recientes'));
+    bBack.onclick=async()=>{p.hidden=false; await native('update',{id:p.id,hidden:false}); await refresh(); toast(T('Devuelto a recientes'));};
     foot.appendChild(bBack);
   }
-  const bDel=el('button','rk-btn rk-btn--danger','Eliminar proyecto…');
+  const bDel=el('button','rk-btn rk-btn--danger',T('Eliminar proyecto…'));
   bDel.onclick=()=>deleteProject(p);
   foot.appendChild(bDel);
   c.appendChild(foot);
@@ -562,18 +666,18 @@ function renderRail(){
 function openMenu(p,anchor){
   const m=$('#menu'); m.innerHTML='';
   const mk=(label,fn,cls)=>{const b=el('button','it'+(cls?' '+cls:''),label); b.onclick=async e=>{e.stopPropagation(); closeMenu(); await fn();}; m.appendChild(b);};
-  mk('Abrir en REAPER',()=>native('open',{path:p.path}));
-  mk('Mostrar en Finder',()=>native('reveal',{path:p.path}));
-  if((p.backups||[]).length) mk('Ver copias de seguridad ('+p.backups.length+')',async()=>{ if(state.expanded.has(p.id))state.expanded.delete(p.id); else state.expanded.add(p.id); renderTable(); });
+  mk(T('Abrir en REAPER'),()=>native('open',{path:p.path}));
+  mk(T('Mostrar en Finder'),()=>native('reveal',{path:p.path}));
+  if((p.backups||[]).length) mk(T('Ver copias de seguridad')+' ('+p.backups.length+')',async()=>{ if(state.expanded.has(p.id))state.expanded.delete(p.id); else state.expanded.add(p.id); renderTable(); });
   m.appendChild(el('div','sep'));
-  mk(p.pinned?'Quitar de fijados':'Fijar arriba',async()=>{p.pinned=!p.pinned; await native('update',{id:p.id,pinned:p.pinned}); renderTable(); renderRail(); toast(p.pinned?'Fijado arriba':'Quitado de fijados');});
-  if(p.hidden) mk('Volver a recientes',async()=>{p.hidden=false; await native('update',{id:p.id,hidden:false}); await refresh();});
-  else mk('Quitar de recientes',async()=>{p.hidden=true; await native('update',{id:p.id,hidden:true}); await refresh(); toast('Quitado de recientes · el archivo sigue en su carpeta');});
-  mk(p.archived?'Desarchivar':'Archivar',async()=>{p.archived=!p.archived; await native('update',{id:p.id,archived:p.archived}); await refresh(); toast(p.archived?'Archivado':'Restaurado');});
-  mk('Mover a carpeta…',async()=>{const f=prompt('Carpeta:',p.folder); if(f){p.folder=f; await native('update',{id:p.id,folder:f}); await refresh();}});
+  mk(T(p.pinned?'Quitar de fijados':'Fijar arriba'),async()=>{p.pinned=!p.pinned; await native('update',{id:p.id,pinned:p.pinned}); renderTable(); renderRail(); toast(T(p.pinned?'Fijado arriba':'Quitado de fijados'));});
+  if(p.hidden) mk(T('Volver a recientes'),async()=>{p.hidden=false; await native('update',{id:p.id,hidden:false}); await refresh();});
+  else mk(T('Quitar de recientes'),async()=>{p.hidden=true; await native('update',{id:p.id,hidden:true}); await refresh(); toast(T('Quitado de recientes · el archivo sigue en su carpeta'));});
+  mk(T(p.archived?'Desarchivar':'Archivar'),async()=>{p.archived=!p.archived; await native('update',{id:p.id,archived:p.archived}); await refresh(); toast(T(p.archived?'Archivado':'Restaurado'));});
+  mk(T('Mover a carpeta…'),async()=>{const f=prompt(T('Carpeta:'),p.folder); if(f){p.folder=f; await native('update',{id:p.id,folder:f}); await refresh();}});
   m.appendChild(el('div','sep'));
-  mk('Quitar del launcher…',async()=>{
-    if(confirm('¿Quitar «'+p.name+'» del launcher? El .rpp no se toca.')){
+  mk(T('Quitar del launcher…'),async()=>{
+    if(confirm(T('¿Quitar «{name}» del launcher? El .rpp no se toca.',{name:p.name}))){
       await native('forget',{id:p.id}); state.selected=null; await refresh();
     }
   },'is-danger');
@@ -596,9 +700,9 @@ function renderTypes(){
   TEMPLATES.forEach(t=>{
     const b=el('button','type'+(newType===t.id?' is-on':''));
     const d=el('span','dotc'); d.style.background=(TYPES[t.type]||TYPES.studio).color; b.appendChild(d);
-    b.appendChild(el('span','tt',t.name));
-    b.appendChild(el('span','td',t.desc));
-    b.appendChild(el('span','tf',t.file||'nuevo .rpp'));
+    b.appendChild(el('span','tt',T(t.name)));
+    b.appendChild(el('span','td',T(t.desc)));
+    b.appendChild(el('span','tf',t.file||T('nuevo .rpp')));
     b.onclick=()=>{newType=t.id; renderTypes(); updateSummary();};
     c.appendChild(b);
   });
@@ -607,7 +711,11 @@ function updateSummary(){
   const t=TEMPLATES.find(x=>x.id===newType);
   const name=($('#pName').value||'').trim();
   const loc=($('#pLoc').value||'').replace(/\/$/,'');
-  $('#pSummary').innerHTML='creará <b>'+loc+'/'+(name||'Sin_nombre').replace(/\s+/g,'_')+'.rpp</b> desde <b>'+(t.file||'proyecto vacío')+'</b><br>etiquetas: <b>'+(t.tags.length?t.tags.map(x=>'#'+x).join(' '):'—')+'</b> · carpeta: <b>'+t.folder+'</b>';
+  const file=(name||T('Sin_nombre')).replace(/\s+/g,'_')+'.rpp';
+  const tags=t.tags.length?t.tags.map(x=>'#'+x).join(' '):'—';
+  $('#pSummary').innerHTML = LANG==='es'
+    ? 'creará <b>'+loc+'/'+file+'</b> desde <b>'+(t.file||T('proyecto vacío'))+'</b><br>etiquetas: <b>'+tags+'</b> · carpeta: <b>'+T(t.folder)+'</b>'
+    : 'will create <b>'+loc+'/'+file+'</b> from <b>'+(t.file||T('proyecto vacío'))+'</b><br>tags: <b>'+tags+'</b> · folder: <b>'+T(t.folder)+'</b>';
 }
 function openModal(){
   $('#scrim').classList.add('is-on'); $('#modalWrap').classList.add('is-on');
@@ -639,8 +747,8 @@ async function refresh(){
 function renderAll(){
   renderNav(); renderInstances(); renderFilters(); renderTable(); renderRail();
   const [title]=viewLabel();
-  $('#viewTitle').innerHTML='Biblioteca <small>'+title+'</small>';
-  $('#stCount').textContent=DB.projects.filter(p=>!p.archived).length+' proyectos · '+(DB.folders||[]).length+' carpetas';
+  $('#viewTitle').innerHTML=T('Biblioteca')+' <small>'+title+'</small>';
+  $('#stCount').textContent=T('{n} proyectos · {m} carpetas',{n:DB.projects.filter(p=>!p.archived).length, m:(DB.folders||[]).length});
   $('#stHours').textContent=hrs(DB.usage?DB.usage.hoursOpen:0);
   $('#stRec').textContent=hrs(DB.usage?DB.usage.hoursRec:0);
 
@@ -693,12 +801,16 @@ function applyPrefs(){
   const ds = document.documentElement.dataset;
   const theme = ds.theme || getPref('theme','dark');
   const accent = ds.accent || getPref('accent','reapertips');
-  ds.theme = theme; ds.accent = accent;
+  LANG = (ds.lang === 'en' || ds.lang === 'es') ? ds.lang : (getPref('lang','es'));
+  if(LANG !== 'en') LANG = 'es';
+  ds.theme = theme; ds.accent = accent; ds.lang = LANG;
   // localStorage es la fuente mientras la app no tenga prefs.json; cuando la
   // inyección ya trae los valores, ambos coinciden y esto es un no-op.
   if (getPref('theme','') !== theme) setPref('theme', theme);
   if (getPref('accent','') !== accent) setPref('accent', accent);
-  native('prefs', {theme: theme, accent: accent});
+  setPref('lang', LANG);
+  applyStaticI18n();
+  native('prefs', {theme: theme, accent: accent, lang: LANG});
   const bt = $('#btnTheme'); if(bt) bt.innerHTML = theme === 'dark' ? SVG_SUN : SVG_MOON;
   const ba = $('#btnAccent');
   if(ba){
@@ -734,60 +846,65 @@ function openMenuAt(items, x, y){
 
 function projectMenu(p){
   const items=[
-    {label:'Abrir en REAPER', run:()=>native('open',{path:p.path})},
-    {label:'Mostrar en Finder', run:()=>native('reveal',{path:p.path})},
+    {label:T('Abrir en REAPER'), run:()=>native('open',{path:p.path})},
+    {label:T('Mostrar en Finder'), run:()=>native('reveal',{path:p.path})},
     {sep:true},
-    {label:p.pinned?'Quitar de fijados':'Fijar arriba', run:async()=>{p.pinned=!p.pinned; await native('update',{id:p.id,pinned:p.pinned}); await refresh();}},
-    {label:p.archived?'Desarchivar':'Archivar', run:async()=>{p.archived=!p.archived; await native('update',{id:p.id,archived:p.archived}); await refresh();}}
+    {label:T(p.pinned?'Quitar de fijados':'Fijar arriba'), run:async()=>{p.pinned=!p.pinned; await native('update',{id:p.id,pinned:p.pinned}); await refresh();}},
+    {label:T(p.archived?'Desarchivar':'Archivar'), run:async()=>{p.archived=!p.archived; await native('update',{id:p.id,archived:p.archived}); await refresh();}}
   ];
-  if((p.backups||[]).length) items.push({label:'Ver copias de seguridad ('+p.backups.length+')', run:()=>{ if(state.expanded.has(p.id)) state.expanded.delete(p.id); else state.expanded.add(p.id); renderTable(); }});
+  if((p.backups||[]).length) items.push({label:T('Ver copias de seguridad')+' ('+p.backups.length+')', run:()=>{ if(state.expanded.has(p.id)) state.expanded.delete(p.id); else state.expanded.add(p.id); renderTable(); }});
   items.push({sep:true});
-  items.push({label:'Mover a carpeta…', run:async()=>{
-    const f=prompt('Carpeta:',p.folder);
+  items.push({label:T('Mover a carpeta…'), run:async()=>{
+    const f=prompt(T('Carpeta:'),p.folder);
     if(f){ p.folder=f; await native('update',{id:p.id,folder:f}); if(!(DB.folders||[]).includes(f)) await native('addFolder',{name:f}); await refresh(); }
   }});
-  items.push({label:'Quitar de recientes', run:async()=>{p.hidden=true; await native('update',{id:p.id,hidden:true}); await refresh();}});
+  items.push({label:T('Quitar de recientes'), run:async()=>{p.hidden=true; await native('update',{id:p.id,hidden:true}); await refresh();}});
   items.push({sep:true});
-  items.push({label:'Eliminar proyecto…', danger:true, run:()=>deleteProject(p)});
+  items.push({label:T('Eliminar proyecto…'), danger:true, run:()=>deleteProject(p)});
   return items;
 }
 
 function folderMenu(name){
   return [
     {header:name},
-    {label:'Abrir carpeta', run:()=>{state.view={kind:'folder',value:name}; renderAll();}},
+    {label:T('Abrir carpeta'), run:()=>{state.view={kind:'folder',value:name}; renderAll();}},
     {sep:true},
-    {label:'Renombrar…', run:()=>openFolderSheet(name,'rename')},
-    {label:'Color e icono…', run:()=>openFolderSheet(name,'style')},
+    {label:T('Renombrar…'), run:()=>openFolderSheet(name,'rename')},
+    {label:T('Color e icono…'), run:()=>openFolderSheet(name,'style')},
     {sep:true},
-    {label:'Nueva carpeta…', run:createFolder},
-    {label:'Eliminar carpeta', danger:true, run:()=>deleteFolder(name)}
+    {label:T('Nueva carpeta…'), run:createFolder},
+    {label:T('Eliminar carpeta'), danger:true, run:()=>deleteFolder(name)}
   ];
 }
 
 async function deleteProject(p){
-  const ok=confirm('¿Eliminar «'+p.name+'»?\n\nEl archivo se mueve a la Papelera:\n'+p.path+'\n\nEsta acción borra el proyecto del disco y del launcher.');
+  const ok=confirm(LANG==='es'
+    ? '¿Eliminar «'+p.name+'»?\n\nEl archivo se mueve a la Papelera:\n'+p.path+'\n\nEsta acción borra el proyecto del disco y del launcher.'
+    : 'Delete "'+p.name+'"?\n\nThe file goes to the Trash:\n'+p.path+'\n\nThis removes the project from disk and from the launcher.');
   if(!ok) return;
   const r=await native('delete',{id:p.id});
-  if(r && r.ok===false){ toast('No se pudo eliminar: '+(r.error||'error desconocido')); return; }
+  if(r && r.ok===false){ toast(T('No se pudo eliminar: {e}',{e:(r.error||T('error desconocido'))})); return; }
   state.selected=null; await refresh();
-  toast('Proyecto eliminado · el .rpp está en la Papelera');
+  toast(T('Proyecto eliminado · el .rpp está en la Papelera'));
 }
 
 function createFolder(){
-  const n=prompt('Nombre de la carpeta (virtual, no mueve archivos):');
+  const n=prompt(T('Nombre de la carpeta (virtual, no mueve archivos):'));
   if(!n) return;
   native('addFolder',{name:n}).then(refresh);
 }
 
 async function deleteFolder(name){
-  if(!confirm('¿Eliminar la carpeta «'+name+'»?\n\nLos proyectos no se borran: pasan a «Sin carpeta».')){
+  const msg = LANG==='es'
+    ? '¿Eliminar la carpeta «'+name+'»?\n\nLos proyectos no se borran: pasan a «Sin carpeta».'
+    : 'Delete the folder "'+name+'"?\n\nProjects are not deleted: they move to "No folder".';
+  if(!confirm(msg)){
     return;
   }
   await native('deleteFolder',{name});
   if(state.view.kind==='folder' && state.view.value===name) state.view={kind:'recent'};
   await refresh();
-  toast('Carpeta eliminada · los proyectos quedaron en «Sin carpeta»');
+  toast(T('Carpeta eliminada · los proyectos quedaron en «Sin carpeta»'));
 }
 
 /* =========================================================
@@ -808,16 +925,16 @@ async function openFolderSheet(name, focus){
   const box=el('div','rk-modal');
   box.style.width='420px';
   const head=el('div','rk-modal-head');
-  head.appendChild(el('span','rk-section', focus==='rename'?'Renombrar carpeta':'Carpeta'));
+  head.appendChild(el('span','rk-section', T(focus==='rename'?'Renombrar carpeta':'Carpeta')));
   head.appendChild(el('span','rk-meta', name));
   box.appendChild(head);
 
   const body=el('div','rk-modal-body');
   const f1=el('label','rk-field');
-  f1.appendChild(el('span','rk-field-label','Nombre'));
+  f1.appendChild(el('span','rk-field-label',T('Nombre')));
   const inp=el('input','rk-input'); inp.value=name; f1.appendChild(inp); body.appendChild(f1);
 
-  body.appendChild(el('div','rk-field-label','Color'));
+  body.appendChild(el('div','rk-field-label',T('Color')));
   const cw=el('div','swrow');
   FOLDER_COLOR_LIST.forEach(c=>{
     const b=el('button','swbtn'+(selColor===c?' is-on':''));
@@ -826,12 +943,12 @@ async function openFolderSheet(name, focus){
     cw.appendChild(b);
   });
   const bNone=el('button','swbtn swbtn--none'+(selColor===''?' is-on':''));
-  bNone.textContent='—'; bNone.title='Sin color';
+  bNone.textContent='—'; bNone.title=T('Sin color');
   bNone.onclick=()=>{ selColor=''; [...cw.children].forEach(x=>x.classList.remove('is-on')); bNone.classList.add('is-on'); };
   cw.appendChild(bNone);
   body.appendChild(cw);
 
-  body.appendChild(el('div','rk-field-label','Icono'));
+  body.appendChild(el('div','rk-field-label',T('Icono')));
   const iw=el('div','icrow');
   FOLDER_ICON_LIST.forEach(ic=>{
     const b=el('button','icbtn'+(selIcon===ic?' is-on':''));
@@ -843,12 +960,12 @@ async function openFolderSheet(name, focus){
   box.appendChild(body);
 
   const foot=el('div','rk-modal-foot');
-  const cancel=el('button','rk-btn rk-btn--quiet','Cancelar');
+  const cancel=el('button','rk-btn rk-btn--quiet',T('Cancelar'));
   cancel.onclick=closeSheet;
-  const save=el('button','rk-btn rk-btn--primary','Guardar');
+  const save=el('button','rk-btn rk-btn--primary',T('Guardar'));
   save.onclick=async()=>{
     const nuevo=(inp.value||'').trim();
-    if(!nuevo){ toast('La carpeta necesita un nombre'); return; }
+    if(!nuevo){ toast(T('La carpeta necesita un nombre')); return; }
     await native('setFolderMeta',{name, color:selColor, icon:selIcon});
     if(nuevo!==name) await native('renameFolder',{from:name, to:nuevo});
     closeSheet();
@@ -856,7 +973,7 @@ async function openFolderSheet(name, focus){
       state.view={kind:'folder', value:nuevo};
     }
     await refresh();
-    toast('Carpeta actualizada');
+    toast(T('Carpeta actualizada'));
   };
   foot.appendChild(cancel); foot.appendChild(save);
   box.appendChild(foot);
@@ -871,14 +988,14 @@ async function openFolderSheet(name, focus){
 function accentMenu(x, y){
   const cur=getPref('accent','reapertips');
   openMenuAt([
-    {header:'Esquema de color'},
+    {header:T('Esquema de color')},
     ...ACCENTS.map(a=>({
-      label:a.name, swatch:a.swatch, checked:a.id===cur,
+      label:T(a.name), swatch:a.swatch, checked:a.id===cur,
       run:()=>{ setPref('accent',a.id);
                 document.documentElement.dataset.accent = a.id;  // applyPrefs lee de aquí
                 applyPrefs();
                 native('prefs',{theme:getPref('theme','dark'), accent:a.id});
-                toast('Esquema '+a.name); }
+                toast(T('Esquema {name}',{name:T(a.name)})); }
     }))
   ], x, y);
 }
@@ -899,7 +1016,7 @@ $('#pPick').onclick=async()=>{
 $('#mCreate').onclick=async()=>{
   const t=TEMPLATES.find(x=>x.id===newType);
   const name=($('#pName').value||'').trim();
-  if(!name){ toast('Ponle un nombre al proyecto'); return; }
+  if(!name){ toast(T('Ponle un nombre al proyecto')); return; }
   let dir=($('#pLoc').value||'').replace(/^~/, (DB.home||''));
   await native('create',{name:name.replace(/\s+/g,'_'),dir:dir,template:t.file,type:t.type,tags:t.tags,folder:t.folder});
 };
@@ -911,6 +1028,7 @@ $('#btnTheme').onclick=()=>{
   document.documentElement.dataset.theme = next;   // applyPrefs lee de aquí
   applyPrefs();
 };
+$('#btnLang').onclick=()=>{ setLang(LANG==='es'?'en':'es', true); };
 $('#btnAccent').onclick=e=>{
   e.stopPropagation();
   const r=e.currentTarget.getBoundingClientRect();
@@ -928,10 +1046,10 @@ document.addEventListener('contextmenu', e=>{
   if(folder){ openMenuAt(folderMenu(folder.dataset.folder), e.clientX, e.clientY); return; }
   if(e.target.closest('#content')){
     openMenuAt([
-      {label:'Nuevo proyecto…', run:openModal},
-      {label:'Abrir archivo…', run:()=>native('pickProject')},
+      {label:T('Nuevo proyecto…'), run:openModal},
+      {label:T('Abrir archivo…'), run:()=>native('pickProject')},
       {sep:true},
-      {label:'Nueva carpeta…', run:createFolder}
+      {label:T('Nueva carpeta…'), run:createFolder}
     ], e.clientX, e.clientY);
   }
 });
@@ -942,8 +1060,8 @@ document.addEventListener('selectstart', e=>{
 });
 $('#addTag').onclick=()=>{
   const p=byId(state.selected);
-  if(!p){ toast('Selecciona un proyecto primero'); return; }
-  const n=prompt('Nueva etiqueta:');
+  if(!p){ toast(T('Selecciona un proyecto primero')); return; }
+  const n=prompt(T('Nueva etiqueta:'));
   if(n){ const v=n.trim().toLowerCase().replace(/\s+/g,'-'); if(!p.tags.includes(v)) p.tags.push(v); native('update',{id:p.id,tags:p.tags}).then(refresh); }
 };
 $('#railToggle').onclick=()=>$('#rail').classList.toggle('is-open');
@@ -954,9 +1072,12 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){ closeMenu(); closeModal(); if(innerWidth<1080) $('#rail').classList.remove('is-open'); }
   if(e.key==='Enter' && document.activeElement===$('#pName')) $('#mCreate').click();
 });
-addEventListener('resize',()=>{
-  $('#search').placeholder = innerWidth<1180 ? 'Buscar…' : 'Buscar proyecto, etiqueta o ruta';
-});
+function syncSearchPh(){
+  const full = LANG==='es' ? 'Buscar proyecto, etiqueta o ruta' : 'Search project, tag or path';
+  const short = LANG==='es' ? 'Buscar…' : 'Search…';
+  $('#search').placeholder = innerWidth<1180 ? short : full;
+}
+addEventListener('resize',syncSearchPh);
 
 let wasStacked=null;
 function syncRail(){
@@ -970,7 +1091,9 @@ setInterval(()=>{ refresh(); }, 30000);
 
 (async function boot(){
   syncRail();
-  applyPrefs();
+  applyPrefs();          // fija tema, acento e idioma antes del primer pintado
+  applyStaticI18n();
+  syncSearchPh();
   const data=await native('list');
   if(data && data.projects){
     DB=data;

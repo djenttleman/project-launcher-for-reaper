@@ -86,6 +86,7 @@
   footer{margin-top:80px;padding:28px 0 46px;border-top:1px solid var(--line);color:var(--dim2);font-size:13px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
   footer .spacer{flex:1}
   [data-lang="en"] .es,[data-lang="es"] .en{display:none !important}
+  img.shot{display:block;width:100%}
   @media (max-width:760px){ .split{grid-template-columns:1fr} header{padding-top:34px} }
 </style>
 </head>
@@ -127,7 +128,10 @@
   </header>
 
   <section>
-    <div class="hero-shot"><img src="assets/screenshot-dark.png" alt="ReaLauncher dark theme"></div>
+    <div class="hero-shot">
+      <img class="shot en" src="assets/en/screenshot-dark.png" alt="ReaLauncher, dark theme">
+      <img class="shot es" src="assets/es/screenshot-dark.png" alt="ReaLauncher, tema oscuro">
+    </div>
   </section>
 
   <section>
@@ -154,6 +158,9 @@
       <div class="card"><span class="ico">🔒</span><h3><span class="en">Update-proof</span><span class="es">A prueba de actualizaciones</span></h3>
         <p><span class="en">Lua scripts in your resource folder, registered as an action.</span><span class="es">Scripts Lua en tu carpeta de recursos, registrados como acción.</span></p></div>
 
+      <div class="card"><span class="ico">🌐</span><h3><span class="en">English and Spanish</span><span class="es">Inglés y español</span></h3>
+        <p><span class="en">Switch languages from the status bar; it remembers your choice.</span><span class="es">Cambiá de idioma desde la barra inferior; recuerda tu elección.</span></p></div>
+
       <div class="card"><span class="ico">⚡</span><h3><span class="en">Fast and quiet</span><span class="es">Rápido y silencioso</span></h3>
         <p><span class="en">Opens in ~0.4 s, no white flash, no visible redraw.</span><span class="es">Abre en ~0,4 s, sin flash blanco ni repintados visibles.</span></p></div>
     </div>
@@ -161,11 +168,18 @@
 
   <section>
     <h2><span class="en">A closer look</span><span class="es">De cerca</span></h2>
-    <div class="hero-shot"><img src="assets/screenshot-light.png" alt="ReaLauncher light theme"></div>
+    <div class="hero-shot">
+      <img class="shot en" src="assets/en/screenshot-light.png" alt="ReaLauncher, light theme">
+      <img class="shot es" src="assets/es/screenshot-light.png" alt="ReaLauncher, tema claro">
+    </div>
     <div class="split">
-      <figure><img src="assets/menus.png" alt="Right-click menus">
+      <figure>
+        <img class="shot en" src="assets/en/menus.png" alt="Right-click menus">
+        <img class="shot es" src="assets/es/menus.png" alt="Menús de clic derecho">
         <figcaption><span class="en">Its own right-click menus</span><span class="es">Menús de clic derecho propios</span></figcaption></figure>
-      <figure><img src="assets/modals.png" alt="Modals">
+      <figure>
+        <img class="shot en" src="assets/en/modals.png" alt="Modals">
+        <img class="shot es" src="assets/es/modals.png" alt="Modales">
         <figcaption><span class="en">Templates and folder editor</span><span class="es">Plantillas y editor de carpeta</span></figcaption></figure>
     </div>
   </section>
@@ -183,7 +197,7 @@
   </section>
 
   <footer>
-    <span>© 2026 djenttleman · <span class="en">Built with AI</span><span class="es">Hecho con IA</span></span>
+    <span>© 2026 djenttleman · MIT · <span class="en">Built with AI</span><span class="es">Hecho con IA</span></span>
     <span class="spacer"></span>
     <a class="ghost" href="https://github.com/djenttleman/realauncher" target="_blank" rel="noopener">Source ↗</a>
     <a class="ghost" href="https://github.com/djenttleman/realauncher/blob/main/README.es.md">README ES</a>

@@ -109,6 +109,18 @@ Consecuencia: al no tener menú, si otro proceso tiene el foco los atajos no
 llegan hasta que se hace clic en la ventana. macOS 14 además no permite que una
 app agente se active sola desde segundo plano.
 
+## Idioma (ES / EN)
+- Un botón `EN`/`ES` en la barra inferior, junto al sol y la paleta, sin caja.
+- `T(clave, vars)` traduce contra un diccionario cuyo **origen es el texto en
+  español**; las cadenas compuestas usan marcadores (`{n}`, `{v}`, `{name}`).
+- El marcado estático lleva `data-en`, `data-en-ph`, `data-en-title` y
+  `data-en-aria`; `applyStaticI18n()` guarda el original y alterna.
+- `ago()`, `hrs()` y `mb()` respetan el idioma (separador decimal y plurales).
+- El idioma vive en `prefs.json` (`lang`) y se inyecta en `documentStart`
+  (`data-lang`) junto al tema, así que el primer frame ya sale en el idioma
+  correcto. Los nombres de carpetas, etiquetas y proyectos nunca se traducen:
+  son datos del usuario.
+
 ## Portabilidad
 No hay rutas de esta máquina en el código: `~` se expande con el home real que
 entrega la app (`DB.home`), los scripts Lua usan `reaper.GetResourcePath()` y

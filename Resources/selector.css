@@ -384,6 +384,12 @@ input,textarea,.rk-input,code,pre{ -webkit-user-select:text; user-select:text; }
 .stbtn:hover{ color:var(--rk-text-1); }
 .stbtn:active{ opacity:.7; }
 .stbtn svg{ width:15px; height:15px; display:block; }
+/* botón de idioma: texto chico, mismo tratamiento sin caja que tema y acento */
+.stbtn--lang{
+  width:auto; min-width:26px; height:20px; padding:0 2px;
+  font:800 10.5px/1 var(--rk-mono); letter-spacing:.08em; color:var(--rk-text-3);
+}
+.stbtn--lang:hover{ color:var(--rk-text-1); }
 
 /* estado vacío alineado como un ítem de su lista */
 .nav-empty{

@@ -49,8 +49,9 @@ struct Library: Codable {
 }
 
 struct Prefs: Codable {
-    var theme: String = "dark"
-    var accent: String = "reapertips"
+    var theme = "dark"
+    var accent = "reapertips"
+    var lang = "es"
 }
 
 struct Usage: Codable {
@@ -437,6 +438,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         if store.hasPrefsFile {
             let boot = "document.documentElement.dataset.theme='\(store.prefs.theme)';"
                      + "document.documentElement.dataset.accent='\(store.prefs.accent)';"
+                     + "document.documentElement.dataset.lang='\(store.prefs.lang)';"
+                     + "document.documentElement.lang='\(store.prefs.lang)';"
                      + "document.documentElement.style.backgroundColor='\(bgHex)';"
             cfg.userContentController.addUserScript(
                 WKUserScript(source: boot, injectionTime: .atDocumentStart, forMainFrameOnly: true))
@@ -676,8 +679,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             reply(["ok": true])
 
         case "prefs":
-            if let t = body["theme"] as? String { store.prefs.theme = t }
-            if let a = body["accent"] as? String { store.prefs.accent = a }
+            if let t = body["theme"] as? String { self.store.prefs.theme = t }
+            if let a = body["accent"] as? String { self.store.prefs.accent = a }
+            if let l = body["lang"] as? String, l == "es" || l == "en" { self.store.prefs.lang = l }
             store.savePrefs()
             reply(["ok": true])
 

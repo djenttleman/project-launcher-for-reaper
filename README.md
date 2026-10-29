@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/macOS-13%2B-0B0B0D?style=flat-square&labelColor=1a1a20" alt="macOS 13+">
   <img src="https://img.shields.io/badge/Swift-5.9-8660E8?style=flat-square&labelColor=1a1a20" alt="Swift">
   <img src="https://img.shields.io/badge/no%20electron-yes%20please-1ED760?style=flat-square&labelColor=1a1a20" alt="No Electron">
-  <img src="https://img.shields.io/badge/version-1.0.0-4377FF?style=flat-square&labelColor=1a1a20" alt="v1.0.0">
+  <img src="https://img.shields.io/badge/version-1.1.0-4377FF?style=flat-square&labelColor=1a1a20" alt="v1.0.0">
   <img src="https://img.shields.io/badge/license-MIT-1ED760?style=flat-square&labelColor=1a1a20" alt="MIT">
 </p>
 
@@ -39,6 +39,7 @@ It started as a tool for my own live shows. Then it grew folders, tags, backups,
 | 🔎 **Instant search and filters** | Type and filter by type, folder, pinned or archived. `⌘K` and you're typing. |
 | 🧭 **Project inspector** | Regions, tracks, tempo, size and the last time you touched it, read straight from the `.rpp`. |
 | 🗃 **Nested backups** | Every `.rpp-bak` sitting next to your project shows up in a fold-out row. Open it or reveal it. |
+| 🩺 **Recovery mode** | Open any project with all FX offline, or let the launcher bring them online one at a time once it's loaded. `⌥`-click the Open button or use the right-click menu. |
 | 🧩 **Create from templates** | Empty, recording, editing, mixing, mastering or a live show — it writes the right file in the right place. |
 | 📊 **Session stats** | Hours with REAPER open and hours actually recording, accumulated by a quiet Lua script. |
 | 🖱 **Its own right-click menus** | Rename, recolor and re-icon folders; pin, archive, move or trash projects. No native WebKit menu, no text selection. |

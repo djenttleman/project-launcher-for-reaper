@@ -109,6 +109,39 @@ Consecuencia: al no tener menú, si otro proceso tiene el foco los atajos no
 llegan hasta que se hace clic en la ventana. macOS 14 además no permite que una
 app agente se active sola desde segundo plano.
 
+## Abrir con FX offline (1.1)
+El diálogo nativo `Open project` tiene cuatro casillas: *Open in new project tab*,
+*Open read-only*, *Open with FX offline (recovery mode)* y *Bring FX online after
+load*. De esas, el API de ReaScript sólo documenta la de FX:
+
+- `reaper.Main_openProject("fxoffline:" .. path)` → carga con todos los FX offline.
+- CLI: `REAPER -fxoffline path` → lo mismo al arrancar REAPER cerrado.
+- `new tab` y `read-only` no están en el API; por eso el launcher no las ofrece.
+
+### Canal de comandos app → REAPER
+Como con REAPER abierto no se pueden pasar flags, la app escribe una línea en
+`~/Library/Application Support/ReaLauncher/inbox.txt` y `ReaLauncher Startup.lua`
+la consume desde su `defer` (cada ~8 ticks):
+
+```
+open normal <path>            # abre el proyecto en la pestaña actual
+open fxoffline <path>         # recovery mode
+open fxoffline-online <path>  # recovery mode y luego trae los FX online de a uno
+fxonline                      # trae online los FX que estén offline
+dump                          # escribe fxstate.txt (diagnóstico)
+```
+
+El modo `fxoffline-online` reintenta hasta ~5 s hasta que aparecen FX offline y
+después los habilita uno por uno con `TrackFX_SetOffline`.
+
+Verificado con un `.rpp` de prueba: `offline=true` al abrir en los tres caminos y
+`offline=false` después de `fxonline` / `fxoffline-online`.
+
+### Trampa de Lua en ReaScript
+Las variables locales usadas dentro de un `defer` tienen que declararse **antes**
+de la función que las usa: si no, Lua las resuelve como globales (`nil`) y el
+script muere con "attempt to perform arithmetic on a nil value".
+
 ## Idioma (ES / EN)
 - Un botón `EN`/`ES` en la barra inferior, junto al sol y la paleta, sin caja.
 - `T(clave, vars)` traduce contra un diccionario cuyo **origen es el texto en

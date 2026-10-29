@@ -48,6 +48,9 @@ local secondsRec = numberAfter(prior, "secondsRec")
 
 local dirty = false
 local last = reaper.time_precise()
+-- forward: el loop de tick los usa antes de que exista el bloque de comandos
+local pollAcc = 0
+local pollInbox = nil
 
 local function flush()
   if not dirty then return end
@@ -66,6 +69,8 @@ local function tick()
     if reaper.GetPlayState() & 4 ~= 0 then secondsRec = secondsRec + dt end
     dirty = true
   end
+  pollAcc = pollAcc + 1
+  if pollAcc >= 8 then pollAcc = 0; if pollInbox then pollInbox() end end
   reaper.defer(tick)
 end
 
@@ -77,6 +82,94 @@ local function flusher()
   acc = acc + 1
   if acc >= 15 then acc = 0; flush() end
   reaper.defer(flusher)
+end
+
+
+-- --------------------------------------------------------- canal de comandos
+-- La app deja órdenes en inbox.txt y este loop las ejecuta dentro de REAPER:
+-- así el launcher puede abrir con FX offline o traer los FX online sin
+-- depender de la UI de REAPER. Se revisa cada ~0.25 s (no por tick).
+local INBOX = DIR .. "/inbox.txt"
+
+local function allOfflineFX()
+  local list = {}
+  for ti = 0, reaper.CountTracks(0) - 1 do
+    local tr = reaper.GetTrack(0, ti)
+    if tr then
+      for fi = 0, reaper.TrackFX_GetCount(tr) - 1 do
+        if reaper.TrackFX_GetOffline(tr, fi) then list[#list + 1] = { tr, fi } end
+      end
+    end
+  end
+  -- master
+  local master = reaper.GetMasterTrack(0)
+  if master then
+    for fi = 0, reaper.TrackFX_GetCount(master) - 1 do
+      if reaper.TrackFX_GetOffline(master, fi) then list[#list + 1] = { master, fi } end
+    end
+  end
+  return list
+end
+
+-- Trae los FX online de a uno, imitando "Bring FX online after load".
+local function bringOnlineStaggered(list, idx)
+  idx = idx or 1
+  if not list or idx > #list then return end
+  local it = list[idx]
+  if it[1] and reaper.ValidatePtr2(0, it[1], "MediaTrack*") then
+    reaper.TrackFX_SetOffline(it[1], it[2], false)
+  end
+  reaper.defer(function() bringOnlineStaggered(list, idx + 1) end)
+end
+
+local function openProject(mode, path)
+  local prefix = ""
+  if mode == "fxoffline" or mode == "fxoffline-online" then prefix = "fxoffline:" end
+  reaper.Main_openProject(prefix .. path)
+  if mode == "fxoffline-online" then
+    -- el proyecto carga con FX offline; en cuanto aparezcan, se traen online
+    -- de a uno. Se reintenta hasta ~5 s por si el proyecto es grande.
+    local tries = 0
+    local function wait()
+      tries = tries + 1
+      local list = allOfflineFX()
+      if #list > 0 then bringOnlineStaggered(list); return end
+      if tries < 300 then reaper.defer(wait) end
+    end
+    reaper.defer(wait)
+  end
+end
+
+local function handleCommand(line)
+  local cmd, rest = line:match("^([%w%-]+)%s*(.*)$")
+  if not cmd then return end
+  if cmd == "open" then
+    local mode, path = rest:match("^([%w%-]+)%s+(.+)$")
+    if path then openProject(mode, path) end
+  elseif cmd == "fxonline" then
+    bringOnlineStaggered(allOfflineFX())
+  elseif cmd == "dump" then
+    local out = {}
+    for i = 0, reaper.CountTracks(0) - 1 do
+      local tr = reaper.GetTrack(0, i)
+      for fx = 0, reaper.TrackFX_GetCount(tr) - 1 do
+        local _, name = reaper.TrackFX_GetFXName(tr, fx, "")
+        out[#out + 1] = string.format("track %d fx %d offline=%s %s", i + 1, fx + 1,
+          tostring(reaper.TrackFX_GetOffline(tr, fx) and true or false), name)
+      end
+    end
+    writeFile(DIR .. "/fxstate.txt", table.concat(out, "\n") .. "\n")
+  end
+end
+
+pollInbox = function()
+  local raw = readFile(INBOX)
+  if raw and raw ~= "" then
+    os.remove(INBOX)
+    for line in raw:gmatch("[^\r\n]+") do
+      if line ~= "" then handleCommand(line) end
+    end
+  end
 end
 
 reaper.defer(tick)

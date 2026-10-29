@@ -187,6 +187,7 @@ const PAL = ['#8660E8','#019ACB','#C2527A','#5B7CD8','#AD63E7','#0C89B4'];
 const $ = s => document.querySelector(s);
 const el = (t,c,x)=>{const n=document.createElement(t); if(c)n.className=c; if(x!=null)n.textContent=x; return n;};
 const byId = id => DB.projects.find(p=>p.id===id);
+const openWith = (p, mode) => native('openWith', {path: p.path, mode});
 
 /* =========================================================
    Idioma (ES / EN)
@@ -251,6 +252,10 @@ const EN = {
   'REAPER está abierto en esta máquina':'REAPER is open on this machine',
   'Modo claro / oscuro':'Light / dark mode','Modo claro u oscuro':'Light or dark mode',
   'Idioma / Language':'Language','Deshacer':'Undo',
+  'Abrir con FX offline (recovery mode)':'Open with FX offline (recovery mode)',
+  'Abrir y traer los FX online':'Open, then bring FX online',
+  'Traer todos los FX online':'Bring all FX online',
+  '⌥ clic para abrir con FX offline':'⌥ click to open with FX offline',
   'Laboratorio':'Lab','mezcla':'mixing','master':'mastering','grabación':'recording',
   'edición':'editing','en vivo':'live','plantilla':'template','show':'show'
 };
@@ -499,6 +504,7 @@ function rowFor(p,idx){
   const tr=el('tr','project'+(p.id===state.selected?' is-on':''));
   tr.dataset.id=p.id;
   tr.onclick=()=>{state.selected=p.id; renderTable(); renderRail();};
+  tr.ondblclick=e=>{ e.altKey ? openWith(p,'fxoffline') : native('open',{path:p.path}); };
 
   const tdNum=el('td','c-num');
   const pin=el('button','pin-btn'+(p.pinned?' is-pinned':''));
@@ -672,7 +678,8 @@ function renderRail(){
 
   const foot=el('div','rail-foot');
   const bOpen=el('button','rk-btn rk-btn--primary',T('Abrir proyecto'));
-  bOpen.onclick=()=>native('open',{path:p.path});
+  bOpen.title=T('⌥ clic para abrir con FX offline');
+  bOpen.onclick=e=> e.altKey ? openWith(p,'fxoffline') : native('open',{path:p.path});
   foot.appendChild(bOpen);
   const bRev=el('button','rk-btn',T('Mostrar en Finder'));
   bRev.onclick=()=>native('reveal',{path:p.path});
@@ -695,7 +702,10 @@ function openMenu(p,anchor){
   const m=$('#menu'); m.innerHTML='';
   const mk=(label,fn,cls)=>{const b=el('button','it'+(cls?' '+cls:''),label); b.onclick=async e=>{e.stopPropagation(); closeMenu(); await fn();}; m.appendChild(b);};
   mk(T('Abrir en REAPER'),()=>native('open',{path:p.path}));
+  mk(T('Abrir con FX offline (recovery mode)'),()=>openWith(p,'fxoffline'));
+  mk(T('Abrir y traer los FX online'),()=>openWith(p,'fxoffline-online'));
   mk(T('Mostrar en Finder'),()=>native('reveal',{path:p.path}));
+  if(DB.reaperRunning){ m.appendChild(el('div','sep')); mk(T('Traer todos los FX online'),()=>native('fxonline')); }
   if((p.backups||[]).length) mk(T('Ver copias de seguridad')+' ('+p.backups.length+')',async()=>{ if(state.expanded.has(p.id))state.expanded.delete(p.id); else state.expanded.add(p.id); renderTable(); });
   m.appendChild(el('div','sep'));
   mk(T(p.pinned?'Quitar de fijados':'Fijar arriba'),async()=>{p.pinned=!p.pinned; await native('update',{id:p.id,pinned:p.pinned}); renderTable(); renderRail(); toast(T(p.pinned?'Fijado arriba':'Quitado de fijados'));});
@@ -875,6 +885,8 @@ function openMenuAt(items, x, y){
 function projectMenu(p){
   const items=[
     {label:T('Abrir en REAPER'), run:()=>native('open',{path:p.path})},
+    {label:T('Abrir con FX offline (recovery mode)'), run:()=>openWith(p,'fxoffline')},
+    {label:T('Abrir y traer los FX online'), run:()=>openWith(p,'fxoffline-online')},
     {label:T('Mostrar en Finder'), run:()=>native('reveal',{path:p.path})},
     {sep:true},
     {label:T(p.pinned?'Quitar de fijados':'Fijar arriba'), run:async()=>{p.pinned=!p.pinned; await native('update',{id:p.id,pinned:p.pinned}); await refresh();}},
@@ -888,6 +900,7 @@ function projectMenu(p){
   }});
   items.push({label:T('Quitar de recientes'), run:async()=>{p.hidden=true; await native('update',{id:p.id,hidden:true}); await refresh();}});
   items.push({sep:true});
+  if(DB.reaperRunning){ items.push({sep:true}); items.push({label:T('Traer todos los FX online'), run:()=>native('fxonline')}); }
   items.push({label:T('Eliminar proyecto…'), danger:true, run:()=>deleteProject(p)});
   return items;
 }

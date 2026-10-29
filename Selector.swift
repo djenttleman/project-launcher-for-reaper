@@ -524,13 +524,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
                 self.push(self.store.snapshot())
             }
 
-        case "open":
+        case "open", "openWith":
             guard let path = body["path"] as? String else { return }
+            let mode = (body["mode"] as? String) ?? "normal"
             if let i = store.library.projects.firstIndex(where: { $0.path == path }) {
                 store.library.projects[i].lastOpened = Date().timeIntervalSince1970
                 store.save()
             }
-            openInReaper(path)
+            openInReaper(path, mode: mode)
+
+        case "fxonline":
+            sendCommand("fxonline")
 
         case "reveal":
             if let path = body["path"] as? String {
@@ -737,12 +741,45 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         web.evaluateJavaScript("window.__native(\(json));")
     }
 
-    func openInReaper(_ path: String) {
+    /// REAPER está abierto en esta máquina.
+    var reaperIsRunning: Bool {
+        !NSRunningApplication.runningApplications(withBundleIdentifier: "com.cockos.reaper").isEmpty
+    }
+
+    /// Deja una orden en inbox.txt; el script de arranque la ejecuta dentro de REAPER.
+    func sendCommand(_ line: String) {
+        let dir = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/ReaLauncher", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let url = dir.appendingPathComponent("inbox.txt")
+        try? line.appending("\n").write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    func openInReaper(_ path: String, mode: String = "normal") {
+        // Con REAPER abierto, el flag -fxoffline no llega: se pide por el canal Lua.
+        if reaperIsRunning {
+            let cmd = (mode == "fxoffline" || mode == "fxoffline-online")
+                ? "open \(mode) \(path)"
+                : "open normal \(path)"
+            sendCommand(cmd)
+            NSApp.terminate(nil)
+            return
+        }
         let cfg = NSWorkspace.OpenConfiguration()
         cfg.activates = true
         let url = URL(fileURLWithPath: path)
         guard let app = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.cockos.reaper") else {
             NSWorkspace.shared.open(url); NSApp.terminate(nil); return
+        }
+        if mode == "fxoffline" || mode == "fxoffline-online" {
+            // -fxoffline es el flag documentado de REAPER para recovery mode.
+            let exe = app.appendingPathComponent("Contents/MacOS/REAPER")
+            let p = Process()
+            p.executableURL = exe
+            p.arguments = ["-fxoffline", path]
+            try? p.run()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { NSApp.terminate(nil) }
+            return
         }
         NSWorkspace.shared.open([url], withApplicationAt: app, configuration: cfg) { _, error in
             if let error = error { NSLog("open error: \(error)") }

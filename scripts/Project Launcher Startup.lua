@@ -191,6 +191,13 @@ end
 -- -------------------------------------------------- Action List (una vez)
 -- AddRemoveReaScript es la vía soportada: agrega el lanzador a la Action List
 -- sin tocar reaper-kb.ini a mano. Si REAPER se actualiza, el bloque se repone.
+-- limpiar la entrada vieja de la Action List que apuntaba al nombre anterior
+if reaper.GetExtState("ProjectLauncher", "legacyclean") ~= "1" then
+  local old = reaper.GetResourcePath() .. "/Scripts/Reaset Scripts/ReaLauncher.lua"
+  reaper.AddRemoveReaScript(false, 0, old, true)
+  reaper.SetExtState("ProjectLauncher", "legacyclean", "1", true)
+end
+
 if reaper.GetExtState("ProjectLauncher", "action") ~= "1" then
   local launcher = reaper.GetResourcePath() .. "/Scripts/Reaset Scripts/Project Launcher.lua"
   if reaper.file_exists(launcher) then

@@ -335,6 +335,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
     let launchAt = Date()
     var currentMsgId: Int?
     var windowShown = false
+    var fullFrame: NSRect?
     var quitReaperRequested = false
     var cover: NSView?
 
@@ -536,6 +537,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
 
         case "fxonline":
             sendCommand("fxonline")
+
+        case "slim":
+            setSlimWindow((body["on"] as? Bool) ?? false)
 
         case "reveal":
             if let path = body["path"] as? String {
@@ -740,6 +744,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         guard let data = try? JSONSerialization.data(withJSONObject: payload),
               let json = String(data: data, encoding: .utf8) else { return }
         web.evaluateJavaScript("window.__native(\(json));")
+    }
+
+    /// Modo slim: la ventana se angosta a una lista y al volver recupera su marco.
+    func setSlimWindow(_ on: Bool) {
+        guard let w = window else { return }
+        if on {
+            guard fullFrame == nil else { return }
+            fullFrame = w.frame
+            w.setFrameAutosaveName("")                 // el tamaño slim no se guarda
+            w.minSize = NSSize(width: 340, height: 420)
+            let size = NSSize(width: 380, height: 620)
+            var f = w.frame
+            f.origin.x += (f.width - size.width) / 2
+            f.origin.y += f.height - size.height       // conserva el borde superior
+            f.size = size
+            w.setFrame(f, display: true, animate: true)
+        } else if let f = fullFrame {
+            fullFrame = nil
+            w.minSize = NSSize(width: 900, height: 600)
+            w.setFrame(f, display: true, animate: true)
+            w.setFrameAutosaveName("ProjectLauncherWindow")
+        }
     }
 
     /// REAPER está abierto en esta máquina.

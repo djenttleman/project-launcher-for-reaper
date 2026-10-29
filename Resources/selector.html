@@ -11,6 +11,36 @@
   html,body{background:var(--rk-bg-0)}
   .window{height:100vh;width:100vw}
   .empty-bk{padding:10px 12px;font:var(--rk-meta);color:var(--rk-text-3)}
+
+/* ============ modo slim ============ */
+.slim{display:none}
+body.is-slim{display:block;background:var(--rk-bg-1)}
+body.is-slim .window{display:none}
+body.is-slim .slim{display:flex;flex-direction:column;width:100vw;height:100vh;background:var(--rk-bg-1);color:var(--rk-text-1)}
+.slim-head{display:flex;align-items:center;gap:9px;padding:11px 12px 9px;border-bottom:1px solid var(--rk-line-1)}
+.slim-mark{width:18px;height:18px;flex:none;color:var(--rk-text-1)}
+.slim-mark svg{width:18px;height:18px;display:block}
+.slim-titles{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.slim-titles b{font:800 10.5px/1 var(--rk-font);letter-spacing:1.25px;color:var(--rk-text-1);white-space:nowrap}
+.slim-titles i{font:700 7.5px/1 var(--rk-font);letter-spacing:1.75px;font-style:normal;color:var(--rk-text-3)}
+.slim-btn{width:26px;height:26px;flex:none;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;color:var(--rk-text-3)}
+.slim-btn:hover{background:var(--rk-fill-1);color:var(--rk-text-1)}
+.slim-btn svg{width:13px;height:13px}
+.slim-list{flex:1;overflow-y:auto;padding:6px 7px 10px}
+.slim-label{font:700 9px/1 var(--rk-font);letter-spacing:1.5px;text-transform:uppercase;color:var(--rk-text-3);padding:10px 8px 5px}
+.slim-row{display:flex;align-items:center;gap:9px;width:100%;padding:7px 8px;border-radius:8px;text-align:left}
+.slim-row:hover{background:var(--rk-fill-1)}
+.slim-row .dot{width:6px;height:6px;border-radius:50%;flex:none}
+.slim-row .txt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.slim-row .nm{font:600 12.5px/1.2 var(--rk-font);color:var(--rk-text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slim-row .mt{font:400 10.5px/1.2 var(--rk-font);color:var(--rk-text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slim-row .go{flex:none;color:var(--rk-green);opacity:0}
+.slim-row .go svg{width:13px;height:13px;display:block}
+.slim-row:hover .go{opacity:1}
+.slim-foot{display:flex;align-items:center;gap:8px;padding:7px 12px;border-top:1px solid var(--rk-line-1);font:400 10.5px/1 var(--rk-font);color:var(--rk-text-3)}
+.slim-foot .sp{flex:1}
+.slim-led{width:7px;height:7px;border-radius:50%;background:#4A4A4E;flex:none}
+.slim-led.on{background:var(--rk-green);box-shadow:0 0 6px var(--rk-green)}
 </style>
 </head>
 <body>
@@ -86,8 +116,28 @@
     <button class="stbtn stbtn--lang" id="btnLang" title="Idioma / Language" data-en-title="Idioma / Language">ES</button>
     <button class="stbtn" id="btnTheme" title="Modo claro / oscuro" aria-label="Modo claro u oscuro" data-en-title="Modo claro / oscuro" data-en-aria="Modo claro u oscuro"></button>
     <button class="stbtn" id="btnAccent" title="Esquema de color" aria-label="Esquema de color" data-en-title="Esquema de color" data-en-aria="Esquema de color"></button>
+    <button class="stbtn" id="btnSlim" title="Modo slim" data-en-title="Slim mode"></button>
   </footer>
 </div>
+
+<!-- ============ modo slim ============ -->
+<section class="slim" id="slim">
+  <header class="slim-head">
+    <span class="slim-mark"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M128 24C68 24 24 65 24 111c0 48 49 106 89 126a33 33 0 0 0 30 0c40-20 89-78 89-126 0-46-44-87-104-87Z" fill="none" stroke="currentColor" stroke-width="24" stroke-linejoin="round"/><path d="M59 74c44-24 103-24 146 17-36-22-77-28-111-10 9 19 25 34 36 59 15 35 11 68-4 95 10-37 5-68-16-96-23-27-40-39-51-65Z" fill="currentColor"/></svg></span>
+    <span class="slim-titles">
+      <b>PROJECT LAUNCHER</b>
+      <i>FOR REAPER</i>
+    </span>
+    <button class="slim-btn" id="btnFull" title="Volver al modo completo" data-en-title="Back to full mode"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"><path d="M104 56H56v48"/><path d="M152 56h48v48"/><path d="M104 200H56v-48"/><path d="M152 200h48v-48"/></svg></button>
+  </header>
+  <div class="slim-list" id="slimList"></div>
+  <footer class="slim-foot">
+    <span class="slim-led" id="slimLed"></span>
+    <span id="slimCount">—</span>
+    <span class="sp"></span>
+    <button class="slim-btn slim-btn--ghost" id="btnFull2" title="Modo completo" data-en-title="Full mode"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"><path d="M104 56H56v48"/><path d="M152 56h48v48"/><path d="M104 200H56v-48"/><path d="M152 200h48v-48"/></svg></button>
+  </footer>
+</section>
 
 <div class="menu" id="menu"></div>
 
@@ -257,6 +307,8 @@ const EN = {
   'Traer todos los FX online':'Bring all FX online',
   '⌥ clic para abrir con FX offline':'⌥ click to open with FX offline',
   'Más opciones de apertura':'More opening options',
+  'FIJADOS':'PINNED','RECIENTES':'RECENT','proyectos':'projects',
+  'Modo slim':'Slim mode','Volver al modo completo':'Back to full mode','Modo completo':'Full mode',
   'Laboratorio':'Lab','mezcla':'mixing','master':'mastering','grabación':'recording',
   'edición':'editing','en vivo':'live','plantilla':'template','show':'show'
 };
@@ -1165,6 +1217,63 @@ setInterval(()=>{ refresh(); }, 30000);
   // avisa a la app que la UI ya está pintada: recién ahí aparece la ventana
   native('ready');
 })();
+
+/* ============ modo slim ============ */
+const SVG_SLIM = '<svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"><path d="M104 56v48H56"/><path d="M152 56v48h48"/><path d="M104 200v-48H56"/><path d="M152 200v-48h48"/></svg>';
+const SVG_GO = '<svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"><path d="M40 128h168"/><path d="M144 64l64 64-64 64"/></svg>';
+
+function slimRow(p){
+  const b = el('button','slim-row');
+  const d = el('span','dot');
+  d.style.background = (DB.folderMeta && DB.folderMeta[p.folder] && DB.folderMeta[p.folder].color) || 'var(--rk-text-3)';
+  const txt = el('span','txt');
+  txt.appendChild(el('span','nm', p.name));
+  const meta = [p.folder||'', ago(p.lastOpened), (p.regions ? p.regions + ' ' + (LANG==='es'?'reg.':'reg.') : '')].filter(Boolean).join(' · ');
+  txt.appendChild(el('span','mt', meta));
+  const go = el('span','go'); go.innerHTML = SVG_GO;
+  b.appendChild(d); b.appendChild(txt); b.appendChild(go);
+  b.onclick = () => native('open', {path: p.path});
+  return b;
+}
+
+function renderSlim(){
+  const list = $('#slimList'); if(!list) return;
+  const live = DB.projects.filter(p => !p.archived && !p.hidden);
+  const by = (a,b) => (b.lastOpened||0) - (a.lastOpened||0);
+  const pinned = live.filter(p => p.pinned).sort(by);
+  const rest = live.filter(p => !p.pinned).sort(by);
+  list.innerHTML = '';
+  if(pinned.length){
+    list.appendChild(el('div','slim-label', T('FIJADOS')));
+    pinned.forEach(p => list.appendChild(slimRow(p)));
+  }
+  if(rest.length){
+    list.appendChild(el('div','slim-label', T('RECIENTES')));
+    rest.forEach(p => list.appendChild(slimRow(p)));
+  }
+  const c = $('#slimCount');
+  if(c) c.textContent = live.length + ' ' + T('proyectos');
+  const led = $('#slimLed');
+  if(led) led.classList.toggle('on', !!DB.reaperRunning);
+}
+
+function setSlim(on, persist){
+  on = !!on;
+  document.body.classList.toggle('is-slim', on);
+  if(on) renderSlim();
+  if(persist) setPref('slim', on);
+  try { native('slim', {on: on}); } catch(e){}
+}
+
+if($('#btnSlim')){
+  $('#btnSlim').innerHTML = SVG_SLIM;
+  $('#btnSlim').onclick = () => setSlim(true, true);
+}
+if($('#btnFull'))  $('#btnFull').onclick  = () => setSlim(false, true);
+if($('#btnFull2')) $('#btnFull2').onclick = () => setSlim(false, true);
+
+setTimeout(() => { if(getPref('slim', false)) setSlim(true, false); }, 60);
+
 </script>
 </body>
 </html>

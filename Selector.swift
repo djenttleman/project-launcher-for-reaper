@@ -432,6 +432,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
                 window.center()
             }
         }
+        // El modo slim no debe quedar como tamaño guardado: si el marco restaurado
+        // es menor que el mínimo del modo completo, se vuelve al tamaño por defecto.
+        if window.frame.width < window.minSize.width || window.frame.height < window.minSize.height {
+            var f = window.frame
+            f.size = NSSize(width: 1256, height: 783)
+            window.setFrame(f, display: false)
+            window.center()
+        }
         window.setFrameAutosaveName("ProjectLauncherWindow")
 
         let cfg = WKWebViewConfiguration()

@@ -45,7 +45,7 @@
         font-size="23" font-weight="500" fill="#9E9AA8" letter-spacing="0.2">A project launcher for REAPER that doesn't look like 2003.</text>
 
   <text x="90" y="344" font-family="Inter, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-        font-size="15" font-weight="600" fill="#6F6A7D" letter-spacing="2.6">HECHO POR HUMANOS E IA, PARA HUMANOS CON SENTIMIENTOS</text>
+        font-size="15" font-weight="600" fill="#6F6A7D" letter-spacing="2.6">MADE BY HUMANS AND AI, FOR HUMANS WITH FEELINGS</text>
 
   <g transform="translate(1004 78)" opacity="0.95">
     <rect x="0" y="0" width="188" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.14"/>

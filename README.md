@@ -14,8 +14,7 @@
 </p>
 
 <p align="center">
-  <i>Hecho por humanos e IA, para humanos con sentimientos.</i><br>
-  <sub>Made by humans and AI, for humans with feelings.</sub>
+  <i>Made by humans and AI, for humans with feelings.</i>
 </p>
 
 ---
@@ -104,7 +103,7 @@ Built by **[@djenttleman](https://github.com/djenttleman)** — live engineer, C
 
 If it saves you ten seconds every time you open a project, it did its job.
 
-<p align="center"><sub>Hecho por humanos e IA, para humanos con sentimientos.</sub></p>
+<p align="center"><sub>Made by humans and AI, for humans with feelings.</sub></p>
 
 ---
 

@@ -5,6 +5,7 @@
 import Cocoa
 import WebKit
 import UniformTypeIdentifiers
+import ApplicationServices
 
 // MARK: - Modelo
 
@@ -395,6 +396,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
     func applicationDidFinishLaunching(_ notification: Notification) {
         buildMenu()
 
+        // REAPER en evaluación abre su ventana de licencia ~1 s después de
+        // arrancar, encima de todo. Se aparta sola y sin verse.
+        startQuietWatcher()
+
         // Sin icono en el Dock: la app corre como agente (LSUIElement). Al no haber
         // barra de menú, los atajos se resuelven con un monitor local.
         NSApp.setActivationPolicy(.accessory)
@@ -503,6 +508,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         cover = nil
         window.makeKeyAndOrderFront(nil)
         window.orderFrontRegardless()     // también cuando lo lanza REAPER al arrancar
+        // REAPER sigue arrancando cuando aparecemos y recupera el foco un par de
+        // segundos después. Se reclama el teclado hasta quedar al frente.
+        claimAttempts = 0
+        claimFocus()
+        claimTimer?.invalidate()
+        claimTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            self?.claimFocus()
+        }
         NSApp.activate(ignoringOtherApps: true)
         // Como agente (sin Dock) macOS a veces no activa la app sola: se pide dos veces.
         NSRunningApplication.current.activate(options: [.activateAllWindows, .activateIgnoringOtherApps])
@@ -838,7 +851,66 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         if persist { store.prefs.slim = on; store.savePrefs() }
     }
 
+    /// Insiste con la activación: al arrancar, REAPER se pone al frente después
+    /// de nosotros y el buscador se queda sin teclado. Se rinde a los 4 s, y no
+    /// pelea mientras el vigilante del nag necesita a REAPER al frente.
+    func claimFocus() {
+        claimAttempts += 1
+        if quietPoll != nil || claimAttempts > 8 || NSApp.isActive {
+            claimTimer?.invalidate(); claimTimer = nil
+            return
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        window?.orderFrontRegardless()
+    }
+
+    /// REAPER en evaluación abre su ventana de licencia alrededor de un segundo
+    /// después de arrancar. Un vigilante (AppleScript) la manda fuera de pantalla
+    /// antes de que se vea, espera a que el botón se habilite y la descarta, y al
+    /// final devuelve el foco aquí. Con licencia instalada no se ejecuta nada.
+    func startQuietWatcher() {
+        let license = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/REAPER/reaper-license.txt")
+        if FileManager.default.fileExists(atPath: license.path) { return }
+        // Sin permiso de Accesibilidad no se puede tocar la ventana de licencia:
+        // no se intenta, para no disparar el aviso de Privacidad del sistema.
+        guard AXIsProcessTrusted() else {
+            NSLog("quiet-watcher: sin Accesibilidad, no se descarta el aviso de licencia")
+            return
+        }
+        guard let script = Bundle.main.url(forResource: "quiet-reaper", withExtension: "applescript") else {
+            NSLog("quiet-reaper.applescript no está en el bundle"); return
+        }
+        quietWatcher?.terminate()
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+        p.arguments = [script.path, "12"]
+        do { try p.run(); quietWatcher = p }
+        catch { NSLog("no pude lanzar el vigilante del nag: \(error)"); return }
+
+        // El vigilante deja una marca al terminar: en ese momento recuperamos
+        // el foco (una app de agente no se puede activar por AppleScript).
+        let flag = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/Project Launcher/quiet-done")
+        quietPoll?.invalidate()
+        quietPoll = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { [weak self] timer in
+            guard let self = self else { timer.invalidate(); return }
+            if FileManager.default.fileExists(atPath: flag.path) {
+                try? FileManager.default.removeItem(at: flag)
+                timer.invalidate()
+                self.quietPoll = nil
+                NSApp.activate(ignoringOtherApps: true)
+                self.window?.orderFrontRegardless()
+            }
+        }
+    }
+
     /// REAPER está abierto en esta máquina.
+    private var quietWatcher: Process?
+    private var quietPoll: Timer?
+    private var claimTimer: Timer?
+    private var claimAttempts = 0
+
     var reaperIsRunning: Bool {
         !NSRunningApplication.runningApplications(withBundleIdentifier: "com.cockos.reaper").isEmpty
     }
@@ -862,6 +934,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             NSApp.terminate(nil)
             return
         }
+        startQuietWatcher()                 // REAPER arranca en frío: habrá nag
         let cfg = NSWorkspace.OpenConfiguration()
         cfg.activates = true
         let url = URL(fileURLWithPath: path)

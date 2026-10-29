@@ -61,7 +61,7 @@
       <div class="topbar-tools">
         <div class="rk-search">
           <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="m229.7 218.3-42.4-42.4a84 84 0 1 0-11.3 11.3l42.4 42.4a8 8 0 0 0 11.3-11.3ZM44 116a72 72 0 1 1 72 72 72.1 72.1 0 0 1-72-72Z"/></svg>
-          <input class="rk-input" id="search" placeholder="Buscar proyecto, etiqueta o ruta" data-en-ph="Search project, tag or path">
+          <input class="rk-input" id="search" placeholder="Buscar proyecto o etiqueta" data-en-ph="Search projects or tags">
           <span class="rk-kbd">⌘K</span>
         </div>
         <button class="rk-btn rk-btn--icon rail-toggle" id="railToggle" aria-label="Mostrar inspector" data-en-aria="Show inspector" style="display:none">
@@ -199,7 +199,7 @@ const EN = {
   'Tipo':'Type','Última vez':'Last opened','Sin etiquetas todavía':'No tags yet',
   'Nuevo proyecto':'New project','Nuevo proyecto…':'New project…','Abrir archivo…':'Open file…',
   'Nueva carpeta':'New folder','Nueva etiqueta':'New tag','Nueva carpeta…':'New folder…',
-  'Mostrar inspector':'Show inspector','Buscar proyecto, etiqueta o ruta':'Search project, tag or path',
+  'Mostrar inspector':'Show inspector','Buscar proyecto o etiqueta':'Search projects or tags',
   'abierto':'open','grabando':'recording',
   'abiertos hace poco':'recently opened','biblioteca completa':'whole library','proyectos base':'base projects',
   'fuera de la lista diaria':'out of the daily list','agrupación del launcher':'launcher grouping',
@@ -250,8 +250,36 @@ const EN = {
   'Horas acumuladas con REAPER abierto':'Hours with REAPER open','Horas acumuladas en modo grabación':'Hours recording',
   'REAPER está abierto en esta máquina':'REAPER is open on this machine',
   'Modo claro / oscuro':'Light / dark mode','Modo claro u oscuro':'Light or dark mode',
-  'Idioma / Language':'Language','Deshacer':'Undo'
+  'Idioma / Language':'Language','Deshacer':'Undo',
+  'Laboratorio':'Lab','mezcla':'mixing','master':'mastering','grabación':'recording',
+  'edición':'editing','en vivo':'live','plantilla':'template','show':'show'
 };
+
+/* Carpetas y etiquetas por defecto: se guardan como texto plano, pero se
+   muestran en el idioma activo. Las que crea el usuario se dejan intactas. */
+const FOLDER_ALIASES = {
+  'estudio':'Estudio','studio':'Estudio','shows':'Shows','show':'Shows',
+  'plantillas':'Plantillas','templates':'Plantillas','laboratorio':'Laboratorio','lab':'Laboratorio'
+};
+function folderLabel(name){
+  if(!name) return name;
+  const key = FOLDER_ALIASES[String(name).trim().toLowerCase()];
+  return key ? T(key) : name;
+}
+const TAG_ALIASES = {
+  'mezcla':'mezcla','mixing':'mezcla','mix':'mezcla',
+  'master':'master','mastering':'master',
+  'grabacion':'grabación','recording':'grabación',
+  'edicion':'edición','editing':'edición',
+  'en-vivo':'en vivo','live':'en vivo','en vivo':'en vivo',
+  'plantilla':'plantilla','template':'plantilla'
+};
+function tagLabel(tag){
+  if(!tag) return tag;
+  const key = TAG_ALIASES[String(tag).trim().toLowerCase()];
+  return key ? T(key) : tag;
+}
+
 function T(s, vars){
   let out = (LANG === 'es') ? s : (EN[s] !== undefined ? EN[s] : s);
   if (vars) for (const k in vars) out = out.split('{'+k+'}').join(vars[k]);
@@ -333,7 +361,7 @@ function visible(p){
 function qmatch(p){
   if(!state.query) return true;
   const q=state.query.toLowerCase();
-  return (p.name+' '+p.path+' '+(p.tags||[]).join(' ')+' '+p.folder).toLowerCase().includes(q);
+  return (p.name+' '+p.path+' '+(p.tags||[]).map(tagLabel).join(' ')+' '+p.folder+' '+folderLabel(p.folder)).toLowerCase().includes(q);
 }
 function baseList(){
   let arr=DB.projects.filter(visible).filter(qmatch);
@@ -356,8 +384,8 @@ function viewLabel(){
   if(v.kind==='all') return [T('Todos los proyectos'),T('biblioteca completa')];
   if(v.kind==='templates') return [T('Plantillas'),T('proyectos base')];
   if(v.kind==='archived') return [T('Archivados'),T('fuera de la lista diaria')];
-  if(v.kind==='folder') return [T('Carpeta · {v}',{v:v.value}),T('agrupación del launcher')];
-  return [T('Etiqueta · {v}',{v:v.value}),T('agrupación del launcher')];
+  if(v.kind==='folder') return [T('Carpeta · {v}',{v:folderLabel(v.value)}),T('agrupación del launcher')];
+  return [T('Etiqueta · {v}',{v:tagLabel(v.value)}),T('agrupación del launcher')];
 }
 
 /* =========================================================
@@ -387,7 +415,7 @@ function renderNav(){
     const ic=icon(FOLDER_ICONS[meta.icon]||FOLDER_ICONS.folder);
     if(meta.color) ic.style.color=meta.color;
     b.appendChild(ic);
-    b.appendChild(el('span','item-label',f));
+    b.appendChild(el('span','item-label',folderLabel(f)));
     b.appendChild(el('span','nav-item-count',String(DB.projects.filter(p=>p.folder===f&&!p.archived).length)));
     b.onclick=()=>{state.view={kind:'folder',value:f}; renderAll();};
     cf.appendChild(b);
@@ -399,7 +427,7 @@ function renderNav(){
     const b=el('button','rk-nav-item'+(state.view.kind==='tag'&&state.view.value===t?' is-on':''));
     const d=el('span','nav-dot'); d.style.background=PAL[i%PAL.length];
     b.appendChild(d);
-    b.appendChild(el('span','item-label','#'+t));
+    b.appendChild(el('span','item-label','#'+tagLabel(t)));
     b.appendChild(el('span','nav-item-count',String(DB.projects.filter(p=>(p.tags||[]).includes(t)&&!p.archived).length)));
     b.onclick=()=>{state.view={kind:'tag',value:t}; renderAll();};
     ct.appendChild(b);
@@ -585,7 +613,7 @@ function renderRail(){
   const dl=el('dl','rk-dl');
   const add=(k,v,mono)=>{dl.appendChild(el('dt',null,k)); const dd=el('dd',mono?'data':null,String(v)); dd.title=String(v); dl.appendChild(dd);};
   add(T('Tipo'),typeLabel(p.type));
-  add(T('Carpeta'),p.folder);
+  add(T('Carpeta'),folderLabel(p.folder));
   if(p.regions) add(T('Regiones'),T('{n} canciones',{n:p.regions}));
   add(T('Pistas'),p.tracks||0);
   if(p.tempo) add('Tempo',p.tempo+' BPM');
@@ -598,8 +626,8 @@ function renderRail(){
   const wrap=el('div','chips-wrap');
   (p.tags||[]).forEach(tag=>{
     const chip=el('span','rk-chip');
-    chip.appendChild(document.createTextNode('#'+tag));
-    const x=el('button'); x.innerHTML='&times;'; x.setAttribute('aria-label',T('Quitar {t}',{t:tag}));
+    chip.appendChild(document.createTextNode('#'+tagLabel(tag)));
+    const x=el('button'); x.innerHTML='&times;'; x.setAttribute('aria-label',T('Quitar {t}',{t:tagLabel(tag)}));
     x.onclick=async()=>{p.tags=p.tags.filter(z=>z!==tag); await native('update',{id:p.id,tags:p.tags}); renderAll(); toast(T('Etiqueta quitada'));};
     chip.appendChild(x); wrap.appendChild(chip);
   });
@@ -714,8 +742,8 @@ function updateSummary(){
   const file=(name||T('Sin_nombre')).replace(/\s+/g,'_')+'.rpp';
   const tags=t.tags.length?t.tags.map(x=>'#'+x).join(' '):'—';
   $('#pSummary').innerHTML = LANG==='es'
-    ? 'creará <b>'+loc+'/'+file+'</b> desde <b>'+(t.file||T('proyecto vacío'))+'</b><br>etiquetas: <b>'+tags+'</b> · carpeta: <b>'+T(t.folder)+'</b>'
-    : 'will create <b>'+loc+'/'+file+'</b> from <b>'+(t.file||T('proyecto vacío'))+'</b><br>tags: <b>'+tags+'</b> · folder: <b>'+T(t.folder)+'</b>';
+    ? 'creará <b>'+loc+'/'+file+'</b> desde <b>'+(t.file||T('proyecto vacío'))+'</b><br>etiquetas: <b>'+tags+'</b> · carpeta: <b>'+folderLabel(t.folder)+'</b>'
+    : 'will create <b>'+loc+'/'+file+'</b> from <b>'+(t.file||T('proyecto vacío'))+'</b><br>tags: <b>'+tags+'</b> · folder: <b>'+folderLabel(t.folder)+'</b>';
 }
 function openModal(){
   $('#scrim').classList.add('is-on'); $('#modalWrap').classList.add('is-on');
@@ -866,7 +894,7 @@ function projectMenu(p){
 
 function folderMenu(name){
   return [
-    {header:name},
+    {header:folderLabel(name)},
     {label:T('Abrir carpeta'), run:()=>{state.view={kind:'folder',value:name}; renderAll();}},
     {sep:true},
     {label:T('Renombrar…'), run:()=>openFolderSheet(name,'rename')},
@@ -896,8 +924,8 @@ function createFolder(){
 
 async function deleteFolder(name){
   const msg = LANG==='es'
-    ? '¿Eliminar la carpeta «'+name+'»?\n\nLos proyectos no se borran: pasan a «Sin carpeta».'
-    : 'Delete the folder "'+name+'"?\n\nProjects are not deleted: they move to "No folder".';
+    ? '¿Eliminar la carpeta «'+folderLabel(name)+'»?\n\nLos proyectos no se borran: pasan a «Sin carpeta».'
+    : 'Delete the folder "'+folderLabel(name)+'"?\n\nProjects are not deleted: they move to "No folder".';
   if(!confirm(msg)){
     return;
   }
@@ -926,7 +954,7 @@ async function openFolderSheet(name, focus){
   box.style.width='420px';
   const head=el('div','rk-modal-head');
   head.appendChild(el('span','rk-section', T(focus==='rename'?'Renombrar carpeta':'Carpeta')));
-  head.appendChild(el('span','rk-meta', name));
+  head.appendChild(el('span','rk-meta', folderLabel(name)));
   box.appendChild(head);
 
   const body=el('div','rk-modal-body');
@@ -1073,7 +1101,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Enter' && document.activeElement===$('#pName')) $('#mCreate').click();
 });
 function syncSearchPh(){
-  const full = LANG==='es' ? 'Buscar proyecto, etiqueta o ruta' : 'Search project, tag or path';
+  const full = LANG==='es' ? 'Buscar proyecto o etiqueta' : 'Search projects or tags';
   const short = LANG==='es' ? 'Buscar…' : 'Search…';
   $('#search').placeholder = innerWidth<1180 ? short : full;
 }

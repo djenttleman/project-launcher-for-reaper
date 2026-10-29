@@ -19,8 +19,7 @@ echo "== armando bundle =="
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/ProjectLauncher"
-cp "$HERE/Resources/selector.html" "$HERE/Resources/selector.css" "$HERE/Resources/reaset-kit.css" \
-   "$HERE/Resources/quiet-reaper.applescript" "$APP/Contents/Resources/"
+cp "$HERE/Resources/selector.html" "$HERE/Resources/selector.css" "$HERE/Resources/reaset-kit.css" "$APP/Contents/Resources/"
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -49,7 +48,15 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 PLIST
 
 echo "== firmando ad-hoc =="
-codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
+# Firma: si hay una identidad local "Auri Local Signing" se usa esa (el permiso
+# de Accesibilidad sobrevive a las recompilaciones, porque la huella es del
+# certificado y no del binario). Si no existe, ad-hoc como siempre.
+if codesign --force --deep --sign "Auri Local Signing" "$APP" >/dev/null 2>&1; then
+  echo "  firma: Auri Local Signing (local, permisos estables)"
+else
+  codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
+  echo "  firma: ad-hoc"
+fi
 
 echo "== listo =="
 ls -la "$APP/Contents/MacOS" "$APP/Contents/Resources"

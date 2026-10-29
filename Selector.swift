@@ -872,14 +872,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         let license = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/Application Support/REAPER/reaper-license.txt")
         if FileManager.default.fileExists(atPath: license.path) { return }
-        // Sin permiso de Accesibilidad no se puede tocar la ventana de licencia:
-        // no se intenta, para no disparar el aviso de Privacidad del sistema.
+
+        // El vigilante es LOCAL, no se distribuye: si el script no está (una
+        // instalación de terceros) no se hace nada y nunca se pide permiso.
+        let script = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/Project Launcher/quiet-reaper.applescript")
+        guard FileManager.default.fileExists(atPath: script.path) else { return }
+
         guard AXIsProcessTrusted() else {
-            NSLog("quiet-watcher: sin Accesibilidad, no se descarta el aviso de licencia")
+            NSLog("quiet-watcher: falta Accesibilidad, se pide el permiso")
+            requestAccessibility()
             return
-        }
-        guard let script = Bundle.main.url(forResource: "quiet-reaper", withExtension: "applescript") else {
-            NSLog("quiet-reaper.applescript no está en el bundle"); return
         }
         quietWatcher?.terminate()
         let p = Process()
@@ -903,6 +906,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
                 self.window?.orderFrontRegardless()
             }
         }
+    }
+
+    /// Abre la petición de Accesibilidad del sistema para esta app.
+    /// macOS muestra su propio aviso y lleva a Privacidad → Accesibilidad.
+    func requestAccessibility() {
+        let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+        let trusted = AXIsProcessTrustedWithOptions(opts)
+        NSLog("accesibilidad: %@", trusted ? "concedida" : "pendiente")
     }
 
     /// REAPER está abierto en esta máquina.

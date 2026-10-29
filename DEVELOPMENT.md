@@ -148,6 +148,26 @@ Las variables locales usadas dentro de un `defer` tienen que declararse **antes*
 de la función que las usa: si no, Lua las resuelve como globales (`nil`) y el
 script muere con "attempt to perform arithmetic on a nil value".
 
+## Vigilante del aviso de licencia (sólo local, no se distribuye)
+
+REAPER sin licencia abre la ventana `About REAPER…` ~1 s después de arrancar y no se puede
+cerrar por configuración: ni un flag ni una preferencia la suprimen. En esta máquina hay un
+vigilante que la manda fuera de pantalla antes de que se vea, espera a que el botón se
+habilite y le hace clic.
+
+- Vive en `~/Library/Application Support/Project Launcher/quiet-reaper.applescript`, **fuera
+  del repo**. Si el archivo no existe, la app no hace nada: una instalación de terceros nunca
+  ve este comportamiento ni pide permisos por él.
+- Necesita permiso de **Accesibilidad** para `Project Launcher`. El build firma con la
+  identidad local `Auri Local Signing` cuando existe (`certificate leaf`, no `cdhash`), así el
+  permiso sobrevive a las recompilaciones; sin esa identidad cae a firma ad-hoc y macOS vuelve
+  a pedir el permiso en cada build.
+- El contador del diálogo **sólo avanza con REAPER al frente** (~7,4 s, ~1,6 s por unidad).
+  Por eso durante ese rato el launcher no reclama el foco: `claimFocus()` se rinde si el
+  vigilante está activo.
+- Al terminar el vigilante deja la marca `quiet-done`; la app la consume y recupera el foco
+  (cuando macOS lo permite: una app de agente lanzada en segundo plano no puede activarse sola).
+
 ## Toast con deshacer
 
 `toast(msg, undoFn)` acepta una acción opcional. Con acción vive **5 s**, muestra el botón

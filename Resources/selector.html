@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="es" data-rk-density="prepare">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REAPER · Proyectos</title>
+<link rel="stylesheet" href="reaset-kit.css">
+<link rel="stylesheet" href="selector.css">
+<style>
+  /* Ajustes propios de la app (la ventana trae barra de título nativa) */
+  html,body{background:var(--rk-bg-0)}
+  .window{height:100vh;width:100vw}
+  .empty-bk{padding:10px 12px;font:var(--rk-meta);color:var(--rk-text-3)}
+</style>
+</head>
+<body>
+
+<div class="window" id="win">
+  <aside class="rk-nav" id="nav">
+    <div class="nav-fixed">
+      <div class="nav-brand">
+        <svg class="mark" viewBox="0 0 256 256" aria-hidden="true">
+          <path d="M128 24C68 24 24 65 24 111c0 48 49 106 89 126a33 33 0 0 0 30 0c40-20 89-78 89-126 0-46-44-87-104-87Z" fill="none" stroke="currentColor" stroke-width="24" stroke-linejoin="round"/>
+          <path d="M59 74c44-24 103-24 146 17-36-22-77-28-111-10 9 19 25 34 36 59 15 35 11 68-4 95 10-37 5-68-16-96-23-27-40-39-51-65Z" fill="currentColor"/>
+        </svg>
+        REAPER
+      </div>
+      <div class="nav-actions">
+        <button class="rk-btn rk-btn--primary" id="btnNew">
+          <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="M128 24a104 104 0 1 0 104 104A104.1 104.1 0 0 0 128 24Zm0 192a88 88 0 1 1 88-88 88.1 88.1 0 0 1-88 88Zm40-88a8 8 0 0 1-8 8h-24v24a8 8 0 0 1-16 0v-24h-24a8 8 0 0 1 0-16h24V96a8 8 0 0 1 16 0v24h24a8 8 0 0 1 8 8Z"/></svg>
+          <span class="btn-label">Nuevo proyecto</span>
+        </button>
+        <button class="rk-btn" id="btnOpenFile">
+          <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="M216 72h-84.7l-20.7-20.7A16 16 0 0 0 99.3 48H40a16 16 0 0 0-16 16v128a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V88a16 16 0 0 0-16-16Zm0 120H40V64h59.3l24 24H216Z"/></svg>
+          <span class="btn-label">Abrir archivo…</span>
+        </button>
+      </div>
+      <div class="nav-sep"></div>
+    </div>
+
+    <div class="nav-scroll" id="navScroll">
+      <div class="rk-nav-label">Biblioteca</div>
+      <div id="navMain"></div>
+      <div class="rk-nav-label nav-label-row">Carpetas
+        <button class="nav-add" id="addFolder" aria-label="Nueva carpeta">＋</button>
+      </div>
+      <div id="navFolders"></div>
+      <div class="rk-nav-label nav-label-row">Etiquetas
+        <button class="nav-add" id="addTag" aria-label="Nueva etiqueta">＋</button>
+      </div>
+      <div id="navTags"></div>
+    </div>
+
+  </aside>
+
+  <main class="rk-main">
+    <header class="topbar">
+      <div class="topbar-titles">
+        <h1 id="viewTitle">Biblioteca <small id="viewSub"></small></h1>
+      </div>
+      <div class="topbar-tools">
+        <div class="rk-search">
+          <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="m229.7 218.3-42.4-42.4a84 84 0 1 0-11.3 11.3l42.4 42.4a8 8 0 0 0 11.3-11.3ZM44 116a72 72 0 1 1 72 72 72.1 72.1 0 0 1-72-72Z"/></svg>
+          <input class="rk-input" id="search" placeholder="Buscar proyecto, etiqueta o ruta">
+          <span class="rk-kbd">⌘K</span>
+        </div>
+        <button class="rk-btn rk-btn--icon rail-toggle" id="railToggle" aria-label="Mostrar inspector" style="display:none">
+          <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="M216 40H40a16 16 0 0 0-16 16v144a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V56a16 16 0 0 0-16-16Zm-96 160H40V56h80Zm96 0h-80V56h80Z"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="filters" id="filters"></div>
+    <div class="content" id="content"></div>
+  </main>
+
+  <aside class="rail is-open" id="rail"></aside>
+
+  <footer class="rk-statusbar">
+    <span id="stCount">—</span>
+    <span class="stsep"></span>
+    <span class="stat reaper" title="REAPER está abierto en esta máquina"><span class="led" id="ledReaper"></span><span class="l">REAPER</span></span>
+    <span class="stsep"></span>
+    <span class="stat hours" title="Horas acumuladas con REAPER abierto"><span class="l">abierto</span><span class="v" id="stHours">—</span></span>
+    <span class="stat rec" title="Horas acumuladas en modo grabación"><span class="l">grabando</span><span class="v" id="stRec">—</span></span>
+    <span class="sp"></span>
+    <button class="stbtn" id="btnTheme" title="Modo claro / oscuro" aria-label="Modo claro u oscuro"></button>
+    <button class="stbtn" id="btnAccent" title="Esquema de color" aria-label="Esquema de color"></button>
+  </footer>
+</div>
+
+<div class="menu" id="menu"></div>
+
+<div class="scrim" id="scrim"></div>
+<div class="modal-wrap" id="modalWrap">
+  <div class="rk-modal rk-modal--wide">
+    <div class="rk-modal-head">
+      <span class="rk-section">Nuevo proyecto</span>
+      <span class="rk-meta">Elige el tipo: define la plantilla base y las etiquetas que guardará el launcher.</span>
+    </div>
+    <div class="rk-modal-body">
+      <div class="type-list" id="typeList"></div>
+      <div class="fields">
+        <label class="rk-field full">
+          <span class="rk-field-label">Nombre del proyecto</span>
+          <input class="rk-input" id="pName" placeholder="RDV · Anime Setlist">
+        </label>
+        <label class="rk-field">
+          <span class="rk-field-label">Ubicación</span>
+          <input class="rk-input rk-input--data" id="pLoc" value="">
+        </label>
+        <div class="rk-field">
+          <span class="rk-field-label">Elegir otra carpeta</span>
+          <button class="rk-btn" id="pPick" style="justify-content:flex-start">Elegir carpeta…</button>
+        </div>
+      </div>
+      <div class="summary" id="pSummary"></div>
+    </div>
+    <div class="rk-modal-foot">
+      <span class="rk-meta" style="margin-right:auto">El launcher guarda etiquetas y orden; no mueve archivos .rpp</span>
+      <button class="rk-btn rk-btn--quiet" id="mCancel">Cancelar</button>
+      <button class="rk-btn rk-btn--primary" id="mCreate">Crear proyecto</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap">
+  <div class="rk-toast" id="toast" hidden>
+    <svg class="rk-ico" viewBox="0 0 256 256" fill="currentColor"><path d="M232.5 73.5 96 202.5 23.5 130.5a12 12 0 0 1 17-17L96 168.5l128.5-121a12 12 0 0 1 17 17Z"/></svg>
+    <span id="toastMsg"></span>
+    <button class="act" id="toastAct" hidden>Deshacer</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   Puente nativo
+   ========================================================= */
+let seq = 0;
+const pendingMap = new Map();
+function native(cmd, extra) {
+  return new Promise(resolve => {
+    const id = ++seq;
+    pendingMap.set(id, resolve);
+    try {
+      window.webkit.messageHandlers.sel.postMessage(Object.assign({cmd, id}, extra || {}));
+    } catch (e) {
+      pendingMap.delete(id); resolve({error: String(e)});
+    }
+  });
+}
+window.__native = payload => {
+  if (payload && payload._update) {          // refresco silencioso (escaneo en 2º plano)
+    DB = payload; renderRail(); return;
+  }
+  const key = payload && payload._id;
+  if (key != null && pendingMap.has(key)) {
+    const r = pendingMap.get(key); pendingMap.delete(key); r(payload); return;
+  }
+  if (payload && payload.projects) { DB = payload; renderAll(); }
+};
+
+/* =========================================================
+   Estado
+   ========================================================= */
+const TYPES = {
+  show:     {label:'Show',      color:'#8660E8'},
+  studio:   {label:'Estudio',   color:'#019ACB'},
+  template: {label:'Plantilla', color:'#8A8A8A'},
+  lab:      {label:'Lab',       color:'#C2527A'},
+  archive:  {label:'Archivo',   color:'#5E6472'}
+};
+const TEMPLATES = [
+  {id:'empty',  name:'Proyecto vacío', file:'',            desc:'Sin pistas ni FX',               type:'studio', tags:[],   folder:'Estudio'},
+  {id:'record', name:'Grabación',      file:'Record.rpp',  desc:'Pistas de entrada y monitor',    type:'studio', tags:['grabacion'], folder:'Estudio'},
+  {id:'edit',   name:'Edición',        file:'Edit.rpp',    desc:'Comping, crossfades, marcadores',type:'studio', tags:['edicion'],   folder:'Estudio'},
+  {id:'mix',    name:'Mezcla',         file:'Mix.rpp',     desc:'Buses, grupos, referencia',      type:'studio', tags:['mezcla'],    folder:'Estudio'},
+  {id:'master', name:'Master',         file:'Master.rpp',  desc:'Cadena de master y LUFS',        type:'studio', tags:['master'],    folder:'Estudio'},
+  {id:'showT',  name:'Show en vivo',   file:'LiveShow.rpp',desc:'Plantilla tipo ReaLiveMixer',    type:'show',   tags:['show','en-vivo'], folder:'Shows'}
+];
+
+let DB = {projects:[], folders:[], tags:[], usage:{hoursOpen:0, hoursRec:0}, reaperRunning:false};
+const state = {view:{kind:'recent'}, filter:'all', selected:null, query:'', expanded:new Set()};
+const PAL = ['#8660E8','#019ACB','#C2527A','#5B7CD8','#AD63E7','#0C89B4'];
+
+const $ = s => document.querySelector(s);
+const el = (t,c,x)=>{const n=document.createElement(t); if(c)n.className=c; if(x!=null)n.textContent=x; return n;};
+const byId = id => DB.projects.find(p=>p.id===id);
+
+function ago(ts){
+  if(!ts) return '—';
+  const s = Math.floor((Date.now()/1000)-ts);
+  if(s<3600) return 'hace '+Math.max(1,Math.floor(s/60))+' min';
+  if(s<86400) return 'hace '+Math.floor(s/3600)+' h';
+  if(s<86400*30) return 'hace '+Math.floor(s/86400)+' d';
+  return 'hace '+Math.floor(s/86400/30)+' meses';
+}
+function fmtDate(ts){
+  if(!ts) return '—';
+  const d=new Date(ts*1000), p=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+function mb(bytes){ return bytes>0 ? (bytes/1048576).toFixed(1).replace('.',',')+' MB' : '—'; }
+function hrs(n){ return (n||0).toLocaleString('es-CL',{minimumFractionDigits:1,maximumFractionDigits:1})+' h'; }
+function icon(path){
+  const ns='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox','0 0 256 256'); svg.setAttribute('fill','currentColor'); svg.setAttribute('class','rk-ico');
+  const p=document.createElementNS(ns,'path'); p.setAttribute('d',path); svg.appendChild(p);
+  return svg;
+}
+const ICONS = {
+  clock:'M128 24a104 104 0 1 0 104 104A104.1 104.1 0 0 0 128 24Zm0 192a88 88 0 1 1 88-88 88.1 88.1 0 0 1-88 88Zm64-88a8 8 0 0 1-8 8h-56a8 8 0 0 1-8-8V72a8 8 0 0 1 16 0v64h48a8 8 0 0 1 8 8Z',
+  folder:'M216 72h-84.7l-20.7-20.7A16 16 0 0 0 99.3 48H40a16 16 0 0 0-16 16v128a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V88a16 16 0 0 0-16-16Zm0 120H40V64h59.3l24 24H216Z',
+  layers:'M12.8 108.4 128 176l115.2-67.6a8 8 0 0 0 0-13.8L128 27.4 12.8 94.6a8 8 0 0 0 0 13.8Zm230.4 36.4L128 209.8 12.8 144.8a8 8 0 0 0-8.6 13.5l120 67.6a8 8 0 0 0 7.6 0l120-67.6a8 8 0 0 0-8.6-13.5Z',
+  archive:'M208 32H48a16 16 0 0 0-16 16v168a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16Zm0 184H48V48h160Zm-40-152H88a8 8 0 0 0-8 8v32a8 8 0 0 0 16 0v-8h64v8a8 8 0 0 0 16 0V72a8 8 0 0 0-8-8Z',
+  dots:'M140 128a12 12 0 1 1-12-12 12 12 0 0 1 12 12Zm48-12a12 12 0 1 0 12 12 12 12 0 0 0-12-12Zm-96 0a12 12 0 1 0 12 12 12 12 0 0 0-12-12Z',
+  chevron:'M184 128a8 8 0 0 1-2.3 5.7l-80 80a8 8 0 0 1-11.4-11.4L164.7 128 90.3 53.7a8 8 0 0 1 11.4-11.4l80 80A8 8 0 0 1 184 128Z'
+};
+
+/* =========================================================
+   Vistas
+   ========================================================= */
+function visible(p){
+  if(state.filter==='archived') return p.archived;
+  if(p.archived) return false;
+  if(state.filter!=='all' && p.type!==state.filter) return false;
+  return true;
+}
+function qmatch(p){
+  if(!state.query) return true;
+  const q=state.query.toLowerCase();
+  return (p.name+' '+p.path+' '+(p.tags||[]).join(' ')+' '+p.folder).toLowerCase().includes(q);
+}
+function baseList(){
+  let arr=DB.projects.filter(visible).filter(qmatch);
+  const v=state.view;
+  if(v.kind==='recent') arr=arr.filter(p=>!p.hidden).sort((a,b)=>b.lastOpened-a.lastOpened);
+  else if(v.kind==='all') arr=arr.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  else if(v.kind==='templates') arr=arr.filter(p=>p.type==='template');
+  else if(v.kind==='archived') arr=arr.filter(p=>p.archived);
+  else if(v.kind==='folder') arr=arr.filter(p=>p.folder===v.value).sort((a,b)=>b.lastOpened-a.lastOpened);
+  else if(v.kind==='tag') arr=arr.filter(p=>(p.tags||[]).includes(v.value)).sort((a,b)=>b.lastOpened-a.lastOpened);
+  return arr;
+}
+function orderedList(){
+  const arr=baseList();
+  return [...arr.filter(p=>p.pinned), ...arr.filter(p=>!p.pinned)];
+}
+function viewLabel(){
+  const v=state.view;
+  if(v.kind==='recent') return ['Recientes','abiertos hace poco'];
+  if(v.kind==='all') return ['Todos los proyectos','biblioteca completa'];
+  if(v.kind==='templates') return ['Plantillas','proyectos base'];
+  if(v.kind==='archived') return ['Archivados','fuera de la lista diaria'];
+  if(v.kind==='folder') return ['Carpeta · '+v.value,'agrupación del launcher'];
+  return ['Etiqueta · '+v.value,'agrupación del launcher'];
+}
+
+/* =========================================================
+   Sidebar
+   ========================================================= */
+const NAV=[{id:'recent',label:'Recientes',icon:'clock'},{id:'all',label:'Todos los proyectos',icon:'layers'},{id:'templates',label:'Plantillas',icon:'folder'},{id:'archived',label:'Archivados',icon:'archive'}];
+function renderNav(){
+  const c=$('#navMain'); c.innerHTML='';
+  NAV.forEach(n=>{
+    const b=el('button','rk-nav-item'+(state.view.kind===n.id?' is-on':''));
+    b.appendChild(icon(ICONS[n.icon]));
+    b.appendChild(el('span','item-label',n.label));
+    const cnt=n.id==='recent'?DB.projects.filter(p=>!p.hidden&&!p.archived).length
+      :n.id==='all'?DB.projects.filter(p=>!p.archived).length
+      :n.id==='templates'?DB.projects.filter(p=>p.type==='template'&&!p.archived).length
+      :DB.projects.filter(p=>p.archived).length;
+    b.appendChild(el('span','nav-item-count',String(cnt)));
+    b.onclick=()=>{state.view={kind:n.id}; renderAll();};
+    c.appendChild(b);
+  });
+
+  const cf=$('#navFolders'); cf.innerHTML='';
+  (DB.folders||[]).forEach(f=>{
+    const b=el('button','rk-nav-item'+(state.view.kind==='folder'&&state.view.value===f?' is-on':''));
+    b.dataset.folder=f;
+    const meta=(DB.folderMeta||{})[f]||{};
+    const ic=icon(FOLDER_ICONS[meta.icon]||FOLDER_ICONS.folder);
+    if(meta.color) ic.style.color=meta.color;
+    b.appendChild(ic);
+    b.appendChild(el('span','item-label',f));
+    b.appendChild(el('span','nav-item-count',String(DB.projects.filter(p=>p.folder===f&&!p.archived).length)));
+    b.onclick=()=>{state.view={kind:'folder',value:f}; renderAll();};
+    cf.appendChild(b);
+  });
+
+  const ct=$('#navTags'); ct.innerHTML='';
+  const tags=(DB.tags||[]).slice(0,8);
+  tags.forEach((t,i)=>{
+    const b=el('button','rk-nav-item'+(state.view.kind==='tag'&&state.view.value===t?' is-on':''));
+    const d=el('span','nav-dot'); d.style.background=PAL[i%PAL.length];
+    b.appendChild(d);
+    b.appendChild(el('span','item-label','#'+t));
+    b.appendChild(el('span','nav-item-count',String(DB.projects.filter(p=>(p.tags||[]).includes(t)&&!p.archived).length)));
+    b.onclick=()=>{state.view={kind:'tag',value:t}; renderAll();};
+    ct.appendChild(b);
+  });
+  if((DB.tags||[]).length===0){
+    ct.appendChild(el('div','nav-empty','Sin etiquetas todavía'));
+  }
+}
+
+function renderInstances(){
+  const led=$('#ledReaper');
+  if(led){
+    led.classList.toggle('is-on', !!DB.reaperRunning);
+    led.classList.toggle('is-off', !DB.reaperRunning);
+    led.parentElement.title = DB.reaperRunning ? 'REAPER está abierto' : 'REAPER está cerrado';
+  }
+}
+
+/* =========================================================
+   Filtros
+   ========================================================= */
+const CHIPS=[['all','Todos'],['show','Shows'],['studio','Estudio'],['template','Plantillas'],['lab','Lab'],['archived','Archivados']];
+function renderFilters(){
+  const c=$('#filters'); c.innerHTML='';
+  CHIPS.forEach(([id,label])=>{
+    const b=el('button','rk-chip rk-chip--filter',label);
+    b.setAttribute('aria-pressed', state.filter===id?'true':'false');
+    b.onclick=()=>{state.filter=id; renderAll();};
+    c.appendChild(b);
+  });
+  c.appendChild(el('div','spacer'));
+  c.appendChild(el('span','rk-meta', orderedList().length+' proyectos'));
+}
+
+/* =========================================================
+   Tabla
+   ========================================================= */
+function renderTable(){
+  const c=$('#content'); c.innerHTML='';
+  const arr=orderedList();
+  if(!arr.length){
+    const e=el('div','rk-empty');
+    e.appendChild(el('div','rk-title','Sin proyectos en esta vista'));
+    e.appendChild(el('div','rk-body','Crea un proyecto nuevo o abre un archivo .rpp.'));
+    c.appendChild(e); return;
+  }
+  const wrap=el('div','rk-table-wrap');
+  const table=el('table','rk-table');
+  const thead=el('thead'); const htr=el('tr');
+  [['c-num',''],['','Proyecto'],['c-type','Tipo'],['c-when','Última vez'],['c-act','']].forEach(([cls,label])=>htr.appendChild(el('th',cls,label)));
+  thead.appendChild(htr); table.appendChild(thead);
+
+  const tbody=el('tbody');
+  const pinnedCount=arr.filter(p=>p.pinned).length;
+  if(pinnedCount){
+    const g=el('tr','rk-tr-group'); const td=el('td',null,'Fijados'); td.colSpan=5; g.appendChild(td); tbody.appendChild(g);
+  }
+  arr.forEach((p,idx)=>{
+    if(pinnedCount && idx===pinnedCount){
+      const g=el('tr','rk-tr-group'); const td=el('td',null,'Proyectos'); td.colSpan=5; g.appendChild(td); tbody.appendChild(g);
+    }
+    tbody.appendChild(rowFor(p,idx));
+    if(state.expanded.has(p.id) && (p.backups||[]).length) tbody.appendChild(backupsRow(p));
+  });
+  table.appendChild(tbody); wrap.appendChild(table); c.appendChild(wrap);
+}
+
+function rowFor(p,idx){
+  const tr=el('tr','project'+(p.id===state.selected?' is-on':''));
+  tr.dataset.id=p.id;
+  tr.onclick=()=>{state.selected=p.id; renderTable(); renderRail();};
+
+  const tdNum=el('td','c-num');
+  const pin=el('button','pin-btn'+(p.pinned?' is-pinned':''));
+  pin.setAttribute('aria-label',p.pinned?'Quitar de fijados':'Fijar proyecto');
+  pin.title=p.pinned?'Quitar de fijados':'Fijar proyecto';
+  pin.appendChild(el('span','num',String(idx+1).padStart(2,'0')));
+  const ns='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox','0 0 256 256'); svg.setAttribute('class','pinico');
+  const path=document.createElementNS(ns,'path');
+  path.setAttribute('d','M128 24a56 56 0 0 0-56 56c0 30.4 24.8 55.4 48 57.6V200a8 8 0 0 0 16 0v-62.4c23.2-2.2 48-27.2 48-57.6a56 56 0 0 0-56-56Zm0 80a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z');
+  svg.appendChild(path); pin.appendChild(svg);
+  pin.onclick=async e=>{
+    e.stopPropagation();
+    p.pinned=!p.pinned;
+    await native('update',{id:p.id,pinned:p.pinned});
+    renderTable(); renderRail();
+    toast(p.pinned?'Fijado arriba':'Quitado de fijados');
+  };
+  tdNum.appendChild(pin); tr.appendChild(tdNum);
+
+  const tdMain=el('td','rk-td-main');
+  const cell=el('div','proj-cell');
+  const bks=p.backups||[];
+  if(bks.length){
+    const exp=el('button','expander');
+    exp.setAttribute('aria-expanded', state.expanded.has(p.id)?'true':'false');
+    exp.setAttribute('aria-label','Ver copias de seguridad');
+    exp.title=bks.length+' copias de seguridad';
+    const chev=document.createElementNS(ns,'svg');
+    chev.setAttribute('viewBox','0 0 256 256'); chev.setAttribute('fill','currentColor');
+    const cp=document.createElementNS(ns,'path'); cp.setAttribute('d',ICONS.chevron); chev.appendChild(cp);
+    exp.appendChild(chev);
+    exp.onclick=e=>{e.stopPropagation(); if(state.expanded.has(p.id))state.expanded.delete(p.id); else state.expanded.add(p.id); renderTable();};
+    cell.appendChild(exp);
+  } else { const pad=el('span'); pad.style.cssText='width:22px;flex:none'; cell.appendChild(pad); }
+
+  const box=el('div','proj-name');
+  box.appendChild(el('div','nm',p.name));
+  if(p.type==='show' && p.regions){
+    const st=el('div','proj-strip');
+    for(let i=0;i<Math.min(p.regions,16);i++){
+      const b=el('i'); b.style.flex=String(1+(i%4)); b.style.background=PAL[i%PAL.length]; st.appendChild(b);
+    }
+    box.appendChild(st);
+  }
+  cell.appendChild(box);
+  tdMain.appendChild(cell); tr.appendChild(tdMain);
+
+  const tdType=el('td','c-type');
+  const badge=el('span','rk-badge rk-badge--plain');
+  const dot=el('span'); dot.style.cssText='width:8px;height:8px;border-radius:50%;background:'+(TYPES[p.type]||TYPES.studio).color;
+  badge.appendChild(dot); badge.appendChild(document.createTextNode((TYPES[p.type]||TYPES.studio).label));
+  tdType.appendChild(badge); tr.appendChild(tdType);
+
+  const tdWhen=el('td','c-when');
+  const w=el('span','rk-meta',ago(p.lastOpened)); w.style.color='var(--rk-text-3)';
+  tdWhen.appendChild(w); tr.appendChild(tdWhen);
+
+  const tdAct=el('td','c-act');
+  const dots=el('button','rk-btn rk-btn--icon rk-btn--quiet');
+  dots.style.cssText='width:28px;height:28px;color:var(--rk-text-3)';
+  dots.setAttribute('aria-label','Acciones del proyecto');
+  dots.appendChild(icon(ICONS.dots));
+  dots.onclick=e=>{e.stopPropagation(); openMenu(p,dots);};
+  tdAct.appendChild(dots); tr.appendChild(tdAct);
+  return tr;
+}
+
+function backupsRow(p){
+  const tr=el('tr','bk-row');
+  const td=el('td'); td.colSpan=5;
+  const panel=el('div','bk-panel');
+  const head=el('div','bk-head');
+  head.appendChild(el('span',null,'Copias de seguridad · '+p.backups.length));
+  head.appendChild(el('span','spacer'));
+  head.appendChild(el('span',null,'más reciente primero'));
+  panel.appendChild(head);
+  p.backups.forEach((bk,i)=>{
+    const row=el('div','bk-item');
+    row.appendChild(el('span','when',fmtDate(bk.date)));
+    row.appendChild(el('span','name',bk.name));
+    row.appendChild(el('span','size',mb(bk.size)));
+    if(i===0) row.appendChild(el('span','rk-badge rk-badge--ok','reciente'));
+    const acts=el('div','acts');
+    const bOpen=el('button','rk-btn','Abrir');
+    bOpen.onclick=e=>{e.stopPropagation(); native('open',{path:bk.path});};
+    const bRev=el('button','rk-btn','Mostrar');
+    bRev.onclick=e=>{e.stopPropagation(); native('reveal',{path:bk.path});};
+    acts.appendChild(bOpen); acts.appendChild(bRev); row.appendChild(acts);
+    panel.appendChild(row);
+  });
+  td.appendChild(panel); tr.appendChild(td);
+  return tr;
+}
+
+/* =========================================================
+   Inspector
+   ========================================================= */
+function renderRail(){
+  const c=$('#rail'); c.innerHTML='';
+  const p=byId(state.selected);
+  if(!p){ c.appendChild(el('div','rk-empty','Selecciona un proyecto')); return; }
+
+  const head=el('div','rail-head');
+  head.appendChild(el('div','rk-title',p.name));
+  head.appendChild(el('div','path',p.path));
+  c.appendChild(head);
+
+  const body=el('div','rail-body');
+  const dl=el('dl','rk-dl');
+  const add=(k,v,mono)=>{dl.appendChild(el('dt',null,k)); const dd=el('dd',mono?'data':null,String(v)); dd.title=String(v); dl.appendChild(dd);};
+  add('Tipo',(TYPES[p.type]||TYPES.studio).label);
+  add('Carpeta',p.folder);
+  if(p.regions) add('Regiones',p.regions+' canciones');
+  add('Pistas',p.tracks||0);
+  if(p.tempo) add('Tempo',p.tempo+' BPM');
+  add('Tamaño',mb(p.size));
+  add('Modificado',ago(p.lastOpened));
+  body.appendChild(dl);
+
+  const secTags=el('div','rail-section');
+  secTags.appendChild(el('div','rk-eyebrow','Etiquetas'));
+  const wrap=el('div','chips-wrap');
+  (p.tags||[]).forEach(tag=>{
+    const chip=el('span','rk-chip');
+    chip.appendChild(document.createTextNode('#'+tag));
+    const x=el('button'); x.innerHTML='&times;'; x.setAttribute('aria-label','Quitar '+tag);
+    x.onclick=async()=>{p.tags=p.tags.filter(z=>z!==tag); await native('update',{id:p.id,tags:p.tags}); renderAll(); toast('Etiqueta quitada');};
+    chip.appendChild(x); wrap.appendChild(chip);
+  });
+  const addChip=el('button','rk-chip chip-add','＋ etiqueta');
+  addChip.onclick=()=>{
+    addChip.textContent='';
+    const inp=el('input'); inp.placeholder='nueva'; addChip.appendChild(inp); inp.focus();
+    inp.onkeydown=async e=>{
+      if(e.key==='Enter' && inp.value.trim()){
+        const v=inp.value.trim().toLowerCase().replace(/\s+/g,'-');
+        if(!p.tags.includes(v)) p.tags.push(v);
+        await native('update',{id:p.id,tags:p.tags});
+        await refresh();
+        toast('Etiqueta #'+v+' añadida');
+      }
+      if(e.key==='Escape') renderAll();
+    };
+    inp.onblur=()=>renderAll();
+  };
+  wrap.appendChild(addChip); secTags.appendChild(wrap); body.appendChild(secTags);
+
+  if((p.backups||[]).length){
+    const secB=el('div','rail-section');
+    const eh=el('div','rk-eyebrow');
+    eh.appendChild(el('span',null,'Copias de seguridad'));
+    const cnt=el('span',null,String(p.backups.length)); cnt.style.marginLeft='auto'; cnt.style.color='var(--rk-text-3)';
+    eh.appendChild(cnt); secB.appendChild(eh);
+    const list=el('div','bk-list');
+    p.backups.slice(0,5).forEach(bk=>{
+      const row=el('div','row');
+      row.appendChild(el('span','when',fmtDate(bk.date).slice(5)));
+      row.appendChild(el('span','size',mb(bk.size)));
+      const b=el('button','rk-btn','Abrir');
+      b.onclick=()=>native('open',{path:bk.path});
+      row.appendChild(b);
+      list.appendChild(row);
+    });
+    if(p.backups.length>5) list.appendChild(el('div','more','＋ '+(p.backups.length-5)+' más…'));
+    secB.appendChild(list); body.appendChild(secB);
+  }
+  c.appendChild(body);
+
+  const foot=el('div','rail-foot');
+  const bOpen=el('button','rk-btn rk-btn--primary','Abrir proyecto');
+  bOpen.onclick=()=>native('open',{path:p.path});
+  foot.appendChild(bOpen);
+  const bRev=el('button','rk-btn','Mostrar en Finder');
+  bRev.onclick=()=>native('reveal',{path:p.path});
+  foot.appendChild(bRev);
+  if(p.hidden){
+    const bBack=el('button','rk-btn','Volver a recientes');
+    bBack.onclick=async()=>{p.hidden=false; await native('update',{id:p.id,hidden:false}); await refresh(); toast('Devuelto a recientes');};
+    foot.appendChild(bBack);
+  }
+  const bDel=el('button','rk-btn rk-btn--danger','Eliminar proyecto…');
+  bDel.onclick=()=>deleteProject(p);
+  foot.appendChild(bDel);
+  c.appendChild(foot);
+}
+
+/* =========================================================
+   Menú
+   ========================================================= */
+function openMenu(p,anchor){
+  const m=$('#menu'); m.innerHTML='';
+  const mk=(label,fn,cls)=>{const b=el('button','it'+(cls?' '+cls:''),label); b.onclick=async e=>{e.stopPropagation(); closeMenu(); await fn();}; m.appendChild(b);};
+  mk('Abrir en REAPER',()=>native('open',{path:p.path}));
+  mk('Mostrar en Finder',()=>native('reveal',{path:p.path}));
+  if((p.backups||[]).length) mk('Ver copias de seguridad ('+p.backups.length+')',async()=>{ if(state.expanded.has(p.id))state.expanded.delete(p.id); else state.expanded.add(p.id); renderTable(); });
+  m.appendChild(el('div','sep'));
+  mk(p.pinned?'Quitar de fijados':'Fijar arriba',async()=>{p.pinned=!p.pinned; await native('update',{id:p.id,pinned:p.pinned}); renderTable(); renderRail(); toast(p.pinned?'Fijado arriba':'Quitado de fijados');});
+  if(p.hidden) mk('Volver a recientes',async()=>{p.hidden=false; await native('update',{id:p.id,hidden:false}); await refresh();});
+  else mk('Quitar de recientes',async()=>{p.hidden=true; await native('update',{id:p.id,hidden:true}); await refresh(); toast('Quitado de recientes · el archivo sigue en su carpeta');});
+  mk(p.archived?'Desarchivar':'Archivar',async()=>{p.archived=!p.archived; await native('update',{id:p.id,archived:p.archived}); await refresh(); toast(p.archived?'Archivado':'Restaurado');});
+  mk('Mover a carpeta…',async()=>{const f=prompt('Carpeta:',p.folder); if(f){p.folder=f; await native('update',{id:p.id,folder:f}); await refresh();}});
+  m.appendChild(el('div','sep'));
+  mk('Quitar del launcher…',async()=>{
+    if(confirm('¿Quitar «'+p.name+'» del launcher? El .rpp no se toca.')){
+      await native('forget',{id:p.id}); state.selected=null; await refresh();
+    }
+  },'is-danger');
+  m.classList.add('is-on');
+  const r=anchor.getBoundingClientRect(), mw=m.offsetWidth, mh=m.offsetHeight;
+  let x=r.right-mw, y=r.bottom+4;
+  if(x<8)x=8;
+  if(y+mh>innerHeight-8) y=r.top-mh-4;
+  m.style.left=x+'px'; m.style.top=y+'px';
+}
+function closeMenu(){ $('#menu').classList.remove('is-on'); }
+document.addEventListener('click',closeMenu);
+
+/* =========================================================
+   Modal nuevo proyecto
+   ========================================================= */
+let newType='empty';
+function renderTypes(){
+  const c=$('#typeList'); c.innerHTML='';
+  TEMPLATES.forEach(t=>{
+    const b=el('button','type'+(newType===t.id?' is-on':''));
+    const d=el('span','dotc'); d.style.background=(TYPES[t.type]||TYPES.studio).color; b.appendChild(d);
+    b.appendChild(el('span','tt',t.name));
+    b.appendChild(el('span','td',t.desc));
+    b.appendChild(el('span','tf',t.file||'nuevo .rpp'));
+    b.onclick=()=>{newType=t.id; renderTypes(); updateSummary();};
+    c.appendChild(b);
+  });
+}
+function updateSummary(){
+  const t=TEMPLATES.find(x=>x.id===newType);
+  const name=($('#pName').value||'').trim();
+  const loc=($('#pLoc').value||'').replace(/\/$/,'');
+  $('#pSummary').innerHTML='creará <b>'+loc+'/'+(name||'Sin_nombre').replace(/\s+/g,'_')+'.rpp</b> desde <b>'+(t.file||'proyecto vacío')+'</b><br>etiquetas: <b>'+(t.tags.length?t.tags.map(x=>'#'+x).join(' '):'—')+'</b> · carpeta: <b>'+t.folder+'</b>';
+}
+function openModal(){
+  $('#scrim').classList.add('is-on'); $('#modalWrap').classList.add('is-on');
+  newType='empty';
+  $('#pName').value='';
+  if(!$('#pLoc').value) $('#pLoc').value = '~/Desktop';
+  renderTypes(); updateSummary();
+  setTimeout(()=>$('#pName').focus(),60);
+}
+function closeModal(){ $('#scrim').classList.remove('is-on'); $('#modalWrap').classList.remove('is-on'); }
+
+/* =========================================================
+   Toast / estado
+   ========================================================= */
+let toastTimer=null;
+function toast(msg){
+  $('#toastMsg').textContent=msg;
+  $('#toast').hidden=false;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{ $('#toast').hidden=true; },2600);
+}
+
+async function refresh(){
+  const data=await native('list');
+  if(data && data.projects){ DB=data; if(!state.selected && DB.projects.length) state.selected=DB.projects[0].id; }
+  renderAll();
+}
+
+function renderAll(){
+  renderNav(); renderInstances(); renderFilters(); renderTable(); renderRail();
+  const [title]=viewLabel();
+  $('#viewTitle').innerHTML='Biblioteca <small>'+title+'</small>';
+  $('#stCount').textContent=DB.projects.filter(p=>!p.archived).length+' proyectos · '+(DB.folders||[]).length+' carpetas';
+  $('#stHours').textContent=hrs(DB.usage?DB.usage.hoursOpen:0);
+  $('#stRec').textContent=hrs(DB.usage?DB.usage.hoursRec:0);
+
+}
+
+
+/* =========================================================
+   Iconos de carpeta + preferencias (tema / acento)
+   ========================================================= */
+const FOLDER_ICONS = {
+  "folder": "M216,68H133.39l-26-29.29a20,20,0,0,0-15-6.71H40A20,20,0,0,0,20,52V200.62A19.41,19.41,0,0,0,39.38,220H216.89A19.13,19.13,0,0,0,236,200.89V88A20,20,0,0,0,216,68ZM44,56H90.61l10.67,12H44ZM212,196H44V92H212Z",
+  "folder-open": "M248.23,112.31A20,20,0,0,0,232,104H220V88a20,20,0,0,0-20-20H132L105.34,48a20.12,20.12,0,0,0-12-4H40A20,20,0,0,0,20,64V208a12,12,0,0,0,12,12H211.1a12,12,0,0,0,11.33-8l28.49-81.47.06-.17A20,20,0,0,0,248.23,112.31ZM92,68l28.8,21.6A12,12,0,0,0,128,92h68v12H69.77a20,20,0,0,0-18.94,13.58L44,137.15V68ZM202.59,196H48.89l23.72-68H226.37Z",
+  "vinyl-record": "M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212Zm0-128a44.05,44.05,0,0,0-44,44,12,12,0,0,1-24,0,68.07,68.07,0,0,1,68-68,12,12,0,0,1,0,24Zm68,44a68.07,68.07,0,0,1-68,68,12,12,0,0,1,0-24,44.05,44.05,0,0,0,44-44,12,12,0,0,1,24,0Zm-68,28a28,28,0,1,1,28-28A28,28,0,0,1,128,156Z",
+  "music-notes": "M215.38,14.54a12,12,0,0,0-10.29-2.18l-128,32A12,12,0,0,0,68,56V159.35A40,40,0,1,0,92,196V113.37l104-26v40A40,40,0,1,0,220,164V24A12,12,0,0,0,215.38,14.54ZM52,212a16,16,0,1,1,16-16A16,16,0,0,1,52,212ZM92,88.63V65.37l104-26V62.63ZM180,180a16,16,0,1,1,16-16A16,16,0,0,1,180,180Z",
+  "microphone": "M128,180a52.06,52.06,0,0,0,52-52V64A52,52,0,0,0,76,64v64A52.06,52.06,0,0,0,128,180ZM100,64a28,28,0,0,1,56,0v64a28,28,0,0,1-56,0Zm40,155.22V240a12,12,0,0,1-24,0V219.22A92.14,92.14,0,0,1,36,128a12,12,0,0,1,24,0,68,68,0,0,0,136,0,12,12,0,0,1,24,0A92.14,92.14,0,0,1,140,219.22Z",
+  "guitar": "M92.49,187.5a12,12,0,1,1-17,17l-24-24a12,12,0,0,1,17-17ZM112,120a24,24,0,1,0,24,24A24,24,0,0,0,112,120ZM252.49,60.48a12,12,0,0,1-14.12,2.12L182,119a73.13,73.13,0,0,1,5.36,18.68c2.51,17.58-2.2,33.35-13.27,44.42a46.11,46.11,0,0,1-15.73,10.29,4.32,4.32,0,0,0-2.39,4c-.53,15.61-6.16,29.22-16.28,39.34C129,246.37,114.5,252,98.13,252a76.73,76.73,0,0,1-10.77-.78c-19.47-2.78-38.73-12.85-54.23-28.35S7.56,188.11,4.78,168.64c-3-20.75,2.56-39.34,15.55-52.33C30.45,106.19,44.06,100.56,59.67,100a4.32,4.32,0,0,0,4-2.39A46.11,46.11,0,0,1,73.93,81.91C85,70.84,100.77,66.13,118.35,68.64A73.13,73.13,0,0,1,137,74L193.4,17.63A12,12,0,0,1,212.49,3.51l40,40A12,12,0,0,1,252.49,60.48ZM221,46,210,35,191,54l11,11Zm-74.31,63.28C135.53,98.09,121.39,92,109.34,92c-7.29,0-13.81,2.21-18.44,6.85A22.16,22.16,0,0,0,86,106.47,28.23,28.23,0,0,1,60.48,124h0c-6.57.22-15.93,2-23.18,9.26-7.52,7.52-10.63,18.87-8.76,32,2.05,14.37,9.71,28.81,21.56,40.66s26.29,19.51,40.66,21.56c13.09,1.87,24.44-1.24,32-8.76,7.25-7.25,9-16.61,9.26-23.18A28.23,28.23,0,0,1,149.53,170a22.16,22.16,0,0,0,7.59-4.94C169.43,152.79,164.67,127.23,146.72,109.28ZM169,98.07,185,82,174,71,157.93,87c2,1.67,3.9,3.42,5.76,5.27S167.29,96.09,169,98.07Z",
+  "piano-keys": "M208,28H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28ZM92,132V52h24v80Zm52,24v48H112V156Zm20-24H140V52h24ZM52,52H68v92a12,12,0,0,0,12,12h8v48H52ZM204,204H168V156h8a12,12,0,0,0,12-12V52h16Z",
+  "metronome": "M219.05,201.94l-27.4-86.12,25.23-27.75a12,12,0,0,0-17.76-16.14L183.24,89.39l-15.1-47.45A19.93,19.93,0,0,0,149.08,28H106.91A19.93,19.93,0,0,0,87.85,41.94l-50.91,160A20,20,0,0,0,56,228H200a20,20,0,0,0,19.06-26.06ZM179.25,156H155.12L173,136.34ZM109.83,52h36.33l18.42,57.91L122.69,156H76.74ZM61.47,204l7.63-24H186.89l7.63,24Z",
+  "speaker-high": "M157.27,21.22a12,12,0,0,0-12.64,1.31L75.88,76H32A20,20,0,0,0,12,96v64a20,20,0,0,0,20,20H75.88l68.75,53.47A12,12,0,0,0,164,224V32A12,12,0,0,0,157.27,21.22ZM36,100H68v56H36Zm104,99.46L92,162.13V93.87l48-37.33ZM212,128a44,44,0,0,1-11,29.11,12,12,0,1,1-18-15.88,20,20,0,0,0,0-26.43,12,12,0,0,1,18-15.86A43.94,43.94,0,0,1,212,128Zm40,0a83.87,83.87,0,0,1-21.39,56,12,12,0,0,1-17.89-16,60,60,0,0,0,0-80,12,12,0,1,1,17.88-16A83.87,83.87,0,0,1,252,128Z",
+  "sliders": "M68,102.06V40a12,12,0,0,0-24,0v62.06a36,36,0,0,0,0,67.88V216a12,12,0,0,0,24,0V169.94a36,36,0,0,0,0-67.88ZM56,148a12,12,0,1,1,12-12A12,12,0,0,1,56,148ZM164,88a36.07,36.07,0,0,0-24-33.94V40a12,12,0,0,0-24,0V54.06a36,36,0,0,0,0,67.88V216a12,12,0,0,0,24,0V121.94A36.07,36.07,0,0,0,164,88Zm-36,12a12,12,0,1,1,12-12A12,12,0,0,1,128,100Zm108,68a36.07,36.07,0,0,0-24-33.94V40a12,12,0,0,0-24,0v94.06a36,36,0,0,0,0,67.88V216a12,12,0,0,0,24,0V201.94A36.07,36.07,0,0,0,236,168Zm-36,12a12,12,0,1,1,12-12A12,12,0,0,1,200,180Z",
+  "projector-screen": "M236,72V48a20,20,0,0,0-20-20H40A20,20,0,0,0,20,48V72A20,20,0,0,0,36,91.6V164H32a12,12,0,0,0,0,24h84v23.22a24,24,0,1,0,24,0V188h84a12,12,0,0,0,0-24h-4V91.6A20,20,0,0,0,236,72ZM44,52H212V68H44ZM60,164V92H196v72Z",
+  "monitor-play": "M168,120a12,12,0,0,1-5.12,9.83l-40,28A12,12,0,0,1,104,148V92a12,12,0,0,1,18.88-9.83l40,28A12,12,0,0,1,168,120Zm68-56V176a28,28,0,0,1-28,28H48a28,28,0,0,1-28-28V64A28,28,0,0,1,48,36H208A28,28,0,0,1,236,64Zm-24,0a4,4,0,0,0-4-4H48a4,4,0,0,0-4,4V176a4,4,0,0,0,4,4H208a4,4,0,0,0,4-4ZM160,216H96a12,12,0,0,0,0,24h64a12,12,0,0,0,0-24Z",
+  "users-three": "M164.38,181.1a52,52,0,1,0-72.76,0,75.89,75.89,0,0,0-30,28.89,12,12,0,0,0,20.78,12,53,53,0,0,1,91.22,0,12,12,0,1,0,20.78-12A75.89,75.89,0,0,0,164.38,181.1ZM100,144a28,28,0,1,1,28,28A28,28,0,0,1,100,144Zm147.21,9.59a12,12,0,0,1-16.81-2.39c-8.33-11.09-19.85-19.59-29.33-21.64a12,12,0,0,1-1.82-22.91,20,20,0,1,0-24.78-28.3,12,12,0,1,1-21-11.6,44,44,0,1,1,73.28,48.35,92.18,92.18,0,0,1,22.85,21.69A12,12,0,0,1,247.21,153.59Zm-192.28-24c-9.48,2.05-21,10.55-29.33,21.65A12,12,0,0,1,6.41,136.79,92.37,92.37,0,0,1,29.26,115.1a44,44,0,1,1,73.28-48.35,12,12,0,1,1-21,11.6,20,20,0,1,0-24.78,28.3,12,12,0,0,1-1.82,22.91Z",
+  "star": "M243,96a20.33,20.33,0,0,0-17.74-14l-56.59-4.57L146.83,24.62a20.36,20.36,0,0,0-37.66,0L87.35,77.44,30.76,82A20.45,20.45,0,0,0,19.1,117.88l43.18,37.24-13.2,55.7A20.37,20.37,0,0,0,79.57,233L128,203.19,176.43,233a20.39,20.39,0,0,0,30.49-22.15l-13.2-55.7,43.18-37.24A20.43,20.43,0,0,0,243,96ZM172.53,141.7a12,12,0,0,0-3.84,11.86L181.58,208l-47.29-29.08a12,12,0,0,0-12.58,0L74.42,208l12.89-54.4a12,12,0,0,0-3.84-11.86L41.2,105.24l55.4-4.47a12,12,0,0,0,10.13-7.38L128,41.89l21.27,51.5a12,12,0,0,0,10.13,7.38l55.4,4.47Z",
+  "lightning": "M219.71,117.38a12,12,0,0,0-7.25-8.52L161.28,88.39l10.59-70.61a12,12,0,0,0-20.64-10l-112,120a12,12,0,0,0,4.31,19.33l51.18,20.47L84.13,238.22a12,12,0,0,0,20.64,10l112-120A12,12,0,0,0,219.71,117.38ZM113.6,203.55l6.27-41.77a12,12,0,0,0-7.41-12.92L68.74,131.37,142.4,52.45l-6.27,41.77a12,12,0,0,0,7.41,12.92l43.72,17.49Z",
+  "calendar-blank": "M208,28H188V24a12,12,0,0,0-24,0v4H92V24a12,12,0,0,0-24,0v4H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28ZM68,52a12,12,0,0,0,24,0h72a12,12,0,0,0,24,0h16V76H52V52ZM52,204V100H204V204Z",
+  "ticket": "M232,108a12,12,0,0,0,12-12V64a20,20,0,0,0-20-20H32A20,20,0,0,0,12,64V96a12,12,0,0,0,12,12,20,20,0,0,1,0,40,12,12,0,0,0-12,12v32a20,20,0,0,0,20,20H224a20,20,0,0,0,20-20V160a12,12,0,0,0-12-12,20,20,0,0,1,0-40ZM36,170.34a44,44,0,0,0,0-84.68V68H88V188H36Zm184,0V188H112V68H220V85.66a44,44,0,0,0,0,84.68Z",
+  "gear": "M128,76a52,52,0,1,0,52,52A52.06,52.06,0,0,0,128,76Zm0,80a28,28,0,1,1,28-28A28,28,0,0,1,128,156Zm92-27.21v-1.58l14-17.51a12,12,0,0,0,2.23-10.59A111.75,111.75,0,0,0,225,71.89,12,12,0,0,0,215.89,66L193.61,63.5l-1.11-1.11L190,40.1A12,12,0,0,0,184.11,31a111.67,111.67,0,0,0-27.23-11.27A12,12,0,0,0,146.3,22L128.79,36h-1.58L109.7,22a12,12,0,0,0-10.59-2.23A111.75,111.75,0,0,0,71.89,31.05,12,12,0,0,0,66,40.11L63.5,62.39,62.39,63.5,40.1,66A12,12,0,0,0,31,71.89,111.67,111.67,0,0,0,19.77,99.12,12,12,0,0,0,22,109.7l14,17.51v1.58L22,146.3a12,12,0,0,0-2.23,10.59,111.75,111.75,0,0,0,11.29,27.22A12,12,0,0,0,40.11,190l22.28,2.48,1.11,1.11L66,215.9A12,12,0,0,0,71.89,225a111.67,111.67,0,0,0,27.23,11.27A12,12,0,0,0,109.7,234l17.51-14h1.58l17.51,14a12,12,0,0,0,10.59,2.23A111.75,111.75,0,0,0,184.11,225a12,12,0,0,0,5.91-9.06l2.48-22.28,1.11-1.11L215.9,190a12,12,0,0,0,9.06-5.91,111.67,111.67,0,0,0,11.27-27.23A12,12,0,0,0,234,146.3Zm-24.12-4.89a70.1,70.1,0,0,1,0,8.2,12,12,0,0,0,2.61,8.22l12.84,16.05A86.47,86.47,0,0,1,207,166.86l-20.43,2.27a12,12,0,0,0-7.65,4,69,69,0,0,1-5.8,5.8,12,12,0,0,0-4,7.65L166.86,207a86.47,86.47,0,0,1-10.49,4.35l-16.05-12.85a12,12,0,0,0-7.5-2.62c-.24,0-.48,0-.72,0a70.1,70.1,0,0,1-8.2,0,12.06,12.06,0,0,0-8.22,2.6L99.63,211.33A86.47,86.47,0,0,1,89.14,207l-2.27-20.43a12,12,0,0,0-4-7.65,69,69,0,0,1-5.8-5.8,12,12,0,0,0-7.65-4L49,166.86a86.47,86.47,0,0,1-4.35-10.49l12.84-16.05a12,12,0,0,0,2.61-8.22,70.1,70.1,0,0,1,0-8.2,12,12,0,0,0-2.61-8.22L44.67,99.63A86.47,86.47,0,0,1,49,89.14l20.43-2.27a12,12,0,0,0,7.65-4,69,69,0,0,1,5.8-5.8,12,12,0,0,0,4-7.65L89.14,49a86.47,86.47,0,0,1,10.49-4.35l16.05,12.85a12.06,12.06,0,0,0,8.22,2.6,70.1,70.1,0,0,1,8.2,0,12,12,0,0,0,8.22-2.6l16.05-12.85A86.47,86.47,0,0,1,166.86,49l2.27,20.43a12,12,0,0,0,4,7.65,69,69,0,0,1,5.8,5.8,12,12,0,0,0,7.65,4L207,89.14a86.47,86.47,0,0,1,4.35,10.49l-12.84,16.05A12,12,0,0,0,195.88,123.9Z"
+};
+const FOLDER_ICON_LIST = Object.keys(FOLDER_ICONS);
+const FOLDER_COLOR_LIST = ['#8660E8','#4377FF','#019ACB','#1ED760','#E0A32E','#C2527A','#8A8A8E'];
+const SVG_SUN = '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z"/></svg>';
+const SVG_MOON = '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M236.37,139.4a12,12,0,0,0-12-3A84.07,84.07,0,0,1,119.6,31.59a12,12,0,0,0-15-15A108.86,108.86,0,0,0,49.69,55.07,108,108,0,0,0,136,228a107.09,107.09,0,0,0,64.93-21.69,108.86,108.86,0,0,0,38.44-54.94A12,12,0,0,0,236.37,139.4Zm-49.88,47.74A84,84,0,0,1,68.86,69.51,84.93,84.93,0,0,1,92.27,48.29Q92,52.13,92,56A108.12,108.12,0,0,0,200,164q3.87,0,7.71-.27A84.79,84.79,0,0,1,186.49,187.14Z"/></svg>';
+const SVG_PALETTE = '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M203.57,51A107.9,107.9,0,0,0,20,128c0,44.72,27.6,82.25,72,97.94A36,36,0,0,0,140,192a12,12,0,0,1,12-12h46.21a35.79,35.79,0,0,0,35.1-28A108.6,108.6,0,0,0,236,127.09,107.23,107.23,0,0,0,203.57,51Zm6.34,95.67a11.91,11.91,0,0,1-11.7,9.3H152a36,36,0,0,0-36,36,12,12,0,0,1-16,11.3c-16.65-5.88-30.65-15.76-40.48-28.56A76,76,0,0,1,44,128a84,84,0,0,1,83.13-84H128a84.35,84.35,0,0,1,84,83.29A84.72,84.72,0,0,1,209.91,146.71ZM144,76a16,16,0,1,1-16-16A16,16,0,0,1,144,76Zm-44,24A16,16,0,1,1,84,84,16,16,0,0,1,100,100Zm0,56a16,16,0,1,1-16-16A16,16,0,0,1,100,156Zm88-56a16,16,0,1,1-16-16A16,16,0,0,1,188,100Z"/></svg>';
+
+const ACCENTS = [
+  {id:'reapertips', name:'Reapertips', swatch:'#8660E8'},
+  {id:'reaset',     name:'ReaSet Pro', swatch:'#1ED760'},
+  {id:'cyan',       name:'Cian',       swatch:'#019ACB'},
+  {id:'amber',      name:'Ámbar',      swatch:'#E0A32E'},
+  {id:'rose',       name:'Rosa',       swatch:'#C2527A'}
+];
+
+function getPref(k, def){ try { return localStorage.getItem('sel.'+k) || def; } catch(e){ return def; } }
+function setPref(k, v){ try { localStorage.setItem('sel.'+k, v); } catch(e){} }
+
+function applyPrefs(){
+  // La app inyecta el tema/acento guardados ANTES del primer pintado; si ya
+  // vienen puestos, se respetan para no provocar un cambio de color visible.
+  const ds = document.documentElement.dataset;
+  const theme = ds.theme || getPref('theme','dark');
+  const accent = ds.accent || getPref('accent','reapertips');
+  ds.theme = theme; ds.accent = accent;
+  // localStorage es la fuente mientras la app no tenga prefs.json; cuando la
+  // inyección ya trae los valores, ambos coinciden y esto es un no-op.
+  if (getPref('theme','') !== theme) setPref('theme', theme);
+  if (getPref('accent','') !== accent) setPref('accent', accent);
+  native('prefs', {theme: theme, accent: accent});
+  const bt = $('#btnTheme'); if(bt) bt.innerHTML = theme === 'dark' ? SVG_SUN : SVG_MOON;
+  const ba = $('#btnAccent');
+  if(ba){
+    const a = ACCENTS.find(x=>x.id===accent) || ACCENTS[0];
+    ba.innerHTML = SVG_PALETTE;
+    ba.style.color = a.swatch;
+  }
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--rk-bg-1').trim();
+  if(bg) native('chrome', {color: bg});
+}
+
+/* =========================================================
+   Menú contextual genérico
+   ========================================================= */
+function openMenuAt(items, x, y){
+  const m=$('#menu'); m.innerHTML='';
+  items.forEach(it=>{
+    if(it.sep){ m.appendChild(el('div','sep')); return; }
+    if(it.header){ const h=el('div','hd',it.header); m.appendChild(h); return; }
+    const b=el('button','it'+(it.danger?' is-danger':''));
+    if(it.swatch){ const s=el('i','sw'); s.style.background=it.swatch; b.appendChild(s); }
+    b.appendChild(el('span','ml',it.label));
+    if(it.checked) b.appendChild(el('span','chk','✓'));
+    b.onclick=async ev=>{ ev.stopPropagation(); closeMenu(); if(it.run) await it.run(); };
+    m.appendChild(b);
+  });
+  m.classList.add('is-on');
+  m.style.left='0px'; m.style.top='0px';
+  const w=m.offsetWidth, h=m.offsetHeight;
+  m.style.left=Math.max(8, Math.min(x, innerWidth-w-8))+'px';
+  m.style.top=Math.max(8, Math.min(y, innerHeight-h-8))+'px';
+}
+
+function projectMenu(p){
+  const items=[
+    {label:'Abrir en REAPER', run:()=>native('open',{path:p.path})},
+    {label:'Mostrar en Finder', run:()=>native('reveal',{path:p.path})},
+    {sep:true},
+    {label:p.pinned?'Quitar de fijados':'Fijar arriba', run:async()=>{p.pinned=!p.pinned; await native('update',{id:p.id,pinned:p.pinned}); await refresh();}},
+    {label:p.archived?'Desarchivar':'Archivar', run:async()=>{p.archived=!p.archived; await native('update',{id:p.id,archived:p.archived}); await refresh();}}
+  ];
+  if((p.backups||[]).length) items.push({label:'Ver copias de seguridad ('+p.backups.length+')', run:()=>{ if(state.expanded.has(p.id)) state.expanded.delete(p.id); else state.expanded.add(p.id); renderTable(); }});
+  items.push({sep:true});
+  items.push({label:'Mover a carpeta…', run:async()=>{
+    const f=prompt('Carpeta:',p.folder);
+    if(f){ p.folder=f; await native('update',{id:p.id,folder:f}); if(!(DB.folders||[]).includes(f)) await native('addFolder',{name:f}); await refresh(); }
+  }});
+  items.push({label:'Quitar de recientes', run:async()=>{p.hidden=true; await native('update',{id:p.id,hidden:true}); await refresh();}});
+  items.push({sep:true});
+  items.push({label:'Eliminar proyecto…', danger:true, run:()=>deleteProject(p)});
+  return items;
+}
+
+function folderMenu(name){
+  return [
+    {header:name},
+    {label:'Abrir carpeta', run:()=>{state.view={kind:'folder',value:name}; renderAll();}},
+    {sep:true},
+    {label:'Renombrar…', run:()=>openFolderSheet(name,'rename')},
+    {label:'Color e icono…', run:()=>openFolderSheet(name,'style')},
+    {sep:true},
+    {label:'Nueva carpeta…', run:createFolder},
+    {label:'Eliminar carpeta', danger:true, run:()=>deleteFolder(name)}
+  ];
+}
+
+async function deleteProject(p){
+  const ok=confirm('¿Eliminar «'+p.name+'»?\n\nEl archivo se mueve a la Papelera:\n'+p.path+'\n\nEsta acción borra el proyecto del disco y del launcher.');
+  if(!ok) return;
+  const r=await native('delete',{id:p.id});
+  if(r && r.ok===false){ toast('No se pudo eliminar: '+(r.error||'error desconocido')); return; }
+  state.selected=null; await refresh();
+  toast('Proyecto eliminado · el .rpp está en la Papelera');
+}
+
+function createFolder(){
+  const n=prompt('Nombre de la carpeta (virtual, no mueve archivos):');
+  if(!n) return;
+  native('addFolder',{name:n}).then(refresh);
+}
+
+async function deleteFolder(name){
+  if(!confirm('¿Eliminar la carpeta «'+name+'»?\n\nLos proyectos no se borran: pasan a «Sin carpeta».')){
+    return;
+  }
+  await native('deleteFolder',{name});
+  if(state.view.kind==='folder' && state.view.value===name) state.view={kind:'recent'};
+  await refresh();
+  toast('Carpeta eliminada · los proyectos quedaron en «Sin carpeta»');
+}
+
+/* =========================================================
+   Hoja de carpeta (renombrar / color / icono)
+   ========================================================= */
+let sheetCurrent=null;
+function closeSheet(){ const s=$('#sheetWrap'); if(s) s.remove(); sheetCurrent=null; }
+
+async function openFolderSheet(name, focus){
+  closeSheet();
+  sheetCurrent=name;
+  const meta=(DB.folderMeta||{})[name]||{};
+  let selColor=meta.color||'';
+  let selIcon=meta.icon||'folder';
+  const wrap=el('div','modal-wrap is-on');
+  wrap.id='sheetWrap';
+  wrap.onclick=e=>{ if(e.target===wrap) closeSheet(); };
+  const box=el('div','rk-modal');
+  box.style.width='420px';
+  const head=el('div','rk-modal-head');
+  head.appendChild(el('span','rk-section', focus==='rename'?'Renombrar carpeta':'Carpeta'));
+  head.appendChild(el('span','rk-meta', name));
+  box.appendChild(head);
+
+  const body=el('div','rk-modal-body');
+  const f1=el('label','rk-field');
+  f1.appendChild(el('span','rk-field-label','Nombre'));
+  const inp=el('input','rk-input'); inp.value=name; f1.appendChild(inp); body.appendChild(f1);
+
+  body.appendChild(el('div','rk-field-label','Color'));
+  const cw=el('div','swrow');
+  FOLDER_COLOR_LIST.forEach(c=>{
+    const b=el('button','swbtn'+(selColor===c?' is-on':''));
+    b.style.background=c; b.title=c;
+    b.onclick=()=>{ selColor=c; [...cw.children].forEach(x=>x.classList.remove('is-on')); b.classList.add('is-on'); };
+    cw.appendChild(b);
+  });
+  const bNone=el('button','swbtn swbtn--none'+(selColor===''?' is-on':''));
+  bNone.textContent='—'; bNone.title='Sin color';
+  bNone.onclick=()=>{ selColor=''; [...cw.children].forEach(x=>x.classList.remove('is-on')); bNone.classList.add('is-on'); };
+  cw.appendChild(bNone);
+  body.appendChild(cw);
+
+  body.appendChild(el('div','rk-field-label','Icono'));
+  const iw=el('div','icrow');
+  FOLDER_ICON_LIST.forEach(ic=>{
+    const b=el('button','icbtn'+(selIcon===ic?' is-on':''));
+    b.innerHTML=''; b.appendChild(icon(FOLDER_ICONS[ic]));
+    b.onclick=()=>{ selIcon=ic; [...iw.children].forEach(x=>x.classList.remove('is-on')); b.classList.add('is-on'); };
+    iw.appendChild(b);
+  });
+  body.appendChild(iw);
+  box.appendChild(body);
+
+  const foot=el('div','rk-modal-foot');
+  const cancel=el('button','rk-btn rk-btn--quiet','Cancelar');
+  cancel.onclick=closeSheet;
+  const save=el('button','rk-btn rk-btn--primary','Guardar');
+  save.onclick=async()=>{
+    const nuevo=(inp.value||'').trim();
+    if(!nuevo){ toast('La carpeta necesita un nombre'); return; }
+    await native('setFolderMeta',{name, color:selColor, icon:selIcon});
+    if(nuevo!==name) await native('renameFolder',{from:name, to:nuevo});
+    closeSheet();
+    if(state.view.kind==='folder' && state.view.value===name && nuevo!==name){
+      state.view={kind:'folder', value:nuevo};
+    }
+    await refresh();
+    toast('Carpeta actualizada');
+  };
+  foot.appendChild(cancel); foot.appendChild(save);
+  box.appendChild(foot);
+  wrap.appendChild(box);
+  document.body.appendChild(wrap);
+  setTimeout(()=>{ inp.focus(); inp.select(); }, 50);
+}
+
+/* =========================================================
+   Acento y tema
+   ========================================================= */
+function accentMenu(x, y){
+  const cur=getPref('accent','reapertips');
+  openMenuAt([
+    {header:'Esquema de color'},
+    ...ACCENTS.map(a=>({
+      label:a.name, swatch:a.swatch, checked:a.id===cur,
+      run:()=>{ setPref('accent',a.id);
+                document.documentElement.dataset.accent = a.id;  // applyPrefs lee de aquí
+                applyPrefs();
+                native('prefs',{theme:getPref('theme','dark'), accent:a.id});
+                toast('Esquema '+a.name); }
+    }))
+  ], x, y);
+}
+
+/* =========================================================
+   Eventos
+   ========================================================= */
+$('#btnNew').onclick=openModal;
+$('#btnOpenFile').onclick=()=>native('pickProject');
+$('#mCancel').onclick=closeModal;
+$('#scrim').onclick=closeModal;
+$('#pName').oninput=updateSummary;
+$('#pLoc').oninput=updateSummary;
+$('#pPick').onclick=async()=>{
+  const r=await native('pickFolder');
+  if(r && r.path){ $('#pLoc').value=r.path; updateSummary(); }
+};
+$('#mCreate').onclick=async()=>{
+  const t=TEMPLATES.find(x=>x.id===newType);
+  const name=($('#pName').value||'').trim();
+  if(!name){ toast('Ponle un nombre al proyecto'); return; }
+  let dir=($('#pLoc').value||'').replace(/^~/, (DB.home||''));
+  await native('create',{name:name.replace(/\s+/g,'_'),dir:dir,template:t.file,type:t.type,tags:t.tags,folder:t.folder});
+};
+$('#search').oninput=e=>{state.query=e.target.value; renderFilters(); renderTable();};
+$('#addFolder').onclick=createFolder;
+$('#btnTheme').onclick=()=>{
+  const next = getPref('theme','dark')==='dark' ? 'light' : 'dark';
+  setPref('theme', next);
+  document.documentElement.dataset.theme = next;   // applyPrefs lee de aquí
+  applyPrefs();
+};
+$('#btnAccent').onclick=e=>{
+  e.stopPropagation();
+  const r=e.currentTarget.getBoundingClientRect();
+  accentMenu(r.right-230, r.top-8-ACCENTS.length*36);
+};
+
+/* clic derecho propio: biblioteca y barra lateral */
+document.addEventListener('contextmenu', e=>{
+  const inInput = /^(INPUT|TEXTAREA)$/.test(e.target.tagName);
+  e.preventDefault();
+  if(inInput) return;
+  const row=e.target.closest('tr.project');
+  if(row){ const p=byId(row.dataset.id); if(p){ state.selected=p.id; renderTable(); renderRail(); openMenuAt(projectMenu(p), e.clientX, e.clientY); } return; }
+  const folder=e.target.closest('[data-folder]');
+  if(folder){ openMenuAt(folderMenu(folder.dataset.folder), e.clientX, e.clientY); return; }
+  if(e.target.closest('#content')){
+    openMenuAt([
+      {label:'Nuevo proyecto…', run:openModal},
+      {label:'Abrir archivo…', run:()=>native('pickProject')},
+      {sep:true},
+      {label:'Nueva carpeta…', run:createFolder}
+    ], e.clientX, e.clientY);
+  }
+});
+
+/* sin selección de texto fuera de los campos */
+document.addEventListener('selectstart', e=>{
+  if(!/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) e.preventDefault();
+});
+$('#addTag').onclick=()=>{
+  const p=byId(state.selected);
+  if(!p){ toast('Selecciona un proyecto primero'); return; }
+  const n=prompt('Nueva etiqueta:');
+  if(n){ const v=n.trim().toLowerCase().replace(/\s+/g,'-'); if(!p.tags.includes(v)) p.tags.push(v); native('update',{id:p.id,tags:p.tags}).then(refresh); }
+};
+$('#railToggle').onclick=()=>$('#rail').classList.toggle('is-open');
+
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault(); $('#search').focus();}
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='n'){e.preventDefault(); openModal();}
+  if(e.key==='Escape'){ closeMenu(); closeModal(); if(innerWidth<1080) $('#rail').classList.remove('is-open'); }
+  if(e.key==='Enter' && document.activeElement===$('#pName')) $('#mCreate').click();
+});
+addEventListener('resize',()=>{
+  $('#search').placeholder = innerWidth<1180 ? 'Buscar…' : 'Buscar proyecto, etiqueta o ruta';
+});
+
+let wasStacked=null;
+function syncRail(){
+  const stacked=innerWidth<1080;
+  $('#railToggle').style.display=stacked?'inline-flex':'none';
+  if(stacked!==wasStacked){ $('#rail').classList.toggle('is-open',!stacked); wasStacked=stacked; }
+}
+addEventListener('resize',syncRail);
+
+setInterval(()=>{ refresh(); }, 30000);
+
+(async function boot(){
+  syncRail();
+  applyPrefs();
+  const data=await native('list');
+  if(data && data.projects){
+    DB=data;
+    state.selected = DB.projects[0] ? DB.projects[0].id : null;
+  }
+  renderAll();
+  // avisa a la app que la UI ya está pintada: recién ahí aparece la ventana
+  native('ready');
+})();
+</script>
+</body>
+</html>

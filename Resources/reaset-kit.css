@@ -1,0 +1,680 @@
+/* ==========================================================================
+   ReaSet Kit · v0.3
+   Una sola referencia para el Editor, Performance y el Canvas.
+   Estilo «plano con superficies»: los formularios (ajustes, la ficha de un
+   objeto, el detalle) van sobre la página, agrupados por título, línea fina
+   y alineación. Las colecciones de filas comparables (tabla, setlist) van
+   sobre una superficie. Nada de bloques redondeados uno al lado del otro.
+   Origen de los valores: reaset.app. Lo que se aparta del sitio está
+   marcado «≠ sitio» con su motivo.
+   Prefijo rk- (clases) y --rk- (tokens) para convivir con el CSS actual
+   mientras se migra pantalla por pantalla.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* ── Neutros ──────────────────────────────────────────────────────────
+     Una rampa. Reemplaza las cuatro de hoy (Editor #0e0e0e/#181818,
+     Performance #121212/#1F1F1F, Preferencias de Performance
+     #101011/#1a1a1c, Canvas #171717/#1e1e1e). */
+  --rk-bg-0: #0e0e0e;   /* página */
+  --rk-bg-1: #121212;   /* cromo: barra lateral, barra superior, rieles */
+  --rk-bg-2: #181818;   /* superficie: colección (tabla, setlist), modal */
+  --rk-bg-3: #232323;   /* elevado: campo, menú, fila seleccionada, popover */
+  --rk-bg-4: #2c2c2c;   /* sobre elevado: hover de campo, ítem activo de menú */
+  --rk-scrim: rgba(0, 0, 0, .62);
+
+  --rk-line-1: rgba(255, 255, 255, .07);  /* separador y borde de superficie */
+  --rk-line-2: rgba(255, 255, 255, .12);  /* borde de control y de popover */
+  --rk-line-3: rgba(255, 255, 255, .24);  /* hover de control */
+
+  --rk-fill-1: rgba(255, 255, 255, .06);  /* botón secundario, hover de fila */
+  --rk-fill-2: rgba(255, 255, 255, .10);  /* hover de botón secundario */
+  --rk-fill-3: rgba(255, 255, 255, .16);  /* presionado */
+
+  /* Texto. ≠ sitio: el terciario es #8a8a8a y no #555. #555 da 2.4:1 sobre
+     una tarjeta; #8a8a8a pasa AA (5.1:1) sobre página, tarjeta y campo. */
+  --rk-text-1: #ffffff;   /* títulos, etiquetas, valores */
+  --rk-text-2: #b3b3b3;   /* texto de apoyo */
+  --rk-text-3: #8a8a8a;   /* metadatos, eyebrow, placeholder */
+  --rk-text-4: #555555;   /* deshabilitado (exento de contraste) */
+
+  /* ── Color con significado ────────────────────────────────────────────
+     Cada color dice UNA cosa. No se usa como adorno. */
+  --rk-green: #1ED760;   /* marca · acción principal · sano/encendido · Director */
+  --rk-amber: #FF9F0A;   /* atención · revisar · reloj de pausa · omitir */
+  --rk-red:   #FC3C44;   /* error · peligro · grabando · parar al final */
+  --rk-blue:  #64D2FF;   /* información · Músico · Count-In · enlace */
+  --rk-purple:#BF5AF2;   /* loop */
+  --rk-teal:  #4FD8C4;   /* voz (CUES) */
+  --rk-pink:  #FF6AC2;   /* identidad de Canvas (solo navegación) */
+  --rk-on-green: #000000;
+
+  --rk-green-bg: rgba(30, 215, 96, .12);   --rk-green-line: rgba(30, 215, 96, .30);
+  --rk-amber-bg: rgba(255, 159, 10, .12);  --rk-amber-line: rgba(255, 159, 10, .30);
+  --rk-red-bg:   rgba(252, 60, 68, .12);   --rk-red-line:   rgba(252, 60, 68, .30);
+  --rk-blue-bg:  rgba(100, 210, 255, .12); --rk-blue-line:  rgba(100, 210, 255, .30);
+  --rk-purple-bg:rgba(191, 90, 242, .14);  --rk-purple-line:rgba(191, 90, 242, .32);
+  --rk-teal-bg:  rgba(79, 216, 196, .12);  --rk-teal-line:  rgba(79, 216, 196, .30);
+
+  /* Estados de la fila del setlist: encendido / apagado. Mismo matiz,
+     el apagado baja luminancia y croma por igual (OKLCH, ver editor.css). */
+  --rk-state-skip-on: #ffa83c;   --rk-state-skip-off: #85613a;
+  --rk-state-loop-on: #dda2ff;   --rk-state-loop-off: #7c5890;
+  --rk-state-stop-on: #fc3c44;   --rk-state-stop-off: #98514d;
+  --rk-state-ci-on:   #64d2ff;   --rk-state-ci-off:   #4a6f80;
+  --rk-state-voz-on:  #4fd8c4;   --rk-state-voz-off:  #3f7a72;
+
+  /* Identidad de vista: SOLO en navegación (pestaña, ícono de módulo).
+     Nunca como estado. Tripletas RGB para poder bajar el alfa. */
+  --rk-view-show:   30 215 96;
+  --rk-view-lyrics: 100 210 255;
+  --rk-view-chords: 191 90 242;
+  --rk-view-notes:  255 159 10;
+  --rk-view-canvas: 255 106 194;
+  --rk-view-live:   255 69 58;
+
+  /* ── Tipografía ───────────────────────────────────────────────────── */
+  --rk-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  /* `ui-monospace` primero: es como macOS entrega SF Mono a una página.
+     Pedido por su nombre no se encuentra, y se caía a una fuente fina. */
+  --rk-mono: ui-monospace, "SF Mono", Menlo, "Roboto Mono", Consolas, monospace;
+  /* Pesos permitidos: 400 · 500 · 600 · 700 · 800 · 900. Nada intermedio. */
+
+  /* Roles (densidad Preparar: Editor, escritorio, mouse) */
+  --rk-display:  900 42px/1.1 var(--rk-font);   --rk-display-ls: -1px;
+  --rk-view:     900 28px/1.15 var(--rk-font);  --rk-view-ls: -.6px;
+  --rk-section:  800 20px/1.25 var(--rk-font);  --rk-section-ls: -.4px;
+  --rk-title:    700 15px/1.3 var(--rk-font);   --rk-title-ls: -.2px;
+  --rk-label:    600 13px/1.35 var(--rk-font);
+  --rk-body:     400 13px/1.55 var(--rk-font);
+  --rk-meta:     400 12px/1.45 var(--rk-font);
+  --rk-eyebrow:  700 11px/1.2 var(--rk-font);   --rk-eyebrow-ls: 2px;
+  --rk-badge:    600 12px/1.2 var(--rk-font);
+  --rk-button:   700 13px/1 var(--rk-font);
+  --rk-data:     400 12px/1.4 var(--rk-mono);
+  /* Números de tabla (BPM, tiempos, cantidades): la fuente del sistema con
+     dígitos de ancho fijo, que alinea entre filas igual que la mono y se lee
+     mucho mejor en oscuro. Va con .rk-num (tabular-nums). */
+  --rk-num:      500 13px/1.3 var(--rk-font);
+  --rk-metric:   900 32px/1 var(--rk-font);     --rk-metric-ls: -.8px;
+
+  /* ── Espacio (base 4) ─────────────────────────────────────────────── */
+  --rk-s-1: 4px;  --rk-s-2: 8px;  --rk-s-3: 12px; --rk-s-4: 16px;
+  --rk-s-5: 20px; --rk-s-6: 24px; --rk-s-8: 32px; --rk-s-10: 40px;
+  --rk-s-14: 56px; --rk-s-18: 72px;
+
+  /* ── Tamaños de control ───────────────────────────────────────────── */
+  --rk-h-sm: 28px;   /* dentro de filas y tablas */
+  --rk-h-md: 32px;   /* por omisión */
+  --rk-h-lg: 40px;   /* acciones de pantalla, táctil */
+  --rk-h-xl: 48px;   /* transporte */
+  --rk-row: 48px;    /* fila de lista agrupada */
+  --rk-row-dense: 40px; /* tabla */
+  --rk-label-col: 240px; /* columna de etiquetas de un formulario */
+
+  /* ── Radios ───────────────────────────────────────────────────────── */
+  --rk-r-xs: 4px;    /* chip, rol, ítem de menú, botón del segmentado */
+  --rk-r-sm: 6px;    /* botón, campo, desplegable, segmentado, aviso flotante */
+  --rk-r-md: 8px;    /* superficie de colección, menú, popover */
+  --rk-r-lg: 12px;   /* modal, hoja */
+  --rk-r-pill: 9999px; /* solo interruptor, progreso y contadores */
+
+  /* ── Elevación ────────────────────────────────────────────────────── */
+  --rk-shadow-pop: 0 12px 32px rgba(0, 0, 0, .55);
+  --rk-shadow-modal: 0 24px 64px rgba(0, 0, 0, .6);
+
+  /* ── Movimiento ───────────────────────────────────────────────────── */
+  --rk-fast: 120ms; --rk-base: 180ms; --rk-slow: 280ms;
+  --rk-ease: cubic-bezier(.2, .7, .2, 1);
+
+  /* ── Capas ────────────────────────────────────────────────────────── */
+  --rk-z-sticky: 10; --rk-z-menu: 100; --rk-z-pop: 200;
+  --rk-z-modal: 300; --rk-z-toast: 400; --rk-z-tip: 500;
+
+  /* ── Foco ─────────────────────────────────────────────────────────── */
+  --rk-focus: 0 0 0 2px var(--rk-bg-0), 0 0 0 4px #ffffff;
+}
+
+/* Densidad Operar: Performance en tablet, teléfono y escenario. Mismos
+   roles, más grandes; filas de 52 px para el dedo. */
+[data-rk-density="touch"] {
+  --rk-view:    800 22px/1.2 var(--rk-font);   --rk-view-ls: -.4px;
+  --rk-title:   700 17px/1.3 var(--rk-font);
+  --rk-label:   500 15px/1.35 var(--rk-font);
+  --rk-body:    400 15px/1.5 var(--rk-font);
+  --rk-meta:    400 13px/1.45 var(--rk-font);
+  --rk-button:  700 15px/1 var(--rk-font);
+  --rk-h-sm: 32px; --rk-h-md: 40px; --rk-h-lg: 48px; --rk-h-xl: 56px;
+  --rk-row: 52px;  --rk-row-dense: 48px;
+  --rk-label-col: 260px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --rk-fast: 0ms; --rk-base: 0ms; --rk-slow: 0ms; }
+}
+
+/* ==========================================================================
+   Texto
+   ========================================================================== */
+.rk-display { font: var(--rk-display); letter-spacing: var(--rk-display-ls); color: var(--rk-text-1); }
+.rk-view    { font: var(--rk-view); letter-spacing: var(--rk-view-ls); color: var(--rk-text-1); }
+.rk-section { font: var(--rk-section); letter-spacing: var(--rk-section-ls); color: var(--rk-text-1); }
+.rk-title   { font: var(--rk-title); letter-spacing: var(--rk-title-ls); color: var(--rk-text-1); }
+.rk-label   { font: var(--rk-label); color: var(--rk-text-1); }
+.rk-body    { font: var(--rk-body); color: var(--rk-text-2); }
+.rk-meta    { font: var(--rk-meta); color: var(--rk-text-3); }
+.rk-eyebrow { font: var(--rk-eyebrow); letter-spacing: var(--rk-eyebrow-ls); text-transform: uppercase; color: var(--rk-text-3); }
+.rk-data    { font: var(--rk-data); color: var(--rk-text-1); font-variant-numeric: tabular-nums; }
+.rk-metric  { font: var(--rk-metric); letter-spacing: var(--rk-metric-ls); color: var(--rk-text-1); font-variant-numeric: tabular-nums; }
+.rk-num     { font-variant-numeric: tabular-nums; }
+.rk-link    { color: var(--rk-blue); text-decoration: none; font-weight: 600; cursor: pointer; }
+.rk-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.rk-kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: var(--rk-r-xs); border: 1px solid var(--rk-line-2); border-bottom-width: 2px; background: var(--rk-bg-3); font: 600 11px/1 var(--rk-font); color: var(--rk-text-2); }
+.rk-code { font: var(--rk-data); padding: 1px 6px; border-radius: var(--rk-r-xs); background: var(--rk-bg-3); color: var(--rk-text-1); }
+.rk-ico { width: 16px; height: 16px; flex: none; fill: currentColor; }
+.rk-ico-14 { width: 14px; height: 14px; } .rk-ico-20 { width: 20px; height: 20px; } .rk-ico-24 { width: 24px; height: 24px; }
+.rk-divider { height: 1px; background: var(--rk-line-1); border: 0; margin: var(--rk-s-4) 0; }
+
+/* Foco visible, uno para todo */
+.rk :focus-visible, .rk-focus:focus-visible { outline: none; box-shadow: var(--rk-focus); }
+
+/* ==========================================================================
+   Botones · rectángulo de radio 6; el secundario es contorno
+   ========================================================================== */
+.rk-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: var(--rk-h-md); padding: 0 16px; border-radius: var(--rk-r-sm);
+  border: 1px solid var(--rk-line-2); background: transparent; color: var(--rk-text-1);
+  font: var(--rk-button); white-space: nowrap; cursor: pointer; user-select: none;
+  transition: background var(--rk-fast) var(--rk-ease), border-color var(--rk-fast) var(--rk-ease), box-shadow var(--rk-fast) var(--rk-ease), transform var(--rk-fast) var(--rk-ease);
+}
+.rk-btn:hover { background: var(--rk-fill-1); border-color: var(--rk-line-3); }
+.rk-btn:active { background: var(--rk-fill-2); transform: scale(.98); }
+.rk-btn:disabled, .rk-btn[aria-disabled="true"] { color: var(--rk-text-4); background: transparent; border-color: var(--rk-line-1); cursor: default; transform: none; }
+.rk-btn--primary { background: var(--rk-green); border-color: var(--rk-green); color: var(--rk-on-green); font-weight: 800; }
+.rk-btn--primary:hover { background: #1fdf64; border-color: #1fdf64; }
+.rk-btn--primary:active { background: #19c457; }
+.rk-btn--primary:disabled { background: var(--rk-green-bg); border-color: transparent; color: rgba(30, 215, 96, .45); box-shadow: none; }
+.rk-btn--quiet { background: none; border-color: transparent; color: var(--rk-text-2); font-weight: 600; padding: 0 10px; }
+.rk-btn--quiet:hover { background: var(--rk-fill-1); border-color: transparent; color: var(--rk-text-1); }
+.rk-btn--danger { background: transparent; border-color: var(--rk-red-line); color: var(--rk-red); }
+.rk-btn--danger:hover { background: rgba(252, 60, 68, .2); border-color: var(--rk-red); }
+.rk-btn--sm { height: var(--rk-h-sm); padding: 0 12px; font-size: 12px; }
+.rk-btn--lg { height: var(--rk-h-lg); padding: 0 20px; }
+.rk-btn--icon { width: var(--rk-h-md); padding: 0; }
+.rk-btn--icon.rk-btn--sm { width: var(--rk-h-sm); }
+.rk-btn--icon.rk-btn--lg { width: var(--rk-h-lg); }
+.rk-btn.is-loading { color: transparent; position: relative; pointer-events: none; }
+.rk-btn.is-loading::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-color: var(--rk-text-2) transparent var(--rk-text-2) transparent; animation: rk-spin .8s linear infinite; }
+.rk-btn--primary.is-loading::after { border-color: #000 transparent #000 transparent; }
+.rk-btn-group { display: inline-flex; gap: var(--rk-s-2); align-items: center; }
+.rk-split { display: inline-flex; }
+.rk-split > .rk-btn:first-child { border-radius: var(--rk-r-sm) 0 0 var(--rk-r-sm); padding-right: 12px; }
+.rk-split > .rk-btn:last-child { border-radius: 0 var(--rk-r-sm) var(--rk-r-sm) 0; width: 30px; padding: 0; margin-left: 1px; }
+.rk-fab { position: relative; display: inline-grid; place-items: center; width: 52px; height: 52px; border-radius: var(--rk-r-lg); background: var(--rk-green); color: #000; border: 0; box-shadow: var(--rk-shadow-pop); cursor: pointer; }
+
+/* ==========================================================================
+   Campos
+   ========================================================================== */
+.rk-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.rk-field > .rk-field-label { font: var(--rk-label); color: var(--rk-text-1); display: flex; align-items: center; gap: 6px; }
+.rk-field > .rk-field-msg { font: var(--rk-meta); color: var(--rk-text-3); }
+.rk-field.is-error > .rk-field-msg { color: var(--rk-red); }
+.rk-input {
+  height: var(--rk-h-md); width: 100%; min-width: 0; padding: 0 12px;
+  border-radius: var(--rk-r-sm); border: 1px solid var(--rk-line-2); background: var(--rk-bg-3);
+  color: var(--rk-text-1); font: 400 13px/1 var(--rk-font); outline: none; -webkit-appearance: none; appearance: none;
+  transition: border-color var(--rk-fast) var(--rk-ease), background var(--rk-fast) var(--rk-ease);
+}
+[data-rk-density="touch"] .rk-input { font-size: 15px; }
+.rk-input::placeholder { color: var(--rk-text-3); }
+.rk-input:hover { border-color: var(--rk-line-3); }
+.rk-input:focus { border-color: var(--rk-text-1); background: var(--rk-bg-4); }
+.rk-input:disabled { color: var(--rk-text-4); background: var(--rk-fill-1); border-color: var(--rk-line-1); }
+.rk-field.is-error .rk-input { border-color: var(--rk-red); }
+.rk-input--data { font-family: var(--rk-mono); font-size: 12px; }
+.rk-input--sm { height: var(--rk-h-sm); }
+textarea.rk-input { height: auto; min-height: 88px; padding: 10px 12px; line-height: 1.5; resize: vertical; }
+input[type=number].rk-input::-webkit-inner-spin-button, input[type=number].rk-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.rk-affix { position: relative; display: flex; align-items: center; min-width: 0; }
+.rk-affix > .rk-input { padding-right: 40px; }
+.rk-affix > .rk-affix-end { position: absolute; right: 12px; font: var(--rk-meta); color: var(--rk-text-3); pointer-events: none; }
+.rk-search { position: relative; display: flex; align-items: center; }
+.rk-search > .rk-ico { position: absolute; left: 11px; color: var(--rk-text-3); pointer-events: none; }
+.rk-search > .rk-input { padding-left: 34px; }
+
+/* Paso a paso: − valor + */
+.rk-stepper { display: inline-flex; align-items: center; height: var(--rk-h-md); border-radius: var(--rk-r-sm); border: 1px solid var(--rk-line-2); background: var(--rk-bg-3); }
+.rk-stepper button { width: var(--rk-h-md); height: 100%; border: 0; background: none; color: var(--rk-text-2); font: 700 15px/1 var(--rk-font); cursor: pointer; border-radius: 0; }
+.rk-stepper button:hover { color: var(--rk-text-1); background: var(--rk-fill-1); }
+.rk-stepper output { min-width: 44px; text-align: center; font: 600 13px/1 var(--rk-font); color: var(--rk-text-1); font-variant-numeric: tabular-nums; }
+
+/* Desplegable propio (reemplaza <select>) */
+.rk-select { position: relative; display: inline-flex; min-width: 160px; }
+.rk-select-trigger {
+  display: flex; align-items: center; gap: 10px; width: 100%; height: var(--rk-h-md); padding: 0 10px 0 12px;
+  border-radius: var(--rk-r-sm); border: 1px solid var(--rk-line-2); background: var(--rk-bg-3);
+  color: var(--rk-text-1); font: 600 13px/1 var(--rk-font); cursor: pointer; text-align: left;
+}
+[data-rk-density="touch"] .rk-select-trigger { font-size: 15px; font-weight: 500; }
+.rk-select-trigger:hover { border-color: var(--rk-line-3); }
+.rk-select-trigger > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rk-select-trigger > .rk-ico { color: var(--rk-text-3); }
+.rk-select.is-open .rk-select-trigger { border-color: var(--rk-text-1); }
+
+/* Menú: el del desplegable, el «…», el contextual y el combobox */
+.rk-menu { min-width: 200px; max-width: 320px; padding: 6px; border-radius: var(--rk-r-md); border: 1px solid var(--rk-line-2); background: var(--rk-bg-3); box-shadow: var(--rk-shadow-pop); z-index: var(--rk-z-menu); }
+.rk-menu-label { padding: 8px 10px 4px; font: var(--rk-eyebrow); letter-spacing: var(--rk-eyebrow-ls); text-transform: uppercase; color: var(--rk-text-3); }
+.rk-menu-item { display: flex; align-items: center; gap: 10px; min-height: 32px; padding: 0 10px; border-radius: var(--rk-r-xs); font: 600 13px/1.2 var(--rk-font); color: var(--rk-text-1); cursor: pointer; }
+[data-rk-density="touch"] .rk-menu-item { min-height: 44px; font-size: 15px; font-weight: 500; }
+.rk-menu-item:hover, .rk-menu-item.is-active { background: var(--rk-bg-4); }
+.rk-menu-item > .rk-ico { color: var(--rk-text-2); }
+.rk-menu-item > .rk-menu-end { margin-left: auto; font: var(--rk-meta); color: var(--rk-text-3); }
+.rk-menu-item[aria-checked="true"]::after { content: ''; margin-left: auto; width: 10px; height: 6px; border-left: 2px solid var(--rk-green); border-bottom: 2px solid var(--rk-green); transform: rotate(-45deg) translate(1px, -2px); }
+.rk-menu-item.is-danger { color: var(--rk-red); }
+.rk-menu-item.is-danger > .rk-ico { color: var(--rk-red); }
+.rk-menu-item mark { background: none; color: var(--rk-green); }
+.rk-menu-item[aria-disabled="true"] { color: var(--rk-text-4); cursor: default; background: none; }
+.rk-menu-sep { height: 1px; margin: 6px 4px; background: var(--rk-line-1); }
+.rk-menu-hint { padding: 6px 10px 4px; font: var(--rk-meta); color: var(--rk-text-3); }
+
+/* Interruptor (on/off que se aplica al momento) */
+.rk-switch { position: relative; display: inline-flex; flex: none; width: 38px; height: 22px; }
+[data-rk-density="touch"] .rk-switch { width: 46px; height: 28px; }
+.rk-switch input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; z-index: 1; }
+.rk-switch > span { position: absolute; inset: 0; border-radius: var(--rk-r-pill); background: #3a3a3a; transition: background var(--rk-base) var(--rk-ease); }
+.rk-switch > span::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform var(--rk-base) var(--rk-ease); }
+[data-rk-density="touch"] .rk-switch > span::after { width: 24px; height: 24px; }
+.rk-switch input:checked + span { background: var(--rk-green); }
+.rk-switch input:checked + span::after { transform: translateX(16px); }
+[data-rk-density="touch"] .rk-switch input:checked + span::after { transform: translateX(18px); }
+.rk-switch input:disabled + span { opacity: .4; }
+.rk-switch input:focus-visible + span { box-shadow: var(--rk-focus); }
+
+/* Casilla (elegir varios de una lista) y radio */
+.rk-check, .rk-radio { display: inline-flex; align-items: center; gap: 10px; font: var(--rk-label); color: var(--rk-text-1); cursor: pointer; }
+.rk-check input, .rk-radio input { -webkit-appearance: none; appearance: none; margin: 0; width: 18px; height: 18px; flex: none; border: 1.5px solid var(--rk-line-3); background: var(--rk-bg-3); cursor: pointer; display: grid; place-items: center; transition: background var(--rk-fast) var(--rk-ease), border-color var(--rk-fast) var(--rk-ease); }
+.rk-check input { border-radius: var(--rk-r-xs); }
+.rk-radio input { border-radius: 50%; }
+.rk-check input:checked { background: var(--rk-green); border-color: var(--rk-green); }
+.rk-check input:checked::after { content: ''; width: 9px; height: 5px; border-left: 2px solid #000; border-bottom: 2px solid #000; transform: rotate(-45deg) translate(1px, -1px); }
+.rk-check input:indeterminate { background: var(--rk-green); border-color: var(--rk-green); }
+.rk-check input:indeterminate::after { content: ''; width: 8px; height: 2px; background: #000; }
+.rk-radio input:checked { border-color: var(--rk-green); }
+.rk-radio input:checked::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--rk-green); }
+.rk-check input:disabled, .rk-radio input:disabled { opacity: .4; }
+.rk-check input:focus-visible, .rk-radio input:focus-visible { box-shadow: var(--rk-focus); }
+
+/* Segmentado: elegir 1 de 2–5 opciones excluyentes */
+.rk-seg { display: inline-flex; padding: 2px; gap: 2px; border-radius: var(--rk-r-sm); background: var(--rk-bg-3); border: 1px solid var(--rk-line-1); }
+.rk-seg > button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: calc(var(--rk-h-md) - 8px); padding: 0 12px; border: 0; border-radius: var(--rk-r-xs); background: none; color: var(--rk-text-2); font: 600 12px/1 var(--rk-font); cursor: pointer; white-space: nowrap; }
+[data-rk-density="touch"] .rk-seg > button { font-size: 14px; }
+.rk-seg > button:hover { color: var(--rk-text-1); }
+.rk-seg > button[aria-pressed="true"], .rk-seg > button[aria-selected="true"] { background: var(--rk-bg-4); color: var(--rk-text-1); box-shadow: 0 1px 2px rgba(0,0,0,.4); }
+.rk-seg--fill { display: flex; } .rk-seg--fill > button { flex: 1; }
+.rk-seg > button.rk-seg-icon { width: calc(var(--rk-h-md) - 6px); padding: 0; }
+
+/* Deslizador */
+.rk-range { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.rk-range input { -webkit-appearance: none; appearance: none; flex: 1; min-width: 80px; height: 4px; border-radius: var(--rk-r-pill); background: linear-gradient(var(--rk-text-1), var(--rk-text-1)) 0 / var(--rk-fill, 50%) 100% no-repeat, #3a3a3a; outline: none; }
+.rk-range input::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 0; box-shadow: 0 1px 4px rgba(0,0,0,.5); cursor: pointer; }
+.rk-range input:focus-visible::-webkit-slider-thumb { box-shadow: var(--rk-focus); }
+.rk-range output { min-width: 48px; text-align: right; font: var(--rk-data); color: var(--rk-text-2); }
+
+/* Color */
+.rk-swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.rk-swatch { width: 24px; height: 24px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; background: var(--c); box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+.rk-swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--rk-bg-2), 0 0 0 4px #fff; }
+.rk-swatch--custom { background: conic-gradient(#fc3c44, #ff9f0a, #1ed760, #64d2ff, #bf5af2, #fc3c44); }
+.rk-color-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; }
+
+/* Capturar entrada (aprender MIDI, tecla) */
+.rk-capture { display: inline-flex; align-items: center; gap: 8px; height: var(--rk-h-md); padding: 0 14px; border-radius: var(--rk-r-sm); border: 1px dashed var(--rk-line-3); color: var(--rk-text-2); font: 600 12px/1 var(--rk-font); }
+.rk-capture.is-listening { border-style: solid; border-color: var(--rk-amber); color: var(--rk-amber); background: var(--rk-amber-bg); }
+.rk-capture.is-listening::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: rk-pulse 1s ease-in-out infinite; }
+
+/* PIN */
+.rk-pin { display: inline-flex; gap: 8px; }
+.rk-pin input { width: 40px; height: 48px; text-align: center; border-radius: var(--rk-r-sm); border: 1px solid var(--rk-line-2); background: var(--rk-bg-3); color: var(--rk-text-1); font: 700 20px/1 var(--rk-mono); outline: none; }
+.rk-pin input:focus { border-color: var(--rk-text-1); }
+
+/* Soltar archivos */
+.rk-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 28px 20px; border-radius: var(--rk-r-md); border: 1.5px dashed var(--rk-line-2); text-align: center; color: var(--rk-text-2); font: var(--rk-body); }
+.rk-drop > .rk-ico { color: var(--rk-text-3); width: 24px; height: 24px; }
+.rk-drop.is-over { border-color: var(--rk-green); background: var(--rk-green-bg); color: var(--rk-text-1); }
+
+/* ==========================================================================
+   Contenedores
+   ========================================================================== */
+/* Grupo: el contenedor por omisión de un formulario. Título con una línea
+   debajo y filas sobre la página; sin fondo, borde ni radio. */
+.rk-group + .rk-group { margin-top: var(--rk-s-10); }
+.rk-group-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 24px; padding-bottom: 10px; border-bottom: 1px solid var(--rk-line-2); }
+.rk-group-title { flex: 1; min-width: 0; font: var(--rk-title); letter-spacing: var(--rk-title-ls); color: var(--rk-text-1); }
+.rk-group-foot { margin-top: 10px; font: var(--rk-meta); color: var(--rk-text-3); }
+.rk-list { min-width: 0; }
+/* Colección: filas comparables (setlist, entradas) sobre una superficie */
+.rk-list--surface { background: var(--rk-bg-2); border: 1px solid var(--rk-line-1); border-radius: var(--rk-r-md); overflow: hidden; }
+.rk-row { display: flex; align-items: center; gap: 12px; min-height: var(--rk-row); padding: 8px 0; border-top: 1px solid var(--rk-line-1); }
+.rk-row:first-child { border-top: 0; }
+.rk-list--surface > .rk-row { padding: 8px 16px; }
+.rk-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+/* En un formulario la etiqueta ocupa una columna fija y el control va a su
+   lado, no empujado al borde derecho. */
+.rk-group .rk-row-main { flex: 0 0 min(var(--rk-label-col), 42%); }
+.rk-group .rk-row > :not(.rk-row-main) { min-width: 0; }
+.rk-row-main > .rk-row-label { font: var(--rk-label); color: var(--rk-text-1); display: flex; align-items: center; gap: 6px; }
+.rk-row-main > .rk-row-sub { font: var(--rk-meta); color: var(--rk-text-3); }
+.rk-row-end { display: flex; align-items: center; gap: 8px; flex: none; }
+.rk-row-value { font: var(--rk-body); color: var(--rk-text-2); }
+.rk-row--link { margin: 0 -10px; padding-left: 10px; padding-right: 10px; border-radius: var(--rk-r-sm); cursor: pointer; }
+.rk-row--link:hover { background: var(--rk-fill-1); }
+.rk-row--link .rk-row-end::after { content: ''; width: 7px; height: 7px; border-right: 2px solid var(--rk-text-3); border-top: 2px solid var(--rk-text-3); transform: rotate(45deg); margin: 0 4px 0 2px; }
+.rk-row.is-selected { background: var(--rk-fill-1); }
+.rk-list--surface > .rk-row.is-selected { background: var(--rk-bg-3); }
+.rk-row.is-disabled .rk-row-label { color: var(--rk-text-4); }
+.rk-row--action { justify-content: flex-start; }
+.rk-group .rk-row--action { padding-left: calc(min(var(--rk-label-col), 42%) + 12px); }
+.rk-row--wrap { flex-wrap: wrap; }
+.rk-row-lead { width: 28px; height: 28px; flex: none; border-radius: var(--rk-r-xs); display: grid; place-items: center; background: var(--rk-bg-3); color: var(--rk-text-2); font: 700 12px/1 var(--rk-font); }
+
+/* Tarjeta: un objeto con nombre, estado y acciones (motor, dispositivo,
+   informe). Cabecera con línea; cuerpo y pie sobre la página. No se usa
+   para envolver un solo ajuste: para eso está el grupo. */
+.rk-card { min-width: 0; }
+.rk-card-head { display: flex; align-items: center; gap: 12px; min-height: 44px; padding-bottom: 10px; border-bottom: 1px solid var(--rk-line-2); }
+.rk-card-head > .rk-title { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+.rk-card-body { padding: 16px 0; }
+.rk-card-body > .rk-list { margin: -16px 0; }
+.rk-card-foot { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--rk-line-1); }
+.rk-card .rk-toolbar { padding: 0; }
+
+/* Métricas (Resumen): una franja con divisiones, no baldosas */
+.rk-metric-tile { display: flex; flex-direction: column; gap: 8px; padding: 2px 0 2px 20px; border-left: 1px solid var(--rk-line-2); }
+
+/* Datos clave–valor */
+.rk-dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 20px; margin: 0; }
+.rk-dl dt { font: var(--rk-meta); color: var(--rk-text-3); }
+.rk-dl dd { margin: 0; font: var(--rk-body); color: var(--rk-text-1); text-align: right; }
+
+/* Tabla: colección, así que va sobre superficie */
+.rk-table-wrap { background: var(--rk-bg-2); border: 1px solid var(--rk-line-1); border-radius: var(--rk-r-md); overflow: auto; }
+.rk-table { width: 100%; border-collapse: collapse; }
+.rk-table th { position: sticky; top: 0; z-index: var(--rk-z-sticky); height: 36px; padding: 0 12px; background: var(--rk-bg-2); border-bottom: 1px solid var(--rk-line-1); text-align: left; font: var(--rk-eyebrow); letter-spacing: var(--rk-eyebrow-ls); text-transform: uppercase; color: var(--rk-text-3); white-space: nowrap; }
+.rk-table th[aria-sort] { cursor: pointer; } .rk-table th[aria-sort="ascending"]::after { content: ' ↑'; } .rk-table th[aria-sort="descending"]::after { content: ' ↓'; }
+.rk-table td { height: var(--rk-row-dense); padding: 0 12px; border-bottom: 1px solid var(--rk-line-1); font: var(--rk-body); color: var(--rk-text-2); vertical-align: middle; }
+.rk-table tr:last-child td { border-bottom: 0; }
+.rk-table td.rk-td-main { font: var(--rk-label); color: var(--rk-text-1); }
+.rk-table td.rk-td-num { font: var(--rk-num); font-variant-numeric: tabular-nums; text-align: right; color: var(--rk-text-2); }
+.rk-table tbody tr:hover td { background: var(--rk-fill-1); }
+.rk-table tr.is-selected td { background: var(--rk-bg-3); }
+.rk-table tr.rk-tr-group td { height: 36px; background: var(--rk-bg-1); font: var(--rk-title); letter-spacing: var(--rk-title-ls); color: var(--rk-text-1); }
+.rk-table tr.is-off td:not(:first-child) { color: var(--rk-text-4); }
+
+/* Desplegable de detalle */
+.rk-disclosure { border-top: 1px solid var(--rk-line-2); border-bottom: 1px solid var(--rk-line-1); }
+.rk-disclosure > summary { display: flex; align-items: center; gap: 10px; min-height: var(--rk-row); padding: 0; list-style: none; cursor: pointer; font: var(--rk-label); color: var(--rk-text-1); }
+.rk-disclosure > summary::-webkit-details-marker { display: none; }
+.rk-disclosure > summary::before { content: ''; width: 6px; height: 6px; border-right: 2px solid var(--rk-text-3); border-bottom: 2px solid var(--rk-text-3); transform: rotate(-45deg); transition: transform var(--rk-fast) var(--rk-ease); }
+.rk-disclosure[open] > summary::before { transform: rotate(45deg); }
+.rk-disclosure > summary > .rk-meta { margin-left: auto; }
+.rk-disclosure > .rk-disclosure-body { padding: 0 0 16px 16px; }
+
+/* Barra de herramientas (la ÚNICA barra sobre el contenido) */
+.rk-toolbar { display: flex; align-items: center; gap: 8px; min-height: 56px; padding: 0 var(--rk-s-6); border-bottom: 1px solid var(--rk-line-1); }
+.rk-toolbar-sep { width: 1px; height: 20px; background: var(--rk-line-2); margin: 0 4px; }
+.rk-spacer { flex: 1; }
+
+/* Pestañas de módulo (dentro de la barra): subrayadas */
+.rk-tabs { display: inline-flex; gap: 2px; }
+.rk-tab { display: inline-flex; align-items: center; gap: 6px; height: 56px; padding: 0 12px; border: 0; border-radius: 0; background: none; box-shadow: inset 0 -2px 0 transparent; color: var(--rk-text-2); font: 700 13px/1 var(--rk-font); cursor: pointer; }
+.rk-tab:hover { color: var(--rk-text-1); }
+.rk-tab[aria-selected="true"] { color: var(--rk-text-1); box-shadow: inset 0 -2px 0 var(--rk-text-1); }
+.rk-tab > .rk-count { min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--rk-r-pill); background: var(--rk-fill-2); font: 700 10px/18px var(--rk-font); text-align: center; color: var(--rk-text-1); }
+
+/* Pasos (tappers: Preparar · Marcar · Revisar) */
+.rk-steps { display: inline-flex; align-items: center; gap: 4px; }
+.rk-step { display: inline-flex; align-items: center; gap: 8px; height: var(--rk-h-md); padding: 0 12px 0 6px; color: var(--rk-text-3); font: 700 13px/1 var(--rk-font); }
+.rk-step > i { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid currentColor; display: grid; place-items: center; font: 800 10px/1 var(--rk-font); font-style: normal; }
+.rk-step.is-current { color: var(--rk-text-1); }
+.rk-step.is-current > i { border-color: var(--rk-green); color: var(--rk-green); }
+.rk-step.is-done { color: var(--rk-text-2); }
+.rk-step.is-done > i { background: var(--rk-green); border-color: var(--rk-green); color: #000; }
+
+/* ==========================================================================
+   Estado y avisos
+   ========================================================================== */
+/* Badge: SOLO estado, como texto con punto de color (sin cápsula). El valor
+   lo dice el control; el alcance, el título del grupo. */
+.rk-badge { display: inline-flex; align-items: center; gap: 6px; color: var(--rk-text-2); font: var(--rk-badge); white-space: nowrap; }
+.rk-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.rk-badge--plain::before { display: none; }
+.rk-badge--ok { color: var(--rk-green); }
+.rk-badge--warn { color: var(--rk-amber); }
+.rk-badge--error { color: var(--rk-red); }
+.rk-badge--info { color: var(--rk-blue); }
+.rk-badge--live::before { animation: rk-pulse 1.2s ease-in-out infinite; }
+
+.rk-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--rk-text-3); flex: none; }
+.rk-dot--ok { background: var(--rk-green); } .rk-dot--warn { background: var(--rk-amber); } .rk-dot--error { background: var(--rk-red); } .rk-dot--info { background: var(--rk-blue); }
+
+/* Chip: un valor que se puede quitar o elegir (filtros, etiquetas, fuentes) */
+.rk-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: var(--rk-r-xs); border: 1px solid var(--rk-line-2); background: var(--rk-fill-1); color: var(--rk-text-1); font: 600 12px/1 var(--rk-font); white-space: nowrap; }
+.rk-chip > button { display: grid; place-items: center; width: 16px; height: 16px; margin-right: -4px; border: 0; border-radius: 50%; background: none; color: var(--rk-text-3); cursor: pointer; padding: 0; }
+.rk-chip > button:hover { background: var(--rk-fill-2); color: var(--rk-text-1); }
+.rk-chip--filter { cursor: pointer; color: var(--rk-text-2); }
+.rk-chip--filter[aria-pressed="true"] { background: var(--rk-text-1); border-color: var(--rk-text-1); color: #000; }
+.rk-chip--phrase { font: 700 11px/1 var(--rk-mono); letter-spacing: .4px; background: var(--rk-teal-bg); border-color: var(--rk-teal-line); color: var(--rk-teal); }
+
+/* Aviso en línea: algo que hay que saber o resolver en ESTA vista. Sin caja:
+   el ícono y el título llevan el color. */
+.rk-notice { display: flex; align-items: flex-start; gap: 12px; padding: 4px 0; font: var(--rk-body); color: var(--rk-text-1); }
+.rk-notice > .rk-ico { margin-top: 1px; color: var(--rk-text-2); }
+.rk-notice > .rk-notice-main { flex: 1; min-width: 0; }
+.rk-notice > .rk-notice-main > b { display: block; font: var(--rk-label); margin-bottom: 2px; }
+.rk-notice > .rk-notice-main > span { color: var(--rk-text-2); }
+.rk-notice--warn > .rk-ico, .rk-notice--warn > .rk-notice-main > b { color: var(--rk-amber); }
+.rk-notice--error > .rk-ico, .rk-notice--error > .rk-notice-main > b { color: var(--rk-red); }
+.rk-notice--ok > .rk-ico, .rk-notice--ok > .rk-notice-main > b { color: var(--rk-green); }
+.rk-notice--info > .rk-ico, .rk-notice--info > .rk-notice-main > b { color: var(--rk-blue); }
+
+/* Franja global: estado de toda la app (REAPER desconectado) */
+.rk-banner { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 32px; padding: 6px 16px; font: 700 12px/1.3 var(--rk-font); color: #000; background: var(--rk-amber); }
+.rk-banner--error { background: var(--rk-red); color: #fff; }
+
+/* Toast: confirmación pasajera de algo que hizo el usuario */
+.rk-toast { display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 8px 0 14px; border-radius: var(--rk-r-sm); background: var(--rk-bg-4); border: 1px solid var(--rk-line-2); box-shadow: var(--rk-shadow-pop); font: 600 13px/1.2 var(--rk-font); color: var(--rk-text-1); z-index: var(--rk-z-toast); }
+.rk-toast > .rk-ico { color: var(--rk-green); }
+.rk-toast--error > .rk-ico { color: var(--rk-red); }
+
+/* Progreso */
+.rk-progress { height: 4px; border-radius: var(--rk-r-pill); background: var(--rk-fill-2); overflow: hidden; }
+.rk-progress > span { display: block; height: 100%; width: var(--v, 0%); background: var(--rk-text-1); border-radius: inherit; transition: width var(--rk-base) var(--rk-ease); }
+.rk-progress--ok > span { background: var(--rk-green); }
+.rk-progress.is-indeterminate > span { width: 30%; animation: rk-indet 1.2s var(--rk-ease) infinite; }
+.rk-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--rk-fill-3); border-top-color: var(--rk-text-1); animation: rk-spin .8s linear infinite; flex: none; }
+.rk-ring { --v: 0; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(closest-side, var(--rk-bg-0) 82%, transparent 84%), conic-gradient(var(--rk-ring-c, var(--rk-green)) calc(var(--v) * 1%), var(--rk-fill-2) 0); font: 900 15px/1 var(--rk-font); color: var(--rk-text-1); font-variant-numeric: tabular-nums; }
+.rk-skeleton { border-radius: var(--rk-r-xs); background: linear-gradient(90deg, var(--rk-fill-1), var(--rk-fill-2), var(--rk-fill-1)) 0 0 / 200% 100%; animation: rk-shimmer 1.4s linear infinite; }
+
+/* Estado vacío: una invitación, no una disculpa */
+.rk-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 48px 24px; }
+.rk-empty > .rk-empty-ico { width: 44px; height: 44px; display: grid; place-items: center; color: var(--rk-text-3); margin-bottom: 6px; }
+.rk-empty > .rk-title { font-size: 15px; }
+.rk-empty > .rk-body { max-width: 340px; }
+.rk-empty > .rk-btn { margin-top: 8px; }
+
+/* ==========================================================================
+   Ayuda
+   ========================================================================== */
+/* (?) para la ayuda que no puede faltar */
+.rk-help { display: inline-grid; place-items: center; width: 16px; height: 16px; flex: none; padding: 0; border-radius: 50%; border: 1px solid var(--rk-line-3); background: none; color: var(--rk-text-3); font: 700 10px/1 var(--rk-font); cursor: pointer; }
+.rk-help:hover, .rk-help[aria-expanded="true"] { color: var(--rk-text-1); border-color: var(--rk-text-2); }
+[data-rk-density="touch"] .rk-help { width: 20px; height: 20px; font-size: 11px; }
+/* Burbuja: la descripción de un título al pasar el mouse (data-hint) */
+.rk-hint { position: fixed; z-index: var(--rk-z-tip); max-width: 280px; padding: 8px 11px; border-radius: var(--rk-r-sm); background: var(--rk-bg-4); border: 1px solid var(--rk-line-2); box-shadow: var(--rk-shadow-pop); font: 400 12px/1.45 var(--rk-font); color: var(--rk-text-1); pointer-events: none; }
+[data-hint] { cursor: help; }
+/* Popover de ayuda (lo que abre el (?)) */
+.rk-popover { width: 300px; padding: 14px 16px; border-radius: var(--rk-r-md); background: var(--rk-bg-3); border: 1px solid var(--rk-line-2); box-shadow: var(--rk-shadow-pop); z-index: var(--rk-z-pop); }
+.rk-popover > .rk-popover-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font: var(--rk-label); color: var(--rk-text-1); }
+.rk-popover > p { margin: 0; font: var(--rk-body); color: var(--rk-text-2); }
+.rk-popover > p + p { margin-top: 8px; }
+
+/* ==========================================================================
+   Superposiciones
+   ========================================================================== */
+.rk-scrim { position: fixed; inset: 0; background: var(--rk-scrim); z-index: var(--rk-z-modal); display: grid; place-items: center; padding: 24px; }
+.rk-modal { width: min(440px, 100%); border-radius: var(--rk-r-lg); background: var(--rk-bg-2); border: 1px solid var(--rk-line-2); box-shadow: var(--rk-shadow-modal); overflow: hidden; }
+.rk-modal--wide { width: min(720px, 100%); }
+.rk-modal-head { padding: 22px 24px 4px; }
+.rk-modal-head > .rk-section { display: block; }
+.rk-modal-head > .rk-meta { display: block; margin-top: 4px; }
+.rk-modal-body { padding: 12px 24px 20px; font: var(--rk-body); color: var(--rk-text-2); }
+.rk-modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--rk-line-1); }
+.rk-modal-foot > .rk-spacer { flex: 1; }
+/* Hoja inferior (teléfono) */
+.rk-sheet { width: 100%; max-width: 520px; border-radius: var(--rk-r-lg) var(--rk-r-lg) 0 0; background: var(--rk-bg-2); border: 1px solid var(--rk-line-2); border-bottom: 0; padding: 8px 16px 24px; }
+.rk-sheet::before { content: ''; display: block; width: 36px; height: 5px; border-radius: var(--rk-r-pill); background: var(--rk-fill-3); margin: 0 auto 12px; }
+
+/* ==========================================================================
+   Marco de la app
+   ========================================================================== */
+.rk-app { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100%; background: var(--rk-bg-0); color: var(--rk-text-1); font-family: var(--rk-font); -webkit-font-smoothing: antialiased; }
+.rk-nav { background: var(--rk-bg-1); border-right: 1px solid var(--rk-line-1); padding: 16px 10px; display: flex; flex-direction: column; gap: 2px; }
+.rk-nav-brand { font: 900 13px/1 var(--rk-font); letter-spacing: 2px; padding: 4px 10px 20px; }
+.rk-nav-brand b { color: var(--rk-green); font-weight: 900; }
+.rk-nav-label { font: 600 12px/1.2 var(--rk-font); color: var(--rk-text-3); padding: 16px 10px 6px; }
+.rk-nav-item { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border-radius: var(--rk-r-sm); color: var(--rk-text-2); font: 600 13px/1 var(--rk-font); cursor: pointer; }
+.rk-nav-item:hover { background: var(--rk-fill-1); color: var(--rk-text-1); }
+.rk-nav-item[aria-current="page"] { background: var(--rk-fill-1); color: var(--rk-text-1); }
+.rk-nav-item > .rk-ico { color: var(--rk-text-3); }
+.rk-nav-item[aria-current="page"] > .rk-ico { color: var(--rk-text-1); }
+.rk-nav-item > .rk-dot { margin-left: auto; }
+.rk-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.rk-topbar { display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 12px var(--rk-s-6); border-bottom: 1px solid var(--rk-line-1); }
+.rk-topbar-title { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.rk-topbar-crumb { font: 500 12px/1.2 var(--rk-font); color: var(--rk-text-3); }
+.rk-content { flex: 1; min-height: 0; overflow: auto; padding: var(--rk-s-6); }
+.rk-content--split { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--rk-s-6); align-items: start; }
+.rk-content--split > :last-child { padding-left: var(--rk-s-6); border-left: 1px solid var(--rk-line-1); }
+.rk-column { max-width: 680px; }
+.rk-rail { background: var(--rk-bg-1); border-left: 1px solid var(--rk-line-1); }
+.rk-statusbar { display: flex; align-items: center; gap: 12px; height: 28px; padding: 0 var(--rk-s-6); border-top: 1px solid var(--rk-line-1); background: var(--rk-bg-1); font: var(--rk-meta); color: var(--rk-text-3); }
+
+/* Selector de vista (Performance): identidad de color por vista, subrayada */
+.rk-viewtabs { display: inline-flex; }
+.rk-viewtab { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border: 0; border-radius: 0; background: none; box-shadow: inset 0 -2px 0 transparent; color: rgb(var(--v) / .62); font: 800 11px/1 var(--rk-font); letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
+.rk-viewtab[aria-selected="true"] { box-shadow: inset 0 -2px 0 rgb(var(--v)); color: rgb(var(--v)); }
+
+/* Rol del dispositivo */
+.rk-role { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: var(--rk-r-xs); font: 800 10.5px/1 var(--rk-font); letter-spacing: .05em; text-transform: uppercase; }
+.rk-role--director { background: var(--rk-green-bg); color: var(--rk-green); }
+.rk-role--player { background: var(--rk-blue-bg); color: var(--rk-blue); }
+
+/* Selector de host A|B */
+.rk-hosts { display: inline-flex; height: 30px; padding: 0; border-radius: var(--rk-r-sm); background: #161616; border: 1px solid #2b2b2b; overflow: hidden; }
+.rk-host { position: relative; min-width: 34px; padding: 0 8px; border: 0; background: none; color: #9a9a9a; font: 700 12px/1 var(--rk-font); cursor: pointer; }
+.rk-host + .rk-host { border-left: 1px solid #2b2b2b; }
+.rk-host::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 4px; height: 2px; border-radius: 2px; background: var(--st, var(--rk-green)); }
+.rk-host[aria-pressed="true"] { background: var(--st, var(--rk-green)); color: #0b0b0b; }
+.rk-host[aria-pressed="true"]::after { display: none; }
+
+/* Letra/número de identidad (host, número de canción) */
+.rk-tile { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: var(--rk-r-xs); background: var(--rk-bg-3); font: 800 12px/1 var(--rk-font); color: var(--rk-text-1); flex: none; }
+
+/* ==========================================================================
+   Show: transporte, reproductor, filas del setlist
+   ========================================================================== */
+/* Transporte: la forma del Editor (icon-btn del setlist, am-tbtn de los
+   módulos). Cuadrado de radio 10 (el del Editor, a propósito fuera de la
+   escala), nunca círculo. Glifos propios de ReaSet,
+   rellenos (reaset-glyphs.svg), no Phosphor: son los que ya usa el Editor. */
+.rk-transport { display: flex; align-items: center; gap: 8px; }
+.rk-tbtn { --rk-tbtn: var(--rk-h-md); display: inline-grid; place-items: center; width: var(--rk-tbtn); height: var(--rk-tbtn); padding: 0; border: 1px solid var(--rk-line-1); border-radius: 10px; background: var(--rk-fill-1); color: var(--rk-text-2); cursor: pointer; transition: color var(--rk-fast) var(--rk-ease), background var(--rk-fast) var(--rk-ease), border-color var(--rk-fast) var(--rk-ease); }
+.rk-tbtn svg { width: 15px; height: 15px; fill: currentColor; }
+.rk-tbtn:hover:not(:disabled) { color: var(--rk-text-1); background: var(--rk-fill-2); }
+.rk-tbtn--play { --rk-tbtn: 42px; border-color: transparent; background: var(--rk-green); color: #000; }
+[data-rk-density="touch"] .rk-tbtn--play { --rk-tbtn: 52px; }
+.rk-tbtn--play svg { width: 17px; height: 17px; }
+.rk-tbtn--play:hover:not(:disabled) { background: #1fdf64; color: #000; }
+.rk-tbtn--play.is-go { background: var(--rk-amber); font: 800 12px/1 var(--rk-font); letter-spacing: .5px; }
+.rk-tbtn--play.is-go:hover:not(:disabled) { background: #ffad2e; }
+.rk-tbtn--stop.is-cancel { background: var(--rk-red); border-color: transparent; color: #fff; }
+.rk-tbtn.is-on { color: var(--rk-state-loop-on); border-color: var(--rk-purple-line); }
+/* Sin borde ni fondo: dentro del reproductor de módulo (am-tbtn) */
+.rk-tbtn--bare { --rk-tbtn: var(--rk-h-lg); border-color: transparent; background: none; }
+.rk-tbtn--bare.rk-tbtn--play { --rk-tbtn: var(--rk-h-lg); background: var(--rk-green); }
+.rk-tbtn:disabled { opacity: .35; cursor: default; }
+/* Armar / grabar (tappers): con texto, porque cambia el modo de la vista */
+.rk-rec { display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px 0 13px; border: 1px solid rgba(252, 60, 68, .55); border-radius: var(--rk-r-sm); background: var(--rk-red-bg); color: #ff8a8d; font: var(--rk-button); cursor: pointer; }
+.rk-rec svg { width: 14px; height: 14px; fill: currentColor; }
+.rk-rec.is-armed { border-color: transparent; background: #e5484d; color: #fff; animation: rk-pulse 1.6s ease-in-out infinite; }
+
+/* Reproductor de módulo (abajo en tappers, Count-In, CUES, Tempo): una
+   barra pegada al borde, en el gris del cromo */
+.rk-player { display: flex; align-items: center; gap: 14px; padding: 10px var(--rk-s-6); border-top: 1px solid var(--rk-line-1); background: var(--rk-bg-1); }
+.rk-player > .rk-select { min-width: 200px; }
+.rk-player > .rk-transport { gap: 4px; }
+.rk-scrub { position: relative; flex: 1; height: 6px; border-radius: var(--rk-r-pill); background: var(--rk-bg-3); }
+.rk-scrub > span { position: absolute; inset: 0 auto 0 0; width: var(--v, 0%); border-radius: inherit; background: var(--rk-text-2); }
+.rk-scrub > i { position: absolute; top: -4px; bottom: -4px; width: 2px; border-radius: 1px; background: var(--rk-amber); left: var(--m, 0%); }
+
+/* Mapa de canción: secciones sobre una línea de tiempo */
+.rk-songmap { display: flex; gap: 2px; height: 22px; }
+.rk-songmap > span { flex: var(--w, 1); border-radius: 2px; background: var(--rk-bg-3); font: 700 9px/22px var(--rk-font); color: var(--rk-text-3); text-transform: uppercase; letter-spacing: .5px; padding-left: 6px; overflow: hidden; white-space: nowrap; }
+.rk-songmap > span.is-now { background: var(--rk-green-bg); color: var(--rk-green); box-shadow: inset 0 0 0 1px var(--rk-green-line); }
+
+/* Fila del setlist: va en una lista con superficie (rk-list--surface).
+   Filo de color a la izquierda: verde la actual, ámbar la que está en cola. */
+.rk-song { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 16px; border-top: 1px solid var(--rk-line-1); }
+.rk-song:first-child { border-top: 0; }
+.rk-song-num { width: 22px; text-align: right; font: var(--rk-data); color: var(--rk-text-3); flex: none; }
+.rk-song-main { flex: 1; min-width: 0; }
+.rk-song-name { font: 700 14px/1.3 var(--rk-font); color: var(--rk-text-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rk-song-meta { font: var(--rk-meta); color: var(--rk-text-3); display: flex; gap: 8px; margin-top: 2px; }
+.rk-song-time { font: var(--rk-data); color: var(--rk-text-2); }
+.rk-song.is-now { background: var(--rk-green-bg); box-shadow: inset 3px 0 0 var(--rk-green); }
+.rk-song.is-now .rk-song-num { color: var(--rk-green); }
+.rk-song.is-queued { box-shadow: inset 3px 0 0 var(--rk-amber); }
+.rk-song.is-played .rk-song-name { color: var(--rk-text-3); }
+.rk-song.is-skipped { opacity: .45; }
+.rk-song.is-skipped .rk-song-name { text-decoration: line-through; text-decoration-color: var(--rk-text-3); }
+.rk-states { display: inline-flex; gap: 4px; }
+.rk-state { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; border: 0; background: none; color: var(--off); cursor: pointer; }
+.rk-state svg { width: 15px; height: 15px; fill: currentColor; }
+.rk-state[aria-pressed="true"] { color: var(--on); background: color-mix(in srgb, var(--on) 14%, transparent); }
+.rk-state--skip { --on: var(--rk-state-skip-on); --off: var(--rk-state-skip-off); }
+.rk-state--loop { --on: var(--rk-state-loop-on); --off: var(--rk-state-loop-off); }
+.rk-state--stop { --on: var(--rk-state-stop-on); --off: var(--rk-state-stop-off); }
+.rk-state--ci   { --on: var(--rk-state-ci-on);   --off: var(--rk-state-ci-off); }
+.rk-state--voz  { --on: var(--rk-state-voz-on);  --off: var(--rk-state-voz-off); }
+/* Chain va en el mismo botón que Stop: «sigue a la siguiente», en verde. */
+.rk-state--stop.is-chain[aria-pressed="true"] { --on: var(--rk-green); }
+.rk-drag { width: 16px; display: grid; place-items: center; color: var(--rk-text-4); cursor: grab; flex: none; }
+.rk-drag:hover { color: var(--rk-text-2); }
+
+/* Reloj y tiempos */
+.rk-clock { font: 800 28px/1 var(--rk-mono); letter-spacing: -.5px; color: var(--rk-text-1); font-variant-numeric: tabular-nums; }
+.rk-clock--pause { color: var(--rk-amber); }
+.rk-clock--small { font-size: 15px; font-weight: 700; }
+
+/* Pulso / metrónomo visual */
+.rk-beats { display: inline-flex; gap: 6px; }
+.rk-beats > i { width: 10px; height: 10px; border-radius: 50%; background: var(--rk-fill-2); }
+.rk-beats > i.is-on { background: var(--rk-text-1); }
+.rk-beats > i.is-down.is-on { background: var(--rk-green); }
+
+/* Barras de desplazamiento */
+.rk-scroll { scrollbar-gutter: stable; }
+.rk-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.rk-scroll::-webkit-scrollbar-thumb { background: var(--rk-line-2); border-radius: 6px; }
+.rk-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* ==========================================================================
+   Animaciones
+   ========================================================================== */
+@keyframes rk-spin { to { transform: rotate(360deg); } }
+@keyframes rk-pulse { 50% { opacity: .35; } }
+@keyframes rk-indet { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+@keyframes rk-shimmer { to { background-position: -200% 0; } }

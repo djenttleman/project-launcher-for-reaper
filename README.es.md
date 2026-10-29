@@ -103,8 +103,8 @@ Son dos piezas y un truco. La app es una ventana nativa chica de macOS: AppKit m
 Nada de esto se vería así sin lo siguiente:
 
 - **[Phosphor Icons](https://phosphoricons.com/)** (MIT) — los iconos de carpeta, tema, acento e idioma, y casi todos los glifos chicos. Van empaquetados como paths SVG; no hay dependencia en tiempo de ejecución ni nada que se descargue al abrir.
-- **El tema Reapertips** — la paleta sobre la que se apoya toda la interfaz: ese violeta, los acentos cian y rosa, y una serie de grises que no se sienten planos.
-- **El kit de diseño de ReaSet Pro** — espaciado, escala tipográfica y lenguaje de componentes de mis propias herramientas. ReaLauncher lo toma prestado a propósito para que los dos se sientan de la misma familia.
+- **[El tema Reapertips](https://forum.cockos.com/showthread.php?t=281644)** de [Alez156](https://forum.cockos.com/member.php?u=100131) — la paleta sobre la que se apoya toda la interfaz: ese violeta, los acentos cian y rosa, y una serie de grises que no se sienten planos. Gracias por hacer que REAPER se vea bien; este launcher se apoya en eso.
+- **[ReaSet Pro](https://reaset.app/)** — el kit de diseño de mi propia herramienta de shows: espaciado, escala tipográfica y lenguaje de componentes. ReaLauncher lo toma prestado a propósito para que los dos se sientan de la misma familia.
 - **[DeepSeek](https://www.deepseek.com/) V4.1 Flash** — el modelo que escribió buena parte de esto conmigo.
 
 Todo lo demás — la app, los scripts Lua, la interfaz — es código original bajo licencia MIT.

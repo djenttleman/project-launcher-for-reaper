@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReaLauncher — a project launcher for REAPER that doesn't look like 2003</title>
+<meta name="description" content="A native macOS project launcher for REAPER. Folders, tags, backups, inspector and a decent design. Hecho por humanos e IA, para humanos con sentimientos.">
+<meta property="og:title" content="ReaLauncher">
+<meta property="og:description" content="A project launcher for REAPER that doesn't look like 2003.">
+<meta property="og:image" content="../assets/screenshot-dark.png">
+<style>
+  :root{
+    --bg:#0B0B0D; --bg2:#121216; --card:#15151A; --line:rgba(255,255,255,.09);
+    --text:#F2F1F5; --dim:#9E9AA8; --dim2:#6F6A7D;
+    --green:#1ED760; --violet:#8660E8; --blue:#4377FF; --pink:#C2527A; --cyan:#019ACB;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(900px 500px at 12% -10%, rgba(134,96,232,.22), transparent 60%),
+      radial-gradient(800px 500px at 95% 8%, rgba(30,215,96,.10), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.6;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+  a{color:inherit}
+  nav{display:flex;align-items:center;gap:18px;padding:26px 0}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:17px}
+  .brand span.dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 14px rgba(30,215,96,.8)}
+  nav .spacer{flex:1}
+  .lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .lang button{
+    background:none;border:0;color:var(--dim);font:600 12px/1 inherit;letter-spacing:.08em;
+    padding:8px 13px;cursor:pointer;transition:.15s;
+  }
+  .lang button.on{background:rgba(255,255,255,.10);color:var(--text)}
+  .ghost{
+    display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;
+    padding:8px 16px;font-size:13px;font-weight:600;color:var(--dim);text-decoration:none;transition:.15s;
+  }
+  .ghost:hover{color:var(--text);border-color:rgba(255,255,255,.22)}
+  header{padding:64px 0 8px}
+  h1{
+    font-size:clamp(52px,9vw,104px);line-height:.95;letter-spacing:-.045em;margin:0 0 20px;font-weight:800;
+    background:linear-gradient(180deg,#fff,#CFC9DE);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .rule{height:4px;width:min(430px,70%);border-radius:3px;margin:0 0 26px;
+    background:linear-gradient(90deg,var(--violet),var(--blue) 55%,var(--green))}
+  .lead{font-size:clamp(17px,2.2vw,21px);color:var(--dim);max-width:720px;margin:0 0 22px}
+  .motto{font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim2);font-weight:700;margin:0 0 34px}
+  .install{
+    display:flex;align-items:center;gap:12px;background:#0E0E12;border:1px solid var(--line);
+    border-radius:12px;padding:13px 16px;max-width:760px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;
+  }
+  .install code{color:#D8D4E6;flex:1;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+  .install b{color:var(--green);font-weight:600}
+  .copy{margin-left:auto;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--dim);
+    border-radius:8px;padding:6px 11px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .copy:hover{color:var(--text);background:rgba(255,255,255,.10)}
+  .req{margin:14px 0 0;color:var(--dim2);font-size:13px}
+  section{padding:70px 0 0}
+  h2{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim2);margin:0 0 26px;font-weight:700}
+  .hero-shot{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--card);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .hero-shot img{display:block;width:100%}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 20px 22px}
+  .card .ico{font-size:19px;margin-bottom:10px;display:block}
+  .card h3{margin:0 0 6px;font-size:15px;letter-spacing:-.01em}
+  .card p{margin:0;color:var(--dim);font-size:14px}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  .split figure{margin:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--card)}
+  .split img{display:block;width:100%}
+  .split figcaption{padding:10px 14px;font-size:12px;color:var(--dim2);letter-spacing:.1em;text-transform:uppercase}
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:14px}
+  ol.steps li{position:relative;padding:18px 20px 18px 62px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);color:var(--dim)}
+  ol.steps li::before{
+    counter-increment:s;content:counter(s);position:absolute;left:18px;top:16px;width:28px;height:28px;border-radius:50%;
+    display:grid;place-items:center;background:rgba(134,96,232,.18);color:#BFA8FF;font-weight:800;font-size:13px;
+  }
+  ol.steps b{color:var(--text)}
+  footer{margin-top:80px;padding:28px 0 46px;border-top:1px solid var(--line);color:var(--dim2);font-size:13px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+  footer .spacer{flex:1}
+  [data-lang="en"] .es,[data-lang="es"] .en{display:none !important}
+  @media (max-width:760px){ .split{grid-template-columns:1fr} header{padding-top:34px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <div class="brand"><span class="dot"></span>ReaLauncher</div>
+    <div class="spacer"></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button id="btnEn" class="on" onclick="setLang('en')">EN</button>
+      <button id="btnEs" onclick="setLang('es')">ES</button>
+    </div>
+    <a class="ghost" href="https://github.com/djenttleman/realauncher" target="_blank" rel="noopener">GitHub ↗</a>
+  </nav>
+
+  <header>
+    <h1>ReaLauncher</h1>
+    <div class="rule"></div>
+    <p class="lead">
+      <span class="en">A project launcher for REAPER that doesn't look like 2003. Native, fast, and with folders, tags, backups and an inspector that actually tells you something.</span>
+      <span class="es">Un launcher de proyectos para REAPER que no parece de 2003. Nativo, rápido, y con carpetas, etiquetas, copias de seguridad y un inspector que sí te dice algo.</span>
+    </p>
+    <p class="motto">Hecho por humanos e IA, para humanos con sentimientos</p>
+
+    <div class="install">
+      <code><b>$</b> curl -fsSL https://raw.githubusercontent.com/djenttleman/realauncher/main/bootstrap.sh | bash</code>
+      <button class="copy" id="copyBtn" onclick="copyCmd()">
+        <span class="en">copy</span><span class="es">copiar</span>
+      </button>
+    </div>
+    <p class="req">
+      <span class="en">macOS 13+ · Xcode Command Line Tools · REAPER 7</span>
+      <span class="es">macOS 13+ · Xcode Command Line Tools · REAPER 7</span>
+    </p>
+  </header>
+
+  <section>
+    <div class="hero-shot"><img src="../assets/screenshot-dark.png" alt="ReaLauncher dark theme"></div>
+  </section>
+
+  <section>
+    <h2><span class="en">What's inside</span><span class="es">Qué trae</span></h2>
+    <div class="grid">
+      <div class="card"><span class="ico">🌗</span><h3><span class="en">Dark, light and five schemes</span><span class="es">Oscuro, claro y cinco esquemas</span></h3>
+        <p><span class="en">Reapertips, ReaSet Pro, Cyan, Amber and Rose — with a real light mode.</span><span class="es">Reapertips, ReaSet Pro, Cian, Ámbar y Rosa, con modo claro de verdad.</span></p></div>
+
+      <div class="card"><span class="ico">🗂</span><h3><span class="en">Virtual folders and tags</span><span class="es">Carpetas y etiquetas virtuales</span></h3>
+        <p><span class="en">Organize by show, client or mood. It never moves a single file.</span><span class="es">Organizá por show, cliente o estado de ánimo. Nunca mueve un archivo.</span></p></div>
+
+      <div class="card"><span class="ico">🧭</span><h3><span class="en">Project inspector</span><span class="es">Inspector de proyecto</span></h3>
+        <p><span class="en">Regions, tracks, tempo, size and last opened, read from the .rpp.</span><span class="es">Regiones, pistas, tempo, tamaño y última apertura, leídos del .rpp.</span></p></div>
+
+      <div class="card"><span class="ico">🗃</span><h3><span class="en">Nested backups</span><span class="es">Copias anidadas</span></h3>
+        <p><span class="en">Every .rpp-bak next to your project, one click away.</span><span class="es">Cada .rpp-bak junto a tu proyecto, a un clic.</span></p></div>
+
+      <div class="card"><span class="ico">🧩</span><h3><span class="en">Templates</span><span class="es">Plantillas</span></h3>
+        <p><span class="en">Empty, recording, editing, mixing, mastering or live show.</span><span class="es">Vacío, grabación, edición, mezcla, master o show en vivo.</span></p></div>
+
+      <div class="card"><span class="ico">📊</span><h3><span class="en">Session stats</span><span class="es">Estadísticas de sesión</span></h3>
+        <p><span class="en">Hours with REAPER open and hours actually recording.</span><span class="es">Horas con REAPER abierto y horas realmente grabando.</span></p></div>
+
+      <div class="card"><span class="ico">🔒</span><h3><span class="en">Update-proof</span><span class="es">A prueba de actualizaciones</span></h3>
+        <p><span class="en">Lua scripts in your resource folder, registered as an action.</span><span class="es">Scripts Lua en tu carpeta de recursos, registrados como acción.</span></p></div>
+
+      <div class="card"><span class="ico">⚡</span><h3><span class="en">Fast and quiet</span><span class="es">Rápido y silencioso</span></h3>
+        <p><span class="en">Opens in ~0.4 s, no white flash, no visible redraw.</span><span class="es">Abre en ~0,4 s, sin flash blanco ni repintados visibles.</span></p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="en">A closer look</span><span class="es">De cerca</span></h2>
+    <div class="hero-shot"><img src="../assets/screenshot-light.png" alt="ReaLauncher light theme"></div>
+    <div class="split">
+      <figure><img src="../assets/menus.png" alt="Right-click menus">
+        <figcaption><span class="en">Its own right-click menus</span><span class="es">Menús de clic derecho propios</span></figcaption></figure>
+      <figure><img src="../assets/modals.png" alt="Modals">
+        <figcaption><span class="en">Templates and folder editor</span><span class="es">Plantillas y editor de carpeta</span></figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="en">How it works</span><span class="es">Cómo funciona</span></h2>
+    <ol class="steps">
+      <li><span class="en"><b>Two Lua scripts</b> live in your REAPER resource folder: one opens the launcher, the other counts your session hours. They register themselves in the Action List.</span>
+            <span class="es"><b>Dos scripts Lua</b> viven en tu carpeta de recursos de REAPER: uno abre el launcher, el otro cuenta tus horas de sesión. Se registran solos en la lista de acciones.</span></li>
+      <li><span class="en"><b>The app</b> is a small native window (AppKit + WebView, no Electron). It reads each .rpp header and caches regions, tracks and tempo by modification date and size.</span>
+            <span class="es"><b>La app</b> es una ventana nativa chica (AppKit + WebView, sin Electron). Lee la cabecera de cada .rpp y guarda en caché regiones, pistas y tempo por fecha de modificación y tamaño.</span></li>
+      <li><span class="en"><b>loadlastproj=19</b> tells REAPER to start with a new project instead of asking which one, so the custom window is the first thing you see.</span>
+            <span class="es"><b>loadlastproj=19</b> le dice a REAPER que arranque con un proyecto nuevo en vez de preguntarte cuál, así la ventana propia es lo primero que ves.</span></li>
+    </ol>
+  </section>
+
+  <footer>
+    <span>© 2026 David · <span class="en">Built with AI</span><span class="es">Hecho con IA</span></span>
+    <span class="spacer"></span>
+    <a class="ghost" href="https://github.com/djenttleman/realauncher" target="_blank" rel="noopener">Source ↗</a>
+    <a class="ghost" href="https://github.com/djenttleman/realauncher/blob/main/README.es.md">README ES</a>
+  </footer>
+</div>
+
+<script>
+const CMD = 'curl -fsSL https://raw.githubusercontent.com/djenttleman/realauncher/main/bootstrap.sh | bash';
+
+function setLang(lang){
+  document.documentElement.dataset.lang = lang;
+  document.documentElement.lang = lang;
+  document.getElementById('btnEn').classList.toggle('on', lang === 'en');
+  document.getElementById('btnEs').classList.toggle('on', lang === 'es');
+  try { localStorage.setItem('rl.lang', lang); } catch(e){}
+  history.replaceState(null, '', lang === 'es' ? '#es' : location.pathname + location.search);
+}
+
+function copyCmd(){
+  navigator.clipboard.writeText(CMD).then(()=>{
+    const b = document.getElementById('copyBtn');
+    const prev = b.innerHTML;
+    b.innerHTML = '✓';
+    setTimeout(()=>{ b.innerHTML = prev; }, 1200);
+  });
+}
+
+(function init(){
+  const hash = location.hash.replace('#','');
+  const saved = (()=>{ try { return localStorage.getItem('rl.lang'); } catch(e){ return null; } })();
+  const nav = (navigator.language || 'en').toLowerCase().startsWith('es') ? 'es' : 'en';
+  setLang(hash === 'es' || hash === 'en' ? hash : (saved || nav));
+})();
+</script>
+</body>
+</html>

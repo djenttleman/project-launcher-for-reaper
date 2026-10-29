@@ -192,7 +192,8 @@ function ago(ts){
   if(s<3600) return 'hace '+Math.max(1,Math.floor(s/60))+' min';
   if(s<86400) return 'hace '+Math.floor(s/3600)+' h';
   if(s<86400*30) return 'hace '+Math.floor(s/86400)+' d';
-  return 'hace '+Math.floor(s/86400/30)+' meses';
+  const m = Math.floor(s/86400/30);
+  return 'hace '+m+(m===1 ? ' mes' : ' meses');
 }
 function fmtDate(ts){
   if(!ts) return '—';

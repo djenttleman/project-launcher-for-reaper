@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400" role="img" aria-label="ReaLauncher">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B0B0D"/>
+      <stop offset="0.55" stop-color="#121016"/>
+      <stop offset="1" stop-color="#0B0B0D"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="0.18" cy="0.15" r="0.75">
+      <stop offset="0" stop-color="#8660E8" stop-opacity="0.55"/>
+      <stop offset="0.55" stop-color="#8660E8" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#8660E8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0.92" cy="0.95" r="0.7">
+      <stop offset="0" stop-color="#1ED760" stop-opacity="0.30"/>
+      <stop offset="0.6" stop-color="#1ED760" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#1ED760" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8660E8"/>
+      <stop offset="0.6" stop-color="#4377FF"/>
+      <stop offset="1" stop-color="#1ED760"/>
+    </linearGradient>
+    <linearGradient id="word" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D8D4E6"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#FFFFFF" stroke-opacity="0.035" stroke-width="1"/>
+    </pattern>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="400" fill="url(#bg)"/>
+  <rect width="1280" height="400" fill="url(#grid)"/>
+  <ellipse cx="230" cy="60" rx="380" ry="300" fill="url(#glowA)"/>
+  <ellipse cx="1180" cy="390" rx="360" ry="260" fill="url(#glowB)"/>
+
+  <text x="88" y="196" font-family="Inter, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+        font-size="118" font-weight="800" letter-spacing="-3.5" fill="url(#word)">ReaLauncher</text>
+  <rect x="90" y="230" width="430" height="5" rx="2.5" fill="url(#rule)"/>
+
+  <text x="90" y="282" font-family="Inter, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+        font-size="23" font-weight="500" fill="#9E9AA8" letter-spacing="0.2">A project launcher for REAPER that doesn't look like 2003.</text>
+
+  <text x="90" y="344" font-family="Inter, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+        font-size="15" font-weight="600" fill="#6F6A7D" letter-spacing="2.6">HECHO POR HUMANOS E IA, PARA HUMANOS CON SENTIMIENTOS</text>
+
+  <g transform="translate(1004 78)" opacity="0.95">
+    <rect x="0" y="0" width="188" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.14"/>
+    <text x="94" y="22" text-anchor="middle" font-family="Inter, -apple-system, 'Segoe UI', Roboto, sans-serif"
+          font-size="12" font-weight="700" fill="#C9C4D6" letter-spacing="1.6">macOS · SWIFT</text>
+  </g>
+</svg>

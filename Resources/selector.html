@@ -1328,6 +1328,9 @@ if($('#btnSlim')){
 }
 if($('#btnFull2')) $('#btnFull2').onclick = () => setSlim(false, true);
 
+// El nativo inyecta data-slim cuando la última sesión quedó en modo slim.
+if(document.documentElement.dataset.slim === '1') setSlim(true, false);
+
 
 </script>
 </body>

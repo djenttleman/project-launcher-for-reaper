@@ -156,6 +156,7 @@ La ventana puede entrar en un modo de lista angosta de 380 × 620, pensado para 
 - El comando `slim` del canal `sel` llama a `setSlimWindow(_:)`.
 - Al entrar guarda el marco actual en `fullFrame`, desactiva el autosave (`setFrameAutosaveName("")`) para que el tamaño slim no quede como tamaño por defecto, baja `minSize` a 340 × 420 y centra la ventana conservando el borde superior.
 - Al salir restaura el marco guardado, vuelve a `minSize` 900 × 600 y reactiva el autosave.
+- **Se recuerda entre sesiones**: el modo se guarda en `prefs.json` como `slim`. Al arrancar con `slim: true`, la ventana se ajusta antes de mostrar el WebView (`animate: false`, `persist: false`), así no hay salto de tamaño ni parpadeo, y el marco completo que había queda en `fullFrame` para volver con FULL.
 
 **Lado web (`Resources/selector.html`)**
 - `body.is-slim` oculta `.window` y muestra `<section class="slim">`.
@@ -164,6 +165,7 @@ La ventana puede entrar en un modo de lista angosta de 380 × 620, pensado para 
 - Fijar y quitar de recientes son **optimistas**: se muta el objeto local, se re-renderiza al instante y el `update` viaja después. Si se espera la respuesta nativa, la lista no se reordena hasta el siguiente refresco.
 - Clic izquierdo abre el proyecto; clic derecho abre `slimMenu()` con Abrir, FX offline, FX online y Mostrar en Finder.
 - `renderAll()` re-renderiza el slim cuando corresponde, así los cambios desde el modo full se reflejan sin volver a entrar.
+- El nativo inyecta `data-slim="1"` en el `<html>` cuando la sesión anterior quedó en slim, y el JS arranca con `setSlim(true, false)`.
 
 ## Idioma (ES / EN)
 - Un botón `EN`/`ES` en la barra inferior, junto al sol y la paleta, sin caja.

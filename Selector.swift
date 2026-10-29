@@ -52,6 +52,7 @@ struct Prefs: Codable {
     var theme = "dark"
     var accent = "reapertips"
     var lang = "es"
+    var slim: Bool? = nil        // opcional: los prefs viejos no lo traen
 }
 
 struct Usage: Codable {
@@ -441,6 +442,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             window.center()
         }
         window.setFrameAutosaveName("ProjectLauncherWindow")
+        if store.prefs.slim == true {
+            // Arranca ya angosto: el marco completo queda guardado para volver con FULL.
+            setSlimWindow(true, animate: false, persist: false)
+        }
 
         let cfg = WKWebViewConfiguration()
         cfg.userContentController.add(self, name: "sel")
@@ -449,6 +454,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             let boot = "document.documentElement.dataset.theme='\(store.prefs.theme)';"
                      + "document.documentElement.dataset.accent='\(store.prefs.accent)';"
                      + "document.documentElement.dataset.lang='\(store.prefs.lang)';"
+                     + (store.prefs.slim == true ? "document.documentElement.dataset.slim='1';" : "")
                      + "document.documentElement.lang='\(store.prefs.lang)';"
                      + "document.documentElement.style.backgroundColor='\(bgHex)';"
             cfg.userContentController.addUserScript(
@@ -699,6 +705,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             if let t = body["theme"] as? String { self.store.prefs.theme = t }
             if let a = body["accent"] as? String { self.store.prefs.accent = a }
             if let l = body["lang"] as? String, l == "es" || l == "en" { self.store.prefs.lang = l }
+            if let s = body["slim"] as? Bool { self.store.prefs.slim = s }
             store.savePrefs()
             reply(["ok": true])
 
@@ -755,7 +762,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
     }
 
     /// Modo slim: la ventana se angosta a una lista y al volver recupera su marco.
-    func setSlimWindow(_ on: Bool) {
+    func setSlimWindow(_ on: Bool, animate: Bool = true, persist: Bool = true) {
         guard let w = window else { return }
         if on {
             guard fullFrame == nil else { return }
@@ -767,13 +774,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             f.origin.x += (f.width - size.width) / 2
             f.origin.y += f.height - size.height       // conserva el borde superior
             f.size = size
-            w.setFrame(f, display: true, animate: true)
+            w.setFrame(f, display: true, animate: animate)
         } else if let f = fullFrame {
             fullFrame = nil
             w.minSize = NSSize(width: 900, height: 600)
-            w.setFrame(f, display: true, animate: true)
+            w.setFrame(f, display: true, animate: animate)
             w.setFrameAutosaveName("ProjectLauncherWindow")
         }
+        if persist { store.prefs.slim = on; store.savePrefs() }
     }
 
     /// REAPER está abierto en esta máquina.

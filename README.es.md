@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/macOS-13%2B-0B0B0D?style=flat-square&labelColor=1a1a20" alt="macOS 13+">
   <img src="https://img.shields.io/badge/Swift-5.9-8660E8?style=flat-square&labelColor=1a1a20" alt="Swift">
   <img src="https://img.shields.io/badge/sin%20electron-obvio-1ED760?style=flat-square&labelColor=1a1a20" alt="Sin Electron">
-  <img src="https://img.shields.io/badge/versi%C3%B3n-1.1.0-4377FF?style=flat-square&labelColor=1a1a20" alt="v1.0.0">
+  <img src="https://img.shields.io/badge/versi%C3%B3n-1.2.0-4377FF?style=flat-square&labelColor=1a1a20" alt="v1.2.0">
   <img src="https://img.shields.io/badge/licencia-MIT-1ED760?style=flat-square&labelColor=1a1a20" alt="MIT">
 </p>
 
@@ -42,6 +42,7 @@ Empezó como una herramienta para mis propios shows en vivo. Después le crecier
 | 🩺 **Modo recuperación** | Abre cualquier proyecto con todos los FX offline, o deja que el launcher los traiga online de a uno cuando termine de cargar. `⌥`-clic en Abrir o desde el menú contextual. |
 | 🧩 **Crear desde plantillas** | Vacío, grabación, edición, mezcla, master o show en vivo: escribe el archivo correcto en el lugar correcto. |
 | 📊 **Estadísticas de sesión** | Horas con REAPER abierto y horas realmente grabando, acumuladas por un script Lua silencioso. |
+| 🪟 **Modo slim** | La ventana entera se convierte en una lista angosta: fijados primero, después recientes. Un clic y el proyecto abre — sin inspector, sin opciones. El clic derecho sigue dando el modo recuperación. |
 | 🖱 **Menús de clic derecho propios** | Renombrar, cambiar color e icono de carpetas; fijar, archivar, mover o eliminar proyectos. Sin menú nativo de WebKit ni selección de texto. |
 | 🔒 **A prueba de actualizaciones** | Los scripts Lua viven en tu carpeta de recursos de REAPER y se registran solos en la lista de acciones: actualizar REAPER no los rompe. |
 | ⚡ **Rápido y silencioso** | Ventana nativa, sin Electron, abre en ~0,4 s sin flash blanco ni repintados visibles. |
@@ -55,6 +56,10 @@ Empezó como una herramienta para mis propios shows en vivo. Después le crecier
 
 <p align="center">
   <img src="assets/es/screenshot-light.png" alt="Project Launcher en tema claro" width="100%">
+</p>
+
+<p align="center">
+  <img src="assets/es/slim.png" alt="Modo slim: proyectos fijados y recientes en una ventana angosta" width="34%">
 </p>
 
 <p align="center">

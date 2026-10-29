@@ -148,6 +148,23 @@ Las variables locales usadas dentro de un `defer` tienen que declararse **antes*
 de la función que las usa: si no, Lua las resuelve como globales (`nil`) y el
 script muere con "attempt to perform arithmetic on a nil value".
 
+## Modo slim (1.2)
+
+La ventana puede entrar en un modo de lista angosta de 380 × 620, pensado para dejar el launcher abierto al costado mientras trabajás.
+
+**Lado nativo (`Selector.swift`)**
+- El comando `slim` del canal `sel` llama a `setSlimWindow(_:)`.
+- Al entrar guarda el marco actual en `fullFrame`, desactiva el autosave (`setFrameAutosaveName("")`) para que el tamaño slim no quede como tamaño por defecto, baja `minSize` a 340 × 420 y centra la ventana conservando el borde superior.
+- Al salir restaura el marco guardado, vuelve a `minSize` 900 × 600 y reactiva el autosave.
+
+**Lado web (`Resources/selector.html`)**
+- `body.is-slim` oculta `.window` y muestra `<section class="slim">`.
+- `renderSlim()` arma la lista: fijados primero y después el resto, ambos ordenados por última apertura. Usa `folderLabel()` para que las carpetas por defecto salgan en el idioma activo.
+- Cada fila: punto de color de la carpeta, nombre, flecha verde, y en hover el pin a la izquierda y la X al extremo derecho.
+- Fijar y quitar de recientes son **optimistas**: se muta el objeto local, se re-renderiza al instante y el `update` viaja después. Si se espera la respuesta nativa, la lista no se reordena hasta el siguiente refresco.
+- Clic izquierdo abre el proyecto; clic derecho abre `slimMenu()` con Abrir, FX offline, FX online y Mostrar en Finder.
+- `renderAll()` re-renderiza el slim cuando corresponde, así los cambios desde el modo full se reflejan sin volver a entrar.
+
 ## Idioma (ES / EN)
 - Un botón `EN`/`ES` en la barra inferior, junto al sol y la paleta, sin caja.
 - `T(clave, vars)` traduce contra un diccionario cuyo **origen es el texto en

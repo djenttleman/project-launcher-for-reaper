@@ -1274,7 +1274,7 @@ function slimRow(p){
   const go = el('span','go'); go.innerHTML = SVG_GO;
   nm.appendChild(go);
   txt.appendChild(nm);
-  const meta = [p.folder||'', ago(p.lastOpened), (p.regions ? p.regions + ' ' + (LANG==='es'?'reg.':'reg.') : '')].filter(Boolean).join(' · ');
+  const meta = [p.folder ? folderLabel(p.folder) : '', ago(p.lastOpened), (p.regions ? p.regions + ' ' + (LANG==='es'?'reg.':'reg.') : '')].filter(Boolean).join(' · ');
   txt.appendChild(el('span','mt', meta));
 
   const x = el('button','x'); x.innerHTML = SVG_X;

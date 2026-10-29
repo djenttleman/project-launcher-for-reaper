@@ -18,11 +18,8 @@ body.is-slim{display:block;background:var(--rk-bg-1)}
 body.is-slim .window{display:none}
 body.is-slim .slim{display:flex;flex-direction:column;width:100vw;height:100vh;background:var(--rk-bg-1);color:var(--rk-text-1)}
 .slim-head{display:flex;align-items:center;gap:9px;padding:11px 12px 9px;border-bottom:1px solid var(--rk-line-1)}
-.slim-mark{width:18px;height:18px;flex:none;color:var(--rk-text-1)}
-.slim-mark svg{width:18px;height:18px;display:block}
-.slim-titles{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
-.slim-titles b{font:800 10.5px/1 var(--rk-font);letter-spacing:1.25px;color:var(--rk-text-1);white-space:nowrap}
-.slim-titles i{font:700 7.5px/1 var(--rk-font);letter-spacing:1.75px;font-style:normal;color:var(--rk-text-3)}
+.slim-brand{display:flex;align-items:center;gap:9px;flex:1;min-width:0;font:800 19px/1 var(--rk-font);letter-spacing:1.5px;color:var(--rk-text-1)}
+.slim-brand .mark{width:21px;height:21px;flex:none}
 .slim-btn{width:26px;height:26px;flex:none;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;color:var(--rk-text-3)}
 .slim-btn:hover{background:var(--rk-fill-1);color:var(--rk-text-1)}
 .slim-btn svg{width:13px;height:13px}
@@ -39,6 +36,9 @@ body.is-slim .slim{display:flex;flex-direction:column;width:100vw;height:100vh;b
 .slim-row:hover .go{opacity:1}
 .slim-foot{display:flex;align-items:center;gap:8px;padding:7px 12px;border-top:1px solid var(--rk-line-1);font:400 10.5px/1 var(--rk-font);color:var(--rk-text-3)}
 .slim-foot .sp{flex:1}
+.slim-btn--full{width:auto;gap:6px;padding:0 7px;height:22px;color:var(--rk-text-2)}
+.slim-btn--full span{font:700 9px/1 var(--rk-font);letter-spacing:1.2px}
+.slim-btn--full svg{width:11px;height:11px}
 .slim-led{width:7px;height:7px;border-radius:50%;background:#4A4A4E;flex:none}
 .slim-led.on{background:var(--rk-green);box-shadow:0 0 6px var(--rk-green)}
 </style>
@@ -123,19 +123,14 @@ body.is-slim .slim{display:flex;flex-direction:column;width:100vw;height:100vh;b
 <!-- ============ modo slim ============ -->
 <section class="slim" id="slim">
   <header class="slim-head">
-    <span class="slim-mark"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M128 24C68 24 24 65 24 111c0 48 49 106 89 126a33 33 0 0 0 30 0c40-20 89-78 89-126 0-46-44-87-104-87Z" fill="none" stroke="currentColor" stroke-width="24" stroke-linejoin="round"/><path d="M59 74c44-24 103-24 146 17-36-22-77-28-111-10 9 19 25 34 36 59 15 35 11 68-4 95 10-37 5-68-16-96-23-27-40-39-51-65Z" fill="currentColor"/></svg></span>
-    <span class="slim-titles">
-      <b>PROJECT LAUNCHER</b>
-      <i>FOR REAPER</i>
-    </span>
-    <button class="slim-btn" id="btnFull" title="Volver al modo completo" data-en-title="Back to full mode"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"><path d="M104 56H56v48"/><path d="M152 56h48v48"/><path d="M104 200H56v-48"/><path d="M152 200h48v-48"/></svg></button>
+    <span class="slim-brand"><svg class="mark" viewBox="0 0 256 256" aria-hidden="true"><path d="M128 24C68 24 24 65 24 111c0 48 49 106 89 126a33 33 0 0 0 30 0c40-20 89-78 89-126 0-46-44-87-104-87Z" fill="none" stroke="currentColor" stroke-width="24" stroke-linejoin="round"/><path d="M59 74c44-24 103-24 146 17-36-22-77-28-111-10 9 19 25 34 36 59 15 35 11 68-4 95 10-37 5-68-16-96-23-27-40-39-51-65Z" fill="currentColor"/></svg>REAPER</span>
   </header>
   <div class="slim-list" id="slimList"></div>
   <footer class="slim-foot">
     <span class="slim-led" id="slimLed"></span>
     <span id="slimCount">—</span>
     <span class="sp"></span>
-    <button class="slim-btn slim-btn--ghost" id="btnFull2" title="Modo completo" data-en-title="Full mode"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"><path d="M104 56H56v48"/><path d="M152 56h48v48"/><path d="M104 200H56v-48"/><path d="M152 200h48v-48"/></svg></button>
+    <button class="slim-btn slim-btn--ghost slim-btn--full" id="btnFull2" title="Volver al modo completo" data-en-title="Back to full mode"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"><path d="M104 56H56v48"/><path d="M152 56h48v48"/><path d="M104 200H56v-48"/><path d="M152 200h48v-48"/></svg><span>FULL</span></button>
   </footer>
 </section>
 
@@ -1269,7 +1264,6 @@ if($('#btnSlim')){
   $('#btnSlim').innerHTML = SVG_SLIM;
   $('#btnSlim').onclick = () => setSlim(true, true);
 }
-if($('#btnFull'))  $('#btnFull').onclick  = () => setSlim(false, true);
 if($('#btnFull2')) $('#btnFull2').onclick = () => setSlim(false, true);
 
 setTimeout(() => { if(getPref('slim', false)) setSlim(true, false); }, 60);

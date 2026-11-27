@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/macOS-13%2B-0B0B0D?style=flat-square&labelColor=1a1a20" alt="macOS 13+">
   <img src="https://img.shields.io/badge/Swift-5.9-8660E8?style=flat-square&labelColor=1a1a20" alt="Swift">
   <img src="https://img.shields.io/badge/no%20electron-yes%20please-1ED760?style=flat-square&labelColor=1a1a20" alt="No Electron">
-  <img src="https://img.shields.io/badge/version-1.2.0-4377FF?style=flat-square&labelColor=1a1a20" alt="v1.2.0">
+  <img src="https://img.shields.io/badge/version-1.2.1-4377FF?style=flat-square&labelColor=1a1a20" alt="v1.2.1">
   <img src="https://img.shields.io/badge/license-MIT-1ED760?style=flat-square&labelColor=1a1a20" alt="MIT">
 </p>
 
@@ -95,6 +95,8 @@ The installer builds the app into `~/Applications/Project Launcher.app`, copies 
 ## How it works
 
 It's two pieces and a trick. The app is a small native macOS window — AppKit plus a WebView, no Electron, no Node, nothing downloaded at runtime. On the REAPER side there are two Lua scripts: one opens the launcher at startup, the other quietly accumulates your session hours. They live in your resource path and register themselves as an action, so a REAPER update doesn't touch them. The app reads the header of each `.rpp` to pull out regions, tracks and tempo, caches what it finds keyed by modification date and size, and renders everything in its own interface. `loadlastproj=19` tells REAPER to start with a new project instead of asking which one — that's what makes the custom window the first thing you see.
+
+Project Launcher opens on an empty startup and reappears when closing the last project leaves REAPER empty. Recents follows projects opened directly in REAPER and imports missing entries from REAPER’s history.
 
 ## Good to know
 

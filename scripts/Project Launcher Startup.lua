@@ -51,6 +51,7 @@ local last = reaper.time_precise()
 -- forward: el loop de tick los usa antes de que exista el bloque de comandos
 local pollAcc = 0
 local pollInbox = nil
+local watchProjects = nil
 
 local function flush()
   if not dirty then return end
@@ -70,7 +71,11 @@ local function tick()
     dirty = true
   end
   pollAcc = pollAcc + 1
-  if pollAcc >= 8 then pollAcc = 0; if pollInbox then pollInbox() end end
+  if pollAcc >= 8 then
+    pollAcc = 0
+    if pollInbox then pollInbox() end
+    if watchProjects then watchProjects() end
+  end
   reaper.defer(tick)
 end
 
@@ -188,6 +193,56 @@ local function selectorApp()
   return nil
 end
 
+local function showLauncher()
+  local app = selectorApp()
+  if app then
+    reaper.ExecProcess("/usr/bin/open -a " .. string.format("%q", app), 0)
+  end
+end
+
+local RECENTS = DIR .. "/reaper-recents"
+local previousPaths = {}
+local hadWork = false
+
+watchProjects = function()
+  local active = reaper.EnumProjects(-1)
+  if not active then return end
+
+  local paths, opened = {}, {}
+  local hasWork = false
+  local index = 0
+  while true do
+    local project, path = reaper.EnumProjects(index, "")
+    if not project then break end
+    paths[project] = path
+    hasWork = hasWork or path ~= "" or reaper.CountTracks(project) > 0 or reaper.IsProjectDirty(project) ~= 0
+    if path:lower():sub(-4) == ".rpp" and previousPaths[project] ~= path then
+      opened[#opened + 1] = path
+    end
+    index = index + 1
+  end
+  previousPaths = paths
+
+  if #opened > 0 then
+    local times = {}
+    for time, path in (readFile(RECENTS) or ""):gmatch("(%d+)\t([^%z]+)%z") do
+      times[path] = time
+    end
+    local now = os.time()
+    for _, path in ipairs(opened) do times[path] = now end
+    local entries = {}
+    for path, time in pairs(times) do entries[#entries + 1] = time .. "\t" .. path .. "\0" end
+    writeFile(RECENTS, table.concat(entries))
+  end
+
+  -- REAPER can reuse the same project tab when it resets to a blank project.
+  -- Undoing edits back to a blank project leaves its redo history intact.
+  local show = hadWork and not hasWork and index == 1
+      and not reaper.Undo_CanUndo2(active) and not reaper.Undo_CanRedo2(active)
+  hadWork = hasWork
+  if show then showLauncher() end
+end
+
 -- -------------------------------------------------- Action List (una vez)
 -- AddRemoveReaScript es la vía soportada: agrega el lanzador a la Action List
 -- sin tocar reaper-kb.ini a mano. Si REAPER se actualiza, el bloque se repone.
@@ -211,12 +266,10 @@ end
 -- (Cuando REAPER arranca con un .rpp este script ni siquiera corre todavía,
 -- así que aquí no hay riesgo de interrumpir una carga manual.)
 do
+  watchProjects()
   local _, p0 = reaper.EnumProjects(-1, "")
-  if p0 == nil or p0 == "" then
-    local app = selectorApp()
-    if app then
-      reaper.ExecProcess("/usr/bin/open -a " .. string.format("%q", app), 0)
-    end
+  if (p0 == nil or p0 == "") and not hadWork and not reaper.EnumProjects(1) then
+    showLauncher()
   end
 end
 

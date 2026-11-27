@@ -119,12 +119,12 @@ final class Store {
             prefs = Prefs()
             hasPrefsFile = false
         }
-        if library.projects.isEmpty { seedFromReaperRecents() }
+        refreshRecents()
     }
 
     func save() {
         let enc = JSONEncoder(); enc.outputFormatting = [.prettyPrinted, .sortedKeys]
-        if let d = try? enc.encode(library) { try? d.write(to: libraryURL) }
+        if let d = try? enc.encode(library) { try? d.write(to: libraryURL, options: .atomic) }
     }
 
     func savePrefs() {
@@ -132,25 +132,75 @@ final class Store {
         if let d = try? enc.encode(prefs) { try? d.write(to: prefsURL) }
     }
 
-    /// Primera ejecución: toma la lista de recientes de REAPER.ini y arma la biblioteca.
-    func seedFromReaperRecents() {
+    /// Recupera proyectos de sesiones anteriores, incluso si la biblioteca ya existe.
+    private var reaperHistory: Data?
+
+    private func mergeReaperHistory() -> Bool {
         let ini = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/Application Support/REAPER/REAPER.ini")
-        guard let text = try? String(contentsOf: ini, encoding: .utf8) else { return }
-        var seen = Set<String>()
-        for line in text.split(separator: "\n") {
-            guard line.hasPrefix("recent"), let eq = line.firstIndex(of: "=") else { continue }
-            let path = String(line[line.index(after: eq)...]).trimmingCharacters(in: .whitespaces)
-            guard path.lowercased().hasSuffix(".rpp"), !seen.contains(path) else { continue }
-            guard !(library.ignored ?? []).contains(path) else { continue }
-            guard FileManager.default.fileExists(atPath: path) else { continue }
-            seen.insert(path)
-            var p = makeProject(path: path)
-            p.lastOpened = modDate(path)
-            library.projects.append(p)
+        guard let data = try? Data(contentsOf: ini), data != reaperHistory,
+              let text = String(data: data, encoding: .utf8) else { return false }
+        reaperHistory = data
+        var inRecentSection = false
+        var paths: [(String, Double)] = []
+        let knownPaths = Set(library.projects.map(\.path))
+        for line in text.split(whereSeparator: \.isNewline) {
+            if line.hasPrefix("[") {
+                inRecentSection = line.lowercased() == "[recent]"
+                continue
+            }
+            guard inRecentSection, let eq = line.firstIndex(of: "="),
+                  line[..<eq].hasPrefix("recent"), Int(line[..<eq].dropFirst(6)) != nil else { continue }
+            let path = String(line[line.index(after: eq)...])
+            if path.lowercased().hasSuffix(".rpp"), !knownPaths.contains(path) {
+                paths.append((path, modDate(path)))
+            }
         }
-        library.projects.sort { $0.lastOpened > $1.lastOpened }
-        save()
+        return mergeRecentProjects(paths, updateExisting: false)
+    }
+
+    private var trackedProjects: Data?
+
+    @discardableResult
+    func refreshRecents() -> Bool {
+        let trackedChanged = refreshTrackedProjects()
+        let historyChanged = mergeReaperHistory()
+        return trackedChanged || historyChanged
+    }
+
+    private func refreshTrackedProjects() -> Bool {
+        guard let data = try? Data(contentsOf: root.appendingPathComponent("reaper-recents")),
+              data != trackedProjects, let text = String(data: data, encoding: .utf8) else { return false }
+        trackedProjects = data
+        let projects: [(String, Double)] = text.split(separator: "\0").compactMap { entry in
+            guard let tab = entry.firstIndex(of: "\t"), let time = Double(entry[..<tab]) else { return nil }
+            return (String(entry[entry.index(after: tab)...]), time)
+        }
+        return mergeRecentProjects(projects)
+    }
+
+    @discardableResult
+    func mergeRecentProjects(_ entries: [(String, Double)], updateExisting: Bool = true) -> Bool {
+        var byPath: [String: Int] = [:]
+        for (index, project) in library.projects.enumerated() { byPath[project.path] = index }
+        let ignored = Set(library.ignored ?? [])
+        var changed = false
+        for (path, time) in entries {
+            guard path.lowercased().hasSuffix(".rpp"), !ignored.contains(path) else { continue }
+            if let index = byPath[path] {
+                guard updateExisting, time > library.projects[index].lastOpened else { continue }
+                library.projects[index].lastOpened = time
+            } else {
+                guard FileManager.default.fileExists(atPath: path) else { continue }
+                var project = makeProject(path: path)
+                project.lastOpened = time
+                byPath[path] = library.projects.count
+                library.projects.append(project)
+            }
+            changed = true
+        }
+        if changed { save() }
+        return changed
     }
 
     func makeProject(path: String) -> Project {
@@ -576,6 +626,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
 
         switch cmd {
         case "list":
+            store.refreshRecents()
             let t0 = Date()
             let snap = store.snapshot()
             NSLog("snapshot en %.0f ms", Date().timeIntervalSince(t0) * 1000)
@@ -589,10 +640,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         case "open", "openWith":
             guard let path = body["path"] as? String else { return }
             let mode = (body["mode"] as? String) ?? "normal"
-            if let i = store.library.projects.firstIndex(where: { $0.path == path }) {
-                store.library.projects[i].lastOpened = Date().timeIntervalSince1970
-                store.save()
-            }
             openInReaper(path, mode: mode)
 
         case "fxonline":
@@ -621,11 +668,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             panel.allowedContentTypes = [UTType(filenameExtension: "rpp") ?? .data]
             panel.prompt = "Abrir"
             guard panel.runModal() == .OK, let url = panel.url else { reply(["path": ""]); return }
-            let quitado = (store.library.ignored ?? []).contains(url.path)
-            if !quitado && !store.library.projects.contains(where: { $0.path == url.path }) {
-                store.library.projects.append(store.makeProject(path: url.path))
-                store.save()
-            }
             openInReaper(url.path)
 
         case "relocate":
@@ -806,6 +848,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
 
         case "ready":
             revealWindow(reason: "js")
+            _ = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
+                guard let self = self else { timer.invalidate(); return }
+                if self.store.refreshRecents() { self.push(self.store.snapshot()) }
+            }
             reply(["ok": true])
 
         case "prefs":
